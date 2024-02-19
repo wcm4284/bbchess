@@ -1,3 +1,6 @@
+#ifndef RAND_H
+#define RAND_H
+
 #include "debug.h"
 
 unsigned int state = 1804289383;
@@ -27,3 +30,5 @@ u64 get_random_u64_number() {
 
     return n1 | (n2 << 16) | (n3 << 32) | (n4 << 48);
 }
+
+#endif

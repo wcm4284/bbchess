@@ -1,3 +1,6 @@
+#ifndef GAME_H
+#define GAME_H
+
 #include <map>
 
 // board squares
@@ -56,3 +59,40 @@ std::map<char, int> char_pieces = {
     {'q', q},
     {'k', k}
 };
+
+// piece bitboard 
+u64 bitboards[12] = {
+    0xFF000000000000,
+    0x2400000000000000,
+    0x4200000000000000,
+    0x8100000000000000,
+    0x0800000000000000,
+    0x1000000000000000,
+    0xFF00,
+    0x42,
+    0x24,
+    0x81,
+    0x8,
+    0x10
+};
+
+// occupancy bitboards
+u64 occupancies[3];
+
+// side to move
+int side = 0;
+
+// en passant square
+int en_passant = no_sq;
+
+/* castling rights defined as follows
+     bin  dec 
+
+    0001    1   white king can castle to the king side
+    0010    2   white king can castle to the queen side
+    0100    3   black king can castle to the king side
+    1000    4   black king can castle to the queen side
+*/
+int castle = 0xF;
+
+#endif
