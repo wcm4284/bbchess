@@ -2,6 +2,14 @@
 #define GAME_H
 
 #include <map>
+#include <string>
+#include "bit.h"
+
+// useful fen strings for debugging/testing
+const char* empty_board = "8/8/8/8/8/8/8/8 w - - ";
+const char* start_position = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1 ";
+const char* tricky_position = "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq -";
+const char* killer_position = "rnbqkb1r/pp1p1pPp/8/2p1pP2/1P1P4/3P3P/P1P1P3/RNBQKBNR w KQkq e6 0 1";
 
 // board squares
 enum {
@@ -94,5 +102,18 @@ int en_passant = no_sq;
     1000    4   black king can castle to the queen side
 */
 int castle = 0xF;
+
+#define copy_board()                                                    \
+    u64 bitboards_copy[12], occupancies_copy[3];                        \
+    int side_copy, enpassant_copy, castle_copy;                         \
+    memcpy(bitboards_copy, bitboards, sizeof(bitboards));               \
+    memcpy(occupancies_copy, occupancies, sizeof(occupancies));         \
+    side_copy = side, enpassant_copy = en_passant, castle_copy = castle \
+
+#define restore_board()                                                 \
+    memcpy(bitboards, bitboards_copy, sizeof(bitboards));               \
+    memcpy(occupancies, occupancies_copy, sizeof(occupancies));         \
+    side = side_copy, en_passant = enpassant_copy, castle = castle_copy \
+
 
 #endif

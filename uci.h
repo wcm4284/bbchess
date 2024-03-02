@@ -3,6 +3,6 @@
 
 #include "game.h"
 
-void parse_fen(const char* fen);
+void parse_FEN(const char* fen);
 
 #endif

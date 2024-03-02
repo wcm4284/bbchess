@@ -1,4 +1,6 @@
-#include "attack_table.h"
+#include "bit.h"
+#include "game.h"
+#include "magic.h"
 
 // bishop relevant occupancy bit count
 const int bishop_relevant_bits[64] = {
@@ -189,3 +191,75 @@ u64 set_occupancy(int index, int bits_in_mask, u64 attack_mask) {
 
     return occupancy;
 }
+
+// get bishop attacks
+static inline u64 get_bishop_attacks(int square, u64 occupancy) {
+
+    // get bishop attacks assuming current board occupancy
+    occupancy &= bishop_masks[square];
+    occupancy *= bishop_magic_numbers[square];
+    occupancy >>= (64 - bishop_relevant_bits[square]);
+
+    return bishop_attacks[square][occupancy];
+}
+
+// get rook attacks
+static inline u64 get_rook_attacks(int square, u64 occupancy) {
+
+    // get rook attacks assuming current board occupancy
+    occupancy &= rook_masks[square];
+    occupancy *= rook_magic_numbers[square];
+    occupancy >>= (64 - rook_relevant_bits[square]);
+
+    return rook_attacks[square][occupancy];
+}
+
+// get queen attacks
+static inline u64 get_queen_attacks(int square, u64 occupancy) {
+
+    u64 bishop_occupancy = occupancy;
+
+    u64 rook_occupancy = occupancy;
+
+    // get rook attacks assuming current board occupancy
+    rook_occupancy &= rook_masks[square];
+    rook_occupancy *= rook_magic_numbers[square];
+    rook_occupancy >>= (64 - rook_relevant_bits[square]);
+
+    // get bishop attacks assming current board occupancy
+    bishop_occupancy &= bishop_masks[square];
+    bishop_occupancy *= bishop_magic_numbers[square];
+    bishop_occupancy >>= (64 - bishop_relevant_bits[square]);
+    
+    // bitor rook and bishop attacks together for queen attacks
+    return rook_attacks[square][rook_occupancy] | bishop_attacks[square][bishop_occupancy];
+}
+
+// check is square is attacked
+static inline int is_square_attacked(int square, int side) {
+    
+    // check white pawn
+    if ((side == white) && (pawn_attacks[black][square] & bitboards[P])) return 1;
+
+    // check black pawn
+    if ((side == black) && (pawn_attacks[white][square] & bitboards[p])) return 1;
+    
+    // check knight
+    if (knight_attacks[square] & ((side == white) ? bitboards[N] : bitboards[n])) return 1;
+    
+    // check bishop
+    if (get_bishop_attacks(square, occupancies[both]) & ((side == white) ? bitboards[B] : bitboards[b])) return 1;
+
+    // check rook
+    if (get_rook_attacks(square, occupancies[both]) & ((side == white) ? bitboards[R] : bitboards[r])) return 1;
+
+    // check queen
+    if (get_queen_attacks(square, occupancies[both]) & ((side == white) ? bitboards[Q] : bitboards[q])) return 1;
+    
+    // check king
+    if (king_attacks[square] & ((side == white) ? bitboards[K] : bitboards[k])) return 1; 
+
+    // default return 0
+    return 0;
+}
+

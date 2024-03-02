@@ -1,6 +1,7 @@
 #ifndef MOVE_H
 #define MOVE_H
 
+#include <stdlib.h>
 #include "game.h"
 
 /*
@@ -51,18 +52,6 @@
 // extract castle flag
 #define get_move_castle(move) (move & 0x800000)
 
-#define copy_board()                                                    \
-    u64 bitboards_copy[12], occupancies_copy[3];                        \
-    int side_copy, enpassant_copy, castle_copy;                         \
-    memcpy(bitboards_copy, bitboards, sizeof(bitboards));               \
-    memcpy(occupancies_copy, occupancies, sizeof(occupancies));         \
-    side_copy = side, enpassant_copy = en_passant, castle_copy = castle \
-
-#define restore_board()                                                 \
-    memcpy(bitboards, bitboards_copy, sizeof(bitboards));               \
-    memcpy(occupancies, occupancies_copy, sizeof(occupancies));         \
-    side = side_copy, en_passant = enpassant_copy, castle = castle_copy \
-
 // move list struct
 typedef struct {
     
@@ -82,5 +71,9 @@ void print_move(int move);
 
 // print move list
 void print_move_list(moves* move_list);
+
+// define enum for move types
+enum { all_moves, only_captures };
+static inline int make_move(int move, int move_flag);
 
 #endif
