@@ -1,6 +1,6 @@
 #ifndef EVALUATION_H
 #define EVALUATION_H
 
-int evaluate();
+extern int evaluate();
 
 #endif

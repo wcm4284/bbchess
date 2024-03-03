@@ -11,7 +11,7 @@ const u64 black_start = 0xFF00;
 // pseudo legal move generation function
 // input => empty moves list
 // output => moves list populated with all pseudo-legal moves in a given position
-static inline void generate_moves(moves* move_list) {
+void generate_moves(moves* move_list) {
 
     // define source and target square
     int source_sq, target_sq;
@@ -362,4 +362,3 @@ static inline void generate_moves(moves* move_list) {
     return;
         
 }
-

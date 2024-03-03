@@ -4,5 +4,6 @@
 #include "game.h"
 
 void parse_FEN(const char* fen);
+void uci_loop();
 
 #endif

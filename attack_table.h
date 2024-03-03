@@ -37,12 +37,12 @@ u64 rook_attacks_otf(int square, u64 block);
 
 u64 set_occupancy(int index, int bits_in_mask, u64 attack_mask);
 
-static inline u64 get_bishop_attacks(int square, u64 occupancy);
+u64 get_bishop_attacks(int square, u64 occupancy);
 
-static inline u64 get_rook_attacks(int square, u64 occupancy);
+u64 get_rook_attacks(int square, u64 occupancy);
 
-static inline u64 get_queen_attacks(int square, u64 occupancy);
+u64 get_queen_attacks(int square, u64 occupancy);
 
-static inline int is_square_attacked(int square, int side);
+int is_square_attacked(int square, int side);
 
 #endif

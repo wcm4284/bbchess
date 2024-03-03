@@ -31,6 +31,6 @@ bool stopped = false;
 int get_time_ms();
 int input_waiting();
 void read_input();
-static void communicate();
+void communicate();
 
 #endif

@@ -111,7 +111,7 @@ void read_input() {
 
 // taken from VICE by Richard Allbert
 // a bridge function to interact between search and GUI input
-static void communicate() {
+void communicate() {
     // if time is up break here
     if (timeset == 1 && get_time_ms() > stoptime) {
         // tell engine to stop calculating

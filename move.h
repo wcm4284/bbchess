@@ -64,7 +64,7 @@ typedef struct {
 } moves;
 
 // add move to move list 
-static inline void add_move(moves* move_list, int move);
+void add_move(moves* move_list, int move);
 
 // print move
 void print_move(int move);
@@ -74,6 +74,7 @@ void print_move_list(moves* move_list);
 
 // define enum for move types
 enum { all_moves, only_captures };
-static inline int make_move(int move, int move_flag);
+
+int make_move(int move, int move_flag);
 
 #endif

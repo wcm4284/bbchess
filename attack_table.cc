@@ -193,7 +193,7 @@ u64 set_occupancy(int index, int bits_in_mask, u64 attack_mask) {
 }
 
 // get bishop attacks
-static inline u64 get_bishop_attacks(int square, u64 occupancy) {
+u64 get_bishop_attacks(int square, u64 occupancy) {
 
     // get bishop attacks assuming current board occupancy
     occupancy &= bishop_masks[square];
@@ -204,7 +204,7 @@ static inline u64 get_bishop_attacks(int square, u64 occupancy) {
 }
 
 // get rook attacks
-static inline u64 get_rook_attacks(int square, u64 occupancy) {
+u64 get_rook_attacks(int square, u64 occupancy) {
 
     // get rook attacks assuming current board occupancy
     occupancy &= rook_masks[square];
@@ -215,7 +215,7 @@ static inline u64 get_rook_attacks(int square, u64 occupancy) {
 }
 
 // get queen attacks
-static inline u64 get_queen_attacks(int square, u64 occupancy) {
+u64 get_queen_attacks(int square, u64 occupancy) {
 
     u64 bishop_occupancy = occupancy;
 
@@ -236,7 +236,7 @@ static inline u64 get_queen_attacks(int square, u64 occupancy) {
 }
 
 // check is square is attacked
-static inline int is_square_attacked(int square, int side) {
+int is_square_attacked(int square, int side) {
     
     // check white pawn
     if ((side == white) && (pawn_attacks[black][square] & bitboards[P])) return 1;

@@ -16,7 +16,7 @@ std::map<int, char> promoted_pieces = {
 };
 
 // add move to move list 
-static inline void add_move(moves* move_list, int move) {
+void add_move(moves* move_list, int move) {
 
     // store move
     move_list->moves[move_list->count] = move;
@@ -86,7 +86,7 @@ const int castling_rights[64] = {
 };
 
 // make move
-static inline int make_move(int move, int move_flag) {
+int make_move(int move, int move_flag) {
 
     // quiet moves
     if (move_flag == all_moves) {
