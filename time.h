@@ -2,31 +2,31 @@
 #define TIME_H
 
 // exit flag
-bool quit = false;
+extern bool quit;
 
 // UCI movestogo command counter
-int movestogo = 30;
+extern int movestogo;
 
 // UCI movetime command time counter
-int movetime = -1;
+extern int movetime;
 
 // UCI time command holder (ms)
-int time = -1;
+extern int time;
 
 // UCI inc command's time increment holder
-int inc = 0;
+extern int inc;
 
 // UCI starttime command time holder
-int starttime = 0;
+extern int starttime;
 
 // UCI stoptime command time holder
-int stoptime = 0;
+extern int stoptime;
 
 // variable to flag time control availability
-bool timeset = false;
+extern bool timeset;
 
 // time up flag
-bool stopped = false;
+extern bool stopped;
 
 int get_time_ms();
 int input_waiting();

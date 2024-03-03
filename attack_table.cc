@@ -71,6 +71,18 @@ const u64 king_attacks[64] =
     0x203000000000000, 0x507000000000000, 0xA0E000000000000, 0x141C000000000000, 0x2838000000000000, 0x5070000000000000, 0xA0E0000000000000, 0x40C0000000000000,
 };
 
+// bishop attack masks [square]
+u64 bishop_masks[64];
+
+// roop attack masks [square]
+u64 rook_masks[64];
+
+//bishop attacks table [square][occupancies]
+u64 bishop_attacks[64][512];
+
+// rook attacks table [square][occupancies]
+u64 rook_attacks[64][4096];
+
 u64 mask_bishop_attacks(int square) {
 
     u64 attacks = 0ull;

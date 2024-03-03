@@ -16,16 +16,16 @@ extern const u64 knight_attacks[];
 extern const u64 king_attacks[];
 
 // bishop attack masks [square]
-u64 bishop_masks[64];
+extern u64 bishop_masks[64];
 
 // roop attack masks [square]
-u64 rook_masks[64];
+extern u64 rook_masks[64];
 
 //bishop attacks table [square][occupancies]
-u64 bishop_attacks[64][512];
+extern u64 bishop_attacks[][512];
 
 // rook attacks table [square][occupancies]
-u64 rook_attacks[64][4096];
+extern u64 rook_attacks[][4096];
 
 u64 mask_bishop_attacks(int square);
 
