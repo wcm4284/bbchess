@@ -430,6 +430,8 @@ void search_position(int depth) {
     // define window adjustment 
     int adj_window = 50;
 
+    int start = get_time_ms();
+
     for (int cdepth = 1; cdepth <= depth; cdepth++) {
         
         // if time is up
@@ -443,6 +445,8 @@ void search_position(int depth) {
         search_pv = true;
 
         int score = alpha_beta_search(alpha, beta, cdepth);
+
+        int stop = get_time_ms();
 
         /* 
         ASPIRATION WINDOW TECHNIQUE, NOT SURE IF I WILL USE
@@ -466,7 +470,10 @@ void search_position(int depth) {
             print_move(pv_table[0][i]);
             printf(" ");
         }
+        printf("\ntime elapsed (ms): %d", stop - start);
         printf("\n");
+
+        start = stop;
 
     }
 
