@@ -3,17 +3,17 @@
 
 #include "game.h"
 
-extern const int bishop_relevant_bits[];
-extern const int rook_relevant_bits[];
+extern int bishop_relevant_bits[64];
+extern int rook_relevant_bits[64];
 
 // attack tables for non-sliding pieces
 
 // pawn attacks [side] [square]
-extern const u64 pawn_attacks[][64];
+extern u64 pawn_attacks[][64];
 // knight attacks [square]
-extern const u64 knight_attacks[];
+extern u64 knight_attacks[];
 // king attacks [square]
-extern const u64 king_attacks[];
+extern u64 king_attacks[];
 
 // bishop attack masks [square]
 extern u64 bishop_masks[64];

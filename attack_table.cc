@@ -3,7 +3,7 @@
 #include "magic.h"
 
 // bishop relevant occupancy bit count
-const int bishop_relevant_bits[64] = {
+int bishop_relevant_bits[64] = {
     6, 5, 5, 5, 5, 5, 5, 6,
     5, 5, 5, 5, 5, 5, 5, 5,
     5, 5, 7, 7, 7, 7, 5, 5,
@@ -15,7 +15,7 @@ const int bishop_relevant_bits[64] = {
 };
 
 // rook relevant occupancy bit count
-const int rook_relevant_bits[64] = {
+int rook_relevant_bits[64] = {
     12, 11, 11, 11, 11, 11, 11, 12,
     11, 10, 10, 10, 10, 10, 10, 11,
     11, 10, 10, 10, 10, 10, 10, 11,
@@ -27,7 +27,7 @@ const int rook_relevant_bits[64] = {
 };
 
 // pawn attack table [side][square]
-const u64 pawn_attacks[2][64] = {
+u64 pawn_attacks[2][64] = {
 {   0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 
     0x2, 0x5, 0xA, 0x14, 0x28, 0x50, 0xA0, 0x40,
     0x200, 0x500, 0xA00, 0x1400, 0x2800, 0x5000, 0xA000, 0x4000,
@@ -48,7 +48,7 @@ const u64 pawn_attacks[2][64] = {
 }};
 
 // knight attack table [square]
-const u64 knight_attacks[64] = 
+u64 knight_attacks[64] = 
 {   0x20400, 0x50800, 0xA1100, 0x142200, 0x284400, 0x508800, 0xA01000, 0x402000,
     0x2040004, 0x5080008, 0xA110011, 0x14220022, 0x28440044, 0x50880088, 0xA0100010, 0x40200020,
     0x204000402, 0x508000805, 0xA1100110A, 0x1422002214, 0x2844004428, 0x5088008850, 0xA0100010A0, 0x4020002040,
@@ -60,7 +60,7 @@ const u64 knight_attacks[64] =
 };
 
 // king attack table [square]
-const u64 king_attacks[64] = 
+u64 king_attacks[64] = 
 {   0x302, 0x705, 0xE0A, 0x1C14, 0x3828, 0x7050, 0xE0A0, 0xC040,
     0x30203, 0x70507, 0xE0A0E, 0x1C141C, 0x382838, 0x705070, 0xE0A0E0, 0xC040C0,
     0x3020300, 0x7050700, 0xE0A0E00, 0x1C141C00, 0x38283800, 0x70507000, 0xE0A0E000, 0xC040C000,

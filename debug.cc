@@ -1,4 +1,5 @@
 #include "debug.h"
+#include "hash.h"
 
 void print_bitboard(u64 bitboard) {
     for (int rank = 0; rank < 8; ++rank) {
@@ -68,4 +69,9 @@ void print_board() {
                                          (castle & wq) ? 'Q' : '-',
                                          (castle & bk) ? 'k' : '-',
                                          (castle & bq) ? 'q' : '-');
+
+    // print hash
+    printf("     Hash: 0x%llx\n", hkey);
+
+    
 }
