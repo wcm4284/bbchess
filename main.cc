@@ -1,3 +1,4 @@
+#include <cstring>
 #include "debug.h"
 #include "magic.h"
 #include "game.h"
@@ -14,11 +15,10 @@ int main() {
     // init hash keys for transposition table
     init_hash_keys();
 
-
     int debug = 1;
 
     if (debug) {
-        parse_FEN(killer_position);
+        parse_FEN(tricky_position);
        
         print_board();
 

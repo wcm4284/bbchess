@@ -3,6 +3,7 @@
 #include "evaluation.h"
 #include "move.h"
 #include "movegen.h"
+#include "transposition.h"
 #include "time.h"
 #include "uci.h"
 
@@ -44,7 +45,7 @@ int ply = 0;
 int nodes = 0;
 
 // max int
-const int INFINITY = 0x7FFFFFFF;
+const int INFINITY = 750000;
 
 
 static inline void enable_pv_scoring(moves* move_list) { 
@@ -172,8 +173,9 @@ static inline int quiescence(int alpha, int beta) {
     }
 
     // found better move
-    if (eval > alpha)
+    if (eval > alpha) {
         alpha = eval;
+    }
     
     // init moves list
     moves* move_list = new moves;
@@ -187,6 +189,7 @@ static inline int quiescence(int alpha, int beta) {
 
         // copy board state
         copy_board();
+
 
         if (make_move(move_list->moves[i], only_captures)) {
 
@@ -211,6 +214,7 @@ static inline int quiescence(int alpha, int beta) {
             if (score > alpha) {
                 alpha = score;
             }
+
         }
     }
     return alpha;
@@ -221,6 +225,15 @@ const int reduction_limit = 3;
 
 static inline int alpha_beta_search(int alpha, int beta, int depth) {
 
+    // init score
+    int score;
+
+    int hashf = hashfALPHA;
+
+    if (score = table.find(hkey, depth, alpha, beta) != no_entry) {
+        return score;
+    }
+
     if ((nodes & 2047) == 0)
     {
         communicate();
@@ -230,12 +243,16 @@ static inline int alpha_beta_search(int alpha, int beta, int depth) {
     pv_length[ply] = ply;
 
     if (depth == 0) {
-        return quiescence(alpha, beta);
+        score = quiescence(alpha, beta);
+        table.add(hkey, depth, hashfEXACT, score);
+        return score;
     }
 
     nodes++;
 
     if (ply > 63) { return evaluate(); }
+
+    //printf("checking square attacked\n");
 
     // find out if king is in check
     bool in_check = is_square_attacked((side == white) ? get_lsb_index(bitboards[K]) : 
@@ -244,9 +261,6 @@ static inline int alpha_beta_search(int alpha, int beta, int depth) {
     
     // if we are in check, increase depth
     if (in_check) { depth++; } 
-
-    // init score
-    int score;
 
     // apply null move pruning
     if (depth >= reduction_limit && !in_check && ply) {
@@ -271,6 +285,7 @@ static inline int alpha_beta_search(int alpha, int beta, int depth) {
 
         // beta cutoff
         if (score >= beta) {
+
             return beta;
         }
     }
@@ -278,6 +293,8 @@ static inline int alpha_beta_search(int alpha, int beta, int depth) {
 
     // init moves list
     moves* move_list = new moves();
+
+    printf("generating moves\n");
 
     // generate moves
     generate_moves(move_list);
@@ -295,6 +312,8 @@ static inline int alpha_beta_search(int alpha, int beta, int depth) {
 
     // init moves searched
     int moves_searched = 0;
+
+    printf("going thru moves\n");
 
     // iterate over moves
     for (int i = 0; i < move_list->count; i++) {
@@ -361,6 +380,8 @@ static inline int alpha_beta_search(int alpha, int beta, int depth) {
 
                 }
 
+               // table.add(hkey, depth, hashfBETA, beta);
+
                 return beta; 
             }
 
@@ -373,6 +394,8 @@ static inline int alpha_beta_search(int alpha, int beta, int depth) {
                     history_moves[get_move_piece(move_list->moves[i])][get_move_target(move_list->moves[i])] += depth;
 
                 }
+
+                hashf = hashfEXACT;
 
                 // update alpha
                 alpha = score;
@@ -403,6 +426,7 @@ static inline int alpha_beta_search(int alpha, int beta, int depth) {
         }
     }
 
+    table.add(hkey, depth, hashf, alpha);
     // move fails low
     return alpha;
 
@@ -444,7 +468,11 @@ void search_position(int depth) {
         // enable search_pv
         search_pv = true;
 
+        printf("entering search\n");
+
         int score = alpha_beta_search(alpha, beta, cdepth);
+
+        printf("exiting search\n");
 
         int stop = get_time_ms();
 
