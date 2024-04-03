@@ -4,7 +4,6 @@
 #include <map>
 #include <string>
 #include "bit.h"
-#include "hash.h"
 
 // useful fen strings for debugging/testing
 extern const char* empty_board;
@@ -71,18 +70,16 @@ extern int en_passant;
 extern int castle;
 
 #define copy_board()                                                    \
-    u64 bitboards_copy[12], occupancies_copy[3], hkey_copy;             \
+    u64 bitboards_copy[12], occupancies_copy[3];                        \
     int side_copy, enpassant_copy, castle_copy;                         \
     memcpy(bitboards_copy, bitboards, sizeof(bitboards));               \
     memcpy(occupancies_copy, occupancies, sizeof(occupancies));         \
-    side_copy = side, enpassant_copy = en_passant,                      \
-    hkey_copy = hkey, castle_copy = castle;                             \
+    side_copy = side, enpassant_copy = en_passant, castle_copy = castle \
 
 #define restore_board()                                                 \
     memcpy(bitboards, bitboards_copy, sizeof(bitboards));               \
     memcpy(occupancies, occupancies_copy, sizeof(occupancies));         \
-    side = side_copy, en_passant = enpassant_copy,                      \
-    hkey = hkey_copy, castle = castle_copy;                             \
+    side = side_copy, en_passant = enpassant_copy, castle = castle_copy \
 
 
 #endif

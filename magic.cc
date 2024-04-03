@@ -1,8 +1,4 @@
-#include <stdio.h>
 #include "magic.h"
-#include "attack_table.h"
-#include "game.h"
-#include "rand.h"
 
 // generate magic number candidate
 u64 generate_magic_number() {

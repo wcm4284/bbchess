@@ -3,13 +3,11 @@
 #include "game.h"
 #include "rand.h"
 
-u64 hkey;
-
 // random piece keys [piece] [square]
 u64 piece_keys[12][64];
 
 // random en passant keys [square] (includes no square)
-u64 en_passant_keys[64];
+u64 en_passant_keys[65];
 
 // random castling keys
 u64 castling_keys[16];
@@ -26,9 +24,6 @@ void init_hash_keys() {
 
     state = 1804289383;
 
-    // init game state key to 0
-    hkey = 0;
-
     // loop over pieces in piece_keys
     for (int i = 0; i < 12; i++) {
         
@@ -41,7 +36,7 @@ void init_hash_keys() {
     }
 
     // loop over en_passant_keys
-    for (int i = 0; i < 64; i++) {
+    for (int i = 0; i < 65; i++) {
         // initialize to random numbers
         en_passant_keys[i] = get_random_u64_number();
     }
@@ -56,11 +51,12 @@ void init_hash_keys() {
     side_key = get_random_u64_number();
 }
 
-u64 hash() {
+int hash() {
 
     if (!initialized) printf("ERROR!");
 
-    u64 key = 0;
+    // initialize hash number
+    int key = 0;
 
     // xor by castle
     key ^= castling_keys[castle];
@@ -68,8 +64,8 @@ u64 hash() {
     // xor by side to move
     if (side == white) key ^= side_key;
 
-    // xor by en passant squares
-    if (en_passant != no_sq) key ^= en_passant_keys[en_passant];
+    // xor by en passant square
+    key ^= en_passant_keys[en_passant];
 
     for (int i = P; i <= k; i++)
     {

@@ -2,7 +2,6 @@
 #include "debug.h"
 #include "magic.h"
 #include "game.h"
-#include "hash.h"
 #include "search.h"
 #include "uci.h"
 
@@ -12,8 +11,7 @@ int main() {
     init_sliders_attacks(bishop);
     init_sliders_attacks(rook);
 
-    // init hash keys for transposition table
-    init_hash_keys();
+    //init_hash_keys();
 
     int debug = 1;
 
@@ -22,7 +20,7 @@ int main() {
        
         print_board();
 
-        search_position(5);
+        search_position(8);
 
     } else {
         uci_loop();

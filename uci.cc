@@ -1,12 +1,10 @@
 #include <stdio.h>
 #include "debug.h"
 #include "game.h"
-#include "hash.h"
 #include "move.h"
 #include "movegen.h"
 #include "time.h"
 #include "search.h"
-
 #ifdef _WIN64
     #include <windows.h>
 #else
@@ -82,8 +80,6 @@ void parse_FEN(const char* fen) {
         }
     }
     occupancies[both] = occupancies[white] | occupancies[black];
-
-    hkey = hash();
 
     return; // don't know what to do with last ints yet
     
