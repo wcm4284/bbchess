@@ -1,6 +1,7 @@
 #include <cstring>
 #include "attack_table.h"
 #include "evaluation.h"
+#include "hash.h"
 #include "move.h"
 #include "movegen.h"
 #include "transposition.h"

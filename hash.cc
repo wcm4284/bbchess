@@ -3,11 +3,13 @@
 #include "game.h"
 #include "rand.h"
 
+u64 hkey;
+
 // random piece keys [piece] [square]
 u64 piece_keys[12][64];
 
 // random en passant keys [square] (includes no square)
-u64 en_passant_keys[65];
+u64 en_passant_keys[64];
 
 // random castling keys
 u64 castling_keys[16];
@@ -36,7 +38,7 @@ void init_hash_keys() {
     }
 
     // loop over en_passant_keys
-    for (int i = 0; i < 65; i++) {
+    for (int i = 0; i < 64; i++) {
         // initialize to random numbers
         en_passant_keys[i] = get_random_u64_number();
     }
