@@ -166,6 +166,25 @@ enum MoveType {
 	
 };
 
+#define ENABLE_INC_OPERATOR_ON(T) \
+		inline T& operator++(T& t) { return t = T(int(t) + 1); } \
+		inline T& operator--(T& t) { return t = T(int(t) - 1); }
+
+	ENABLE_INC_OPERATOR_ON(Square)
+	ENABLE_INC_OPERATOR_ON(Rank)
+	ENABLE_INC_OPERATOR_ON(File)
+
+#undef ENABLE_INC_OPERATOR_ON
+
+inline Direction operator+(Direction d1, Direction d2) { return Direction(int(d1) + int(d2)); }
+inline Direction operator-(Direction d1, Direction d2) { return Direction(int(d1) - int(d2)); }
+inline Direction operator*(int i, Direction d) { return Direction(i * int(d)); }
+
+inline Square operator+(Square s, Direction d) { return Square(int(s) + int(d)); }
+inline Square operator-(Square s, Direction d) { return Square(int(s) - int(d)); }
+inline Square& operator+=(Square& s, Direction d) { return s = s + d; }
+inline Square& operator-=(Square& s, Direction d) { return s = s - d; }
+
 constexpr bool is_ok(Square s) { return s >= SQ_A1 && s <= SQ_H8; }
 
 // class Move
