@@ -185,6 +185,17 @@ inline Square operator-(Square s, Direction d) { return Square(int(s) - int(d));
 inline Square& operator+=(Square& s, Direction d) { return s = s + d; }
 inline Square& operator-=(Square& s, Direction d) { return s = s - d; }
 
+
+// toggle color
+constexpr Color operator~(Color c) { return Color(c ^ BLACK); }
+
+// flip rank A1 -> A8
+constexpr Square flip_rank(Square s) { return Square(s ^ SQ_A8); }
+
+// flip file A1 -> H1
+constexpr Square flip_file(Square s) { return Square(s ^ SQ_H1); }
+
+
 constexpr bool is_ok(Square s) { return s >= SQ_A1 && s <= SQ_H8; }
 
 // class Move
