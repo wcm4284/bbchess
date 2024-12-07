@@ -176,9 +176,9 @@ enum MoveType {
 
 #undef ENABLE_INC_OPERATOR_ON
 
-inline Direction operator+(Direction d1, Direction d2) { return Direction(int(d1) + int(d2)); }
-inline Direction operator-(Direction d1, Direction d2) { return Direction(int(d1) - int(d2)); }
-inline Direction operator*(int i, Direction d) { return Direction(i * int(d)); }
+constexpr Direction operator+(Direction d1, Direction d2) { return Direction(int(d1) + int(d2)); }
+constexpr Direction operator-(Direction d1, Direction d2) { return Direction(int(d1) - int(d2)); }
+constexpr Direction operator*(int i, Direction d) { return Direction(i * int(d)); }
 
 inline Square operator+(Square s, Direction d) { return Square(int(s) + int(d)); }
 inline Square operator-(Square s, Direction d) { return Square(int(s) - int(d)); }
