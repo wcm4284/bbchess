@@ -198,6 +198,11 @@ constexpr Square flip_file(Square s) { return Square(s ^ SQ_H1); }
 
 constexpr bool is_ok(Square s) { return s >= SQ_A1 && s <= SQ_H8; }
 
+constexpr Square make_square(File f, Rank r) { return Square((r * 8) + f); }
+
+constexpr File file_of(Square s) { return File(s & 7); }
+
+constexpr Rank rank_of(Square s) { return Rank(s >> 3); }
 // class Move
 
 class Move {

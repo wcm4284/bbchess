@@ -5,7 +5,7 @@ COMPILER := g++
 FLAGS := -O2 -Wall -Werror -Wpedantic -g -std=c++20
 
 
-FILES := main.cpp
+FILES := main.cpp bitboard.cpp
 OBJECTS := $(patsubst %.cpp,$B/%.o,$(FILES))
 
 main_engine: $(OBJECTS)
