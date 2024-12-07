@@ -36,6 +36,7 @@ constexpr Bitboard Rank8 = Rank1 << (8 * 7);
 
 extern Bitboard Line[SQUARE_NB][SQUARE_NB];
 extern Bitboard Between[SQUARE_NB][SQUARE_NB];
+extern Bitboard PawnAttacks[COLOR_NB][SQUARE_NB];
 
 constexpr Bitboard square_bb(Square s) {
 	assert(is_ok(s));
@@ -52,6 +53,8 @@ inline Bitboard& operator^=(Bitboard& b, Square s) { return b ^= square_bb(s); }
 inline Bitboard operator&(Square s, Bitboard b) { return b & s; }
 inline Bitboard operator|(Square s, Bitboard b) { return b | s; }
 inline Bitboard operator^(Square s, Bitboard b) { return b ^ s; }
+
+constexpr bool more_than_one(Bitboard b) { return b & (b - 1); }
 
 
 template <Direction d>
@@ -70,6 +73,15 @@ constexpr Bitboard shift(Bitboard b) {
 								: 0;
 	
 }
+
+template <Color c>
+constexpr Bitboard generate_pawn_attack(Bitboard b) {
+	return c == WHITE ? shift<NORTH_EAST>(b) | shift<NORTH_WEST>(b)
+					  : shift<SOUTH_EAST>(b) | shift<SOUTH_WEST>(b);
+}
+
+// TODO: magic numbers
+// TODO: rook and bishop attacks
 
 } // namespace Engine
 

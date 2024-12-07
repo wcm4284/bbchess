@@ -3,6 +3,20 @@
 
 namespace Engine {
 
+Bitboard PawnAttacks[COLOR_NB][SQUARE_NB];
+
+void Bitboards::init() {
+
+	for (Square s = SQ_A1; s <= SQ_H8; ++s) {
+
+		PawnAttacks[WHITE][s] = generate_pawn_attack<WHITE>(square_bb(s));
+		PawnAttacks[BLACK][s] = generate_pawn_attack<BLACK>(square_bb(s));
+
+	}
+	
+
+}
+
 
 std::string Bitboards::pretty(Bitboard b) {
 

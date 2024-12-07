@@ -8,15 +8,13 @@ using namespace Engine;
 
 int main() {
 
-	std::cout << Bitboards::pretty(~FileH) << std::endl;
+	Bitboards::init();
 
-	std::cout << Bitboards::pretty(shift<SOUTH_EAST>(square_bb(SQ_E2))) << std::endl;
-
-	std::cout << Bitboards::pretty(shift<NORTH_EAST>(square_bb(SQ_A1))) << std::endl;
-
-	std::cout << Bitboards::pretty(shift<NORTH_WEST>(square_bb(SQ_H3))) << std::endl;
-
-	std::cout << Bitboards::pretty(shift<SOUTH_WEST>(square_bb(SQ_E3))) << std::endl;
+	for (Color c : { WHITE, BLACK } ) {
+		for (Square s = SQ_A1; s <= SQ_H8; ++s) {
+			std::cout << Bitboards::pretty(PawnAttacks[c][s]) << "\n";
+		}
+	}
 
 	return 0;
 
