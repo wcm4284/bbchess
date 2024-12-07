@@ -10,7 +10,7 @@ OBJECTS := $(patsubst %.cpp,$B/%.o,$(FILES))
 
 main_engine: $(OBJECTS)
 	@echo "Linking $@"
-	$(COMPILER) -o $@ $(OBJECTS) $(FLAGS)
+	$(COMPILER) -o $B/$@ $(OBJECTS) $(FLAGS)
 
 
 $B/%.o : %.cpp Makefile
@@ -18,14 +18,13 @@ $B/%.o : %.cpp Makefile
 	@mkdir -p $(B)
 	$(COMPILER) -I. -c -MD -MF $B/$*.d -o $B/$*.o $< $(FLAGS)
 
-	
 
 all: $(FILES)
 
 clean:
-	@rm -r build main_engine
+	@rm -r build
 
 run: main_engine
-	@./main_engine
+	@$B/./main_engine
 
 -include $(patsubst %.cpp,$B/%.d,$(FILES))
