@@ -34,6 +34,11 @@ constexpr Bitboard Rank6 = Rank1 << (8 * 5);
 constexpr Bitboard Rank7 = Rank1 << (8 * 6);
 constexpr Bitboard Rank8 = Rank1 << (8 * 7);
 
+constexpr Bitboard file_bb(File f) { return FileA << f; }
+constexpr Bitboard file_bb(Square s) { return FileA << (file_of(s)); }
+constexpr Bitboard rank_bb(Rank r) { return Rank1 << (8 * r); }
+constexpr Bitboard rank_bb(Square s) { return Rank1 << (8 * rank_of(s)); }
+
 extern Bitboard Line[SQUARE_NB][SQUARE_NB];
 extern Bitboard Between[SQUARE_NB][SQUARE_NB];
 extern Bitboard PawnAttacks[COLOR_NB][SQUARE_NB];

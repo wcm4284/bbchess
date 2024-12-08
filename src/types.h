@@ -9,6 +9,13 @@
 // look at stockfish for compiler stuff?
 // not sure what they're doing yet, but they define popcnt and that's important
 
+#if defined(USE_PEXT)
+	#include <immintrin.h>
+	#define pext(b, m) _pext_u64(b, m)
+#else
+	#define pext(b, m) 0
+#endif
+
 
 
 namespace Engine {
@@ -203,7 +210,6 @@ constexpr Square make_square(File f, Rank r) { return Square((r * 8) + f); }
 constexpr File file_of(Square s) { return File(s & 7); }
 
 constexpr Rank rank_of(Square s) { return Rank(s >> 3); }
-// class Move
 
 class Move {
 

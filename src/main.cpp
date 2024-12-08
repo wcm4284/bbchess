@@ -2,7 +2,6 @@
 #include "bitboard.h"
 
 #include <iostream>
-#include <bitset>
 
 using namespace Engine;
 
@@ -10,11 +9,7 @@ int main() {
 
 	Bitboards::init();
 
-	for (Color c : { WHITE, BLACK } ) {
-		for (Square s = SQ_A1; s <= SQ_H8; ++s) {
-			std::cout << Bitboards::pretty(PawnAttacks[c][s]) << "\n";
-		}
-	}
+	std::cout << std::hex << pext(Bitboard(0x1001011), Bitboard(0x1011001)) << std::endl;
 
 	return 0;
 
