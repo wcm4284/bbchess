@@ -1,6 +1,6 @@
 SHELL := bash
 
-B := build
+B := Build
 COMPILER := g++
 FLAGS := -O2 -Wall -Werror -Wpedantic -g -std=c++20 -mbmi2
 
@@ -22,7 +22,7 @@ $B/%.o : %.cpp Makefile
 all: $(FILES)
 
 clean:
-	@rm -r build
+	@rm -r $B
 
 run: $B/main_engine
 	@$B/main_engine
