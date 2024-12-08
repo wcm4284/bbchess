@@ -41,7 +41,42 @@ constexpr Bitboard rank_bb(Square s) { return Rank1 << (8 * rank_of(s)); }
 
 extern Bitboard Line[SQUARE_NB][SQUARE_NB];
 extern Bitboard Between[SQUARE_NB][SQUARE_NB];
+extern Bitboard PseudoAttacks[PIECE_TYPE_NB][SQUARE_NB];
 extern Bitboard PawnAttacks[COLOR_NB][SQUARE_NB];
+
+// courtesy of chessprogramming.org/Magic_Bitboards
+// attempting the "Fancy" approach
+struct Magic {
+
+	Bitboard mask;
+	Bitboard* attacks;
+
+#ifndef USE_PEXT
+
+	Bitboard magic;
+	int shift;
+
+#endif
+
+	unsigned index(Bitboard occ) const {
+
+		#ifdef USE_PEXT
+
+		return unsigned(pext(occ, mask));
+
+		#else
+		
+		// TODO logic for not using pext
+		assert(false);
+
+		#endif
+	}
+
+	Bitboard attacks_bb(Bitboard occ) const { return attacks[index(occ)]; }
+};
+
+extern Magic Magics[SQUARE_NB][2];
+
 
 constexpr Bitboard square_bb(Square s) {
 	assert(is_ok(s));
@@ -85,7 +120,18 @@ constexpr Bitboard generate_pawn_attack(Bitboard b) {
 					  : shift<SOUTH_EAST>(b) | shift<SOUTH_WEST>(b);
 }
 
-// TODO: magic numbers
+template<typename T = Square>
+inline int distance(Square, Square);
+
+template<>
+inline int distance<File>(Square s1, Square s2) { return abs(file_of(s1) - file_of(s2)); }
+
+template<>
+inline int distance<Rank>(Square s1, Square s2) { return abs(rank_of(s1) - rank_of(s2)); }
+
+template<>
+inline int distance<Square>(Square s1, Square s2) { return std::max(distance<File>(s1, s2), distance<Rank>(s1, s2)); }
+
 // TODO: rook and bishop attacks
 
 } // namespace Engine

@@ -9,7 +9,7 @@
 // look at stockfish for compiler stuff?
 // not sure what they're doing yet, but they define popcnt and that's important
 
-#if defined(USE_PEXT)
+#ifdef USE_PEXT
 	#include <immintrin.h>
 	#define pext(b, m) _pext_u64(b, m)
 #else
@@ -201,7 +201,6 @@ constexpr Square flip_rank(Square s) { return Square(s ^ SQ_A8); }
 
 // flip file A1 -> H1
 constexpr Square flip_file(Square s) { return Square(s ^ SQ_H1); }
-
 
 constexpr bool is_ok(Square s) { return s >= SQ_A1 && s <= SQ_H8; }
 

@@ -10,6 +10,21 @@ Bitboard Between[SQUARE_NB][SQUARE_NB];
 Bitboard PseudoAttacks[PIECE_TYPE_NB][SQUARE_NB];
 Bitboard PawnAttacks[COLOR_NB][SQUARE_NB];
 
+Magic Magics[SQUARE_NB][2];
+
+
+namespace {
+
+//	Bitboard BishopTable[0x1480];
+//	Bitboard RookTable[0x19000];
+
+//	void init_magics(PieceType pt, Bitboard table[], Magic magics[][2]);
+
+Bitboard safe_dst(Square s, int step) {
+	Square to = Square(s + step);
+	return is_ok(to) && distance(s, to) <= 2 ? square_bb(to) : Bitboard(0);
+}
+} // anon namespace
 
 /*
 Bitboard RookMovements[SQUARE_NB];
@@ -56,10 +71,23 @@ void generate_sliding_movements() {
 
 void Bitboards::init() {
 
-	for (Square s = SQ_A1; s <= SQ_H8; ++s) {
+	for (Square s1 = SQ_A1; s1 <= SQ_H8; ++s1) {
 
-		PawnAttacks[WHITE][s] = generate_pawn_attack<WHITE>(square_bb(s));
-		PawnAttacks[BLACK][s] = generate_pawn_attack<BLACK>(square_bb(s));
+		PawnAttacks[WHITE][s1] = generate_pawn_attack<WHITE>(square_bb(s1));
+		PawnAttacks[BLACK][s1] = generate_pawn_attack<BLACK>(square_bb(s1));
+
+		// knight attacks
+		for (int step : { -17, -15, -10, -6, 6, 10, 15, 17 } ) {
+
+			PseudoAttacks[KNIGHT][s1] |= safe_dst(s1, step);
+
+		}
+
+		for (int step : { -9, -8, -7, -1, 1, 7, 8, 9 } ) {
+
+			PseudoAttacks[KING][s1] |= safe_dst(s1, step);
+
+		}
 
 	}
 	
