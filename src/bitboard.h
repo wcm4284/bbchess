@@ -132,8 +132,24 @@ inline int distance<Rank>(Square s1, Square s2) { return abs(rank_of(s1) - rank_
 template<>
 inline int distance<Square>(Square s1, Square s2) { return std::max(distance<File>(s1, s2), distance<Rank>(s1, s2)); }
 
-// TODO: rook and bishop attacks
+template <PieceType pt>
+constexpr Bitboard attacks_bb(Square s, Bitboard occupancy) {
 
+	assert(pt != PAWN);
+	assert(is_ok(s));
+
+	switch (pt) {
+
+		case BISHOP:
+		case ROOK:
+			return Magics[s][pt - BISHOP].attacks_bb(occupancy);
+		case QUEEN:
+			return Magics[s][0].attacks_bb(occupancy) | Magics[s][1].attacks_bb(occupancy);
+	}
+
+	return 0;
+
+}
 } // namespace Engine
 
 #endif

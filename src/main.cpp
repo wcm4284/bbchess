@@ -1,5 +1,6 @@
 #include "types.h"
 #include "bitboard.h"
+#include "position.h"
 
 #include <iostream>
 #include <bitset>
@@ -10,15 +11,11 @@ int main() {
 
 	Bitboards::init();
 
-	std::cout << std::bitset<64>(Bitboard(0x1001011)) << std::endl;
+	std::cout << Bitboards::pretty(Line[SQ_A1][SQ_A3]) << std::endl;
 
-	std::cout << std::bitset<64>(Bitboard(0x1011001)) << std::endl;
+	std::cout << Bitboards::pretty(Between[SQ_A1][SQ_A3]) << std::endl;
+	std::cout << Bitboards::pretty(Line[SQ_A1][SQ_B2]) << std::endl;
 
-	std::cout << std::bitset<64>(pext(Bitboard(0x1001011), Bitboard(0x1011001))) << std::endl;
-
-	std::cout << Bitboards::pretty(PseudoAttacks[KNIGHT][SQ_H8]) << std::endl;
-
-	std::cout << Bitboards::pretty(PseudoAttacks[KING][SQ_H8]) << std::endl;
 
 	return 0;
 

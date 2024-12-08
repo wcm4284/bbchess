@@ -15,68 +15,50 @@ Magic Magics[SQUARE_NB][2];
 
 namespace {
 
-//	Bitboard BishopTable[0x1480];
-//	Bitboard RookTable[0x19000];
+	Bitboard BishopTable[0x1480];
+	Bitboard RookTable[0x19000];
 
-//	void init_magics(PieceType pt, Bitboard table[], Magic magics[][2]);
+void init_magics(PieceType pt, Bitboard table[], Magic magics[][2]);
 
 Bitboard safe_dst(Square s, int step) {
 	Square to = Square(s + step);
 	return is_ok(to) && distance(s, to) <= 2 ? square_bb(to) : Bitboard(0);
 }
-} // anon namespace
 
-/*
-Bitboard RookMovements[SQUARE_NB];
-Bitboard BishopMovements[SQUARE_NB];
+Bitboard sliding_attacks(PieceType pt, Square s, Bitboard occupancy) {
 
-void generate_sliding_movements() {
+	Bitboard attacks              = 0;
+	Direction BishopDirections[4] = { NORTH_EAST, SOUTH_EAST, NORTH_WEST, SOUTH_WEST };
+	Direction RookDirections[4]   = { NORTH, SOUTH, EAST, WEST };
 
-	for (Square s = SQ_A1; s <= SQ_H8; ++s) {
+	for (Direction d : (pt == ROOK ? RookDirections : BishopDirections)) {
 
-		Bitboard edges = ((FileA | FileH) & ~file_bb(s)) | ((Rank1 | Rank8) & ~rank_bb(s));
+		Square sq = s;
 
-		RookMovements[s] = ((rank_bb(s) | file_bb(s)) & ~edges) ^ s;
+		while (safe_dst(sq, d)) {
+			
+			attacks |= (sq += d);
 
-		// I can't think of a better way to do bishops than brute force
-		Bitboard b = square_bb(s);
+			if (sq & occupancy)
+				break;
 
-		Bitboard tmp = square_bb(s);
-
-		while ((tmp = shift<NORTH_EAST>(tmp))) {
-			b |= tmp;
 		}
-		tmp = square_bb(s);
-		while ((tmp = shift<NORTH_WEST>(tmp))) {
-			b |= tmp;
-		}
-		tmp = square_bb(s);
-		while ((tmp = shift<SOUTH_EAST>(tmp))) {
-			b |= tmp;
-		}
-		tmp = square_bb(s);
-		while ((tmp = shift<SOUTH_WEST>(tmp))) {
-			b |= tmp;
-		}
-
-		BishopMovements[s] = (b & ~edges) ^ s;
-
 	}
 
+	return attacks;
 }
-
-*/
-
-		
+} // anon namespace
 
 void Bitboards::init() {
+
+	init_magics(BISHOP, BishopTable, Magics);
+	init_magics(ROOK, RookTable, Magics);
 
 	for (Square s1 = SQ_A1; s1 <= SQ_H8; ++s1) {
 
 		PawnAttacks[WHITE][s1] = generate_pawn_attack<WHITE>(square_bb(s1));
 		PawnAttacks[BLACK][s1] = generate_pawn_attack<BLACK>(square_bb(s1));
 
-		// knight attacks
 		for (int step : { -17, -15, -10, -6, 6, 10, 15, 17 } ) {
 
 			PseudoAttacks[KNIGHT][s1] |= safe_dst(s1, step);
@@ -89,9 +71,25 @@ void Bitboards::init() {
 
 		}
 
-	}
-	
+		PseudoAttacks[QUEEN][s1]  = PseudoAttacks[BISHOP][s1] = sliding_attacks(BISHOP, s1, 0);
+		PseudoAttacks[QUEEN][s1] |= PseudoAttacks[ROOK][s1]   = sliding_attacks(ROOK, s1, 0);
 
+		for (PieceType pt : { BISHOP, ROOK } ) {
+
+			for (Square s2 = SQ_A1; s2 <= SQ_H8; ++s2) {
+
+				if (PseudoAttacks[pt][s1] & s2) {
+
+					Line[s1][s2] = sliding_attacks(pt, s1, square_bb(s2)) & sliding_attacks(pt, s2, square_bb(s1));
+					Between[s1][s2] = Line[s1][s2] | s1 | s2;
+
+				}
+
+			}
+
+		}
+
+	}
 }
 
 
@@ -116,5 +114,42 @@ std::string Bitboards::pretty(Bitboard b) {
 	return s += "\n+---+---+---+---+---+---+---+---+\n  a   b   c   d   e   f   g   h\n";
 
 }
+
+namespace {
+
+
+void init_magics(PieceType pt, Bitboard table[], Magic Magics[][2]) {
+
+	int size = 0;
+
+#ifndef USE_PEXT
+//TODO: actual magic numbers
+	assert(false);
+#endif
+
+	for (Square s = SQ_A1; s <= SQ_H8; ++s) {
+
+		Bitboard edges = ((FileA | FileH) & ~file_bb(s)) | ((Rank1 | Rank8) & ~rank_bb(s));
+
+		Magic& m = Magics[s][pt - BISHOP];
+		m.mask   = sliding_attacks(pt, s, 0) & ~edges;
+
+		m.attacks = (s == SQ_A1) ? table : Magics[s - 1][pt - BISHOP].attacks + size;
+		size      = 0;
+
+		Bitboard b = 0;
+		do {
+			
+			m.attacks[pext(b, m.mask)] = sliding_attacks(pt, s, b);
+			b									= (b - m.mask) & m.mask;
+
+			++size;
+
+		} while (b);
+
+	}
+	
+}
+} // anon namespace
 
 } // namespace Engine
