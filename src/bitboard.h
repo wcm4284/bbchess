@@ -96,6 +96,16 @@ inline Bitboard operator^(Square s, Bitboard b) { return b ^ s; }
 
 constexpr bool more_than_one(Bitboard b) { return b & (b - 1); }
 
+inline Square lsb(Bitboard b) {
+
+	#ifdef __GNUC__
+		return Square(__builtin_ctzll(b));
+	#else
+		assert(false);
+	#endif
+
+}
+
 
 template <Direction d>
 constexpr Bitboard shift(Bitboard b) {
