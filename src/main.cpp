@@ -11,15 +11,11 @@ int main() {
 
 	Bitboards::init();
 
-	std::cout << Bitboards::pretty(Line[SQ_A1][SQ_A3]) << std::endl;
-
-	std::cout << Bitboards::pretty(Between[SQ_A1][SQ_A3]) << std::endl;
-	std::cout << Bitboards::pretty(Line[SQ_A1][SQ_B2]) << std::endl;
-
 	Position p;
 	p.init();
 
-	std::cout << p << std::endl;
+	std::cout << Bitboards::pretty(p.king_on(WHITE)) << std::endl;
+
 
 
 	return 0;

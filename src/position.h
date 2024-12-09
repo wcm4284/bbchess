@@ -30,6 +30,17 @@ class Position {
 		// used for printing to console
 		constexpr Piece piece_on(Square) const;
 		constexpr Color to_play() const;
+		
+		// Called to determine if any pieces are pinned to the king
+		// pinned(WHITE) returns white pinned to the white king
+		Bitboard pinned(Color) const;
+		
+		// determines if any pieces are pinned to PieceType
+		// will be primarily used for evaluation, but can
+		// also probably be used for move ordering
+		Bitboard soft_pinned(Color, PieceType) const;
+
+		inline Bitboard king_on(Color) const;
 
 
 
@@ -62,6 +73,8 @@ inline Bitboard Position::pieces(Color c, PieceTypes... pts) const { return piec
 
 constexpr Piece Position::piece_on(Square s) const { return board[s]; }
 constexpr Color Position::to_play() const { return sideToMove; }
+
+inline Bitboard Position::king_on(Color us) const { return pieces(us, KING); }
 
 } // namespace Engine
 
