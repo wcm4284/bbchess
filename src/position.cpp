@@ -42,7 +42,6 @@ std::ostream& operator<<(std::ostream& os, const Position& pos) {
 	return os << ((pos.to_play() == WHITE) ? "White" : "Black") << " to move\n";
 
 }
-
 	
 void Position::init() {
 
@@ -56,6 +55,8 @@ void Position::init() {
 
 	byColor[WHITE] = 0xFFFF;
 	byColor[BLACK] = byColor[WHITE] << 48;
+
+	byType[ALL_PIECES] = byColor[WHITE] | byColor[BLACK];
 
 	board[SQ_H8] = board[SQ_A8] = B_ROOK;
 	board[SQ_G8] = board[SQ_B8] = B_KNIGHT;
@@ -151,6 +152,61 @@ std::string Position::fen() const {
 	return s += "\n";
 }
 
+Bitboard Position::pinned(Color us, PieceType pinnedTo) {
 
+	Bitboard pinned(0);
+	Color them          = us ^ BLACK;
+	Bitboard pinnedToBB = pieces(us, pinnedTo);
+	
+	while (pinnedToBB) {
 
+		// I call this king because it is the important square here, 
+		// not necessarily because it is referring to the king
+		Square king = pop_lsb(pinnedToBB);
+		
+		// TODO: can this be optimized with a method to find out what
+		// pieces are staring at the king?
+		for (PieceType pt : { BISHOP, ROOK, QUEEN }) {
+			
+			Bitboard pieces = pieces(them, pt);
+
+			while (pieces) {
+				
+				// to figure out if a piece is pinned, we draw a line from where we are to the king
+				// if it hits the king, we need to find out if there are any pieces between us
+				// and the king. if so, add to pinned
+
+				// I thought about doing it without one of the two bitboards, but I decided that:
+				// 
+				// I need line, because PseudoAttacks could hit the king, and in the next step
+				// accidentally decide a piece is pinned. Maybe this could be fixed with a tweak
+				// to the next step but that is a brain exercise for another day
+				// TODO: read above
+
+				// I need PseudoAttacks because line could generate a hit, but be a false positive
+				// in the case that a rook is on the same diagonal as the king, or vice versa.
+				Square pinnedPiece = pop_lsb(pieces);
+				Bitboard line      = Line[s, king];
+				Bitboard attacks   = PseudoAttacks[pt][s];
+
+				if (attacks & king) {
+
+					// we hit the king! now use line
+					if (line & king) {	
+						// since a piece belonging to them could also be blocking,
+						// we probably need to use the whole occupancy to check.
+						// then use & with what we have left to see if pieces are white.
+						Bitboard occ = pieces();
+						if (more_than_one(line &= occ))
+							return Bitboard(0);
+						
+						if (!more_than_one(line &= pieces(us))
+							pinned |= pop_lsb(line);
+					}
+				}
+			}
+		}
+	}
+	return pinned;
+}
 } // namespace Engine

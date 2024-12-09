@@ -106,6 +106,12 @@ inline Square lsb(Bitboard b) {
 
 }
 
+inline Square pop_lsb(Bitboard& b) {
+	Square s = lsb(b);
+	b ^= s;
+	return s;
+}
+
 
 template <Direction d>
 constexpr Bitboard shift(Bitboard b) {
@@ -159,6 +165,21 @@ constexpr Bitboard attacks_bb(Square s, Bitboard occupancy) {
 
 	return 0;
 
+}
+
+inline Bitboard attacks_bb(Square s, Bitboard occupancy, PieceType pt) {
+	assert (pt != PAWN);
+	assert(is_ok(s));
+
+	switch (pt) {
+		case BISHOP:
+		case ROOK:
+			return Magics[s][pt - BISHOP].attacks_bb(occupancy);
+		case QUEEN:
+			return Magics[s][0].attacks_bb(occupancy) | Magics[s][1].attacks_bb(occupancy);
+	}
+
+	return 0;
 }
 } // namespace Engine
 
