@@ -73,8 +73,6 @@ constexpr Color Position::to_play() const { return sideToMove; }
 
 inline Bitboard Position::king_on(Color us) const { return pieces(us, KING); }
 
-inline Bitboard Position::pinned(Color us) const { return pinned(Color, KING); }
-
 } // namespace Engine
 
 #endif

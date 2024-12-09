@@ -177,6 +177,8 @@ inline Bitboard attacks_bb(Square s, Bitboard occupancy, PieceType pt) {
 			return Magics[s][pt - BISHOP].attacks_bb(occupancy);
 		case QUEEN:
 			return Magics[s][0].attacks_bb(occupancy) | Magics[s][1].attacks_bb(occupancy);
+		default:
+			return 0;
 	}
 
 	return 0;

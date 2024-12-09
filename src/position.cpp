@@ -152,10 +152,10 @@ std::string Position::fen() const {
 	return s += "\n";
 }
 
-Bitboard Position::pinned(Color us, PieceType pinnedTo) {
+Bitboard Position::pinned(Color us, PieceType pinnedTo) const {
 
 	Bitboard pinned(0);
-	Color them          = us ^ BLACK;
+	Color them          = ~us;
 	Bitboard pinnedToBB = pieces(us, pinnedTo);
 	
 	while (pinnedToBB) {
@@ -164,13 +164,11 @@ Bitboard Position::pinned(Color us, PieceType pinnedTo) {
 		// not necessarily because it is referring to the king
 		Square king = pop_lsb(pinnedToBB);
 		
-		// TODO: can this be optimized with a method to find out what
-		// pieces are staring at the king?
 		for (PieceType pt : { BISHOP, ROOK, QUEEN }) {
 			
-			Bitboard pieces = pieces(them, pt);
+			Bitboard pinners = pieces(them, pt);
 
-			while (pieces) {
+			while (pinners) {
 				
 				// to figure out if a piece is pinned, we draw a line from where we are to the king
 				// if it hits the king, we need to find out if there are any pieces between us
@@ -185,9 +183,9 @@ Bitboard Position::pinned(Color us, PieceType pinnedTo) {
 
 				// I need PseudoAttacks because line could generate a hit, but be a false positive
 				// in the case that a rook is on the same diagonal as the king, or vice versa.
-				Square pinnedPiece = pop_lsb(pieces);
-				Bitboard line      = Line[s, king];
-				Bitboard attacks   = PseudoAttacks[pt][s];
+				Square pinner      = pop_lsb(pinners);
+				Bitboard line      = Line[pinner][king];
+				Bitboard attacks   = PseudoAttacks[pt][pinner];
 
 				if (attacks & king) {
 
@@ -197,11 +195,11 @@ Bitboard Position::pinned(Color us, PieceType pinnedTo) {
 						// we probably need to use the whole occupancy to check.
 						// then use & with what we have left to see if pieces are white.
 						Bitboard occ = pieces();
-						if (more_than_one(line &= occ))
-							return Bitboard(0);
+						if (more_than_one(line &= occ)) {
+							return Bitboard(0);}
 						
-						if (!more_than_one(line &= pieces(us))
-							pinned |= pop_lsb(line);
+						if (!more_than_one(line &= pieces(us))) {
+							pinned |= pop_lsb(line);}
 					}
 				}
 			}
