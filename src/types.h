@@ -213,29 +213,31 @@ constexpr Rank rank_of(Square s) { return Rank(s >> 3); }
 class Move {
 
 	friend std::ostream& operator<<(std::ostream& os, const Move& mv) {
-		return os << "src: " << mv.src << ", dst: " << mv.dst << ", pc: "
-		          << (mv.pc + 2) << ", mt: " << mv.mt << "\n";
+		return os << "src: " << mv.from_sq() << ", dst: " << mv.to_sq() << ", pc: "
+		          << (mv.promote_to() + 2) << ", mt: " << mv.type() << "\n";
 	}
 
 	public:
-		constexpr explicit Move(uint16_t data) 
-			: src(data & 0x3F),
-			  dst((data >> 6) & 0x3F),
-			  pc((data >> 12) & 0x3),
-			  mt((data >> 14) & 0x3) {}
+		constexpr explicit Move(uint16_t data) : data(data) {}
 
-		constexpr Move(Square to, Square from) : src(to), dst(from), pc(0), mt(2) {}
+		constexpr Move(Square to, Square from) : data(from & (to << 6)) {}
+
+
+		inline Square from_sq() const { return Square(data & 0x3f); }
+		inline Square to_sq() const { return Square(data & 0xfb0); }
+		inline Piece promote_to() const { return Piece(data & 0x3000); }
+		inline MoveType type() const { return MoveType(data & 0xb000); }
+
 
 		template <MoveType T>
 		constexpr static Move make(Square to, Square from, PieceType pt = KNIGHT) {
 			return Move(T + ((pt - KNIGHT) << 12) + (to << 6) + from);
 		}
 
+		constexpr uint16_t raw() const { return data; }
+
 	protected:
-		unsigned int src : 6;
-		unsigned int dst : 6;
-		unsigned int  pc : 2;	
-		unsigned int  mt : 2;
+		uint16_t data;
 
 };
 
