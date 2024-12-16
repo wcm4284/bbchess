@@ -185,23 +185,21 @@ Bitboard Position::pinned(Color us, PieceType pinnedTo) const {
 				// in the case that a rook is on the same diagonal as the king, or vice versa.
 				// can't use attack_bb because that would stop at the pinned piece
 				Square pinner      = pop_lsb(pinners);
-				Bitboard line      = Line[pinner][king];
+				Bitboard line      = line_bb(pinner, king);
 				Bitboard attacks   = PseudoAttacks[pt][pinner];
 
 				if (attacks & king) {
 
 					// we hit the king! now use line
-					if (line & king) {	
-						// since a piece belonging to them could also be blocking,
-						// we probably need to use the whole occupancy to check.
-						// then use & with what we have left to see if pieces are white.
-						Bitboard occ = pieces();
-						if (more_than_one(line &= occ)) {
-							return Bitboard(0);}
-						
-						if (!more_than_one(line &= pieces(us))) {
-							pinned |= pop_lsb(line);}
-					}
+					// since a piece belonging to them could also be blocking,
+					// we probably need to use the whole occupancy to check.
+					// then use & with what we have left to see if pieces are white.
+					Bitboard occ = pieces();
+					if (more_than_one(line &= occ)) {
+						return Bitboard(0);}
+					
+					if (!more_than_one(line &= pieces(us))) {
+						pinned |= pop_lsb(line);}
 				}
 			}
 		}
@@ -213,8 +211,11 @@ Bitboard Position::checkers() const {
 	// assume this method is getting called by whoever is moving
 	Bitboard checkers(0);
 	Color Us = sideToMove;
-
 	Square ksq = king_on(Us);
+	Bitboard occ = pieces();
+
+
+
 
 	return checkers;
 

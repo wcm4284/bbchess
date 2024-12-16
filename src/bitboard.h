@@ -118,9 +118,17 @@ inline Bitboard line_bb(Square s1, Square s2) { return Line[s1][s2]; }
 inline Bitboard line_bb(Square s1, Bitboard b) {
 	Bitboard line(0);
 	while (b) 
-		line |= pop_lsb(b);
+		line |= line_bb(s1, pop_lsb(b));
 
 	return line;
+}
+
+inline Bitboard between_bb(Square s1, Square s2) { return Between[s1][s2]; }
+inline Bitboard between_bb(Square s1, Bitboard b) {
+	Bitboard between(0);
+	while (b)
+		between |= between_bb(s1, pop_lsb(b));
+	return between;
 }
 
 

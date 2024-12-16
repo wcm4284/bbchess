@@ -42,7 +42,7 @@ class Position {
 		// pass a color through
 		Bitboard checkers() const;
 
-		inline Bitboard king_on(Color) const;
+		inline Square king_on(Color) const;
 
 
 
@@ -76,7 +76,7 @@ inline Bitboard Position::pieces(Color c, PieceTypes... pts) const { return piec
 constexpr Piece Position::piece_on(Square s) const { return board[s]; }
 constexpr Color Position::to_play() const { return sideToMove; }
 
-inline Bitboard Position::king_on(Color us) const { return pieces(us, KING); }
+inline Square Position::king_on(Color us) const { return lsb(pieces(us, KING)); }
 
 } // namespace Engine
 
