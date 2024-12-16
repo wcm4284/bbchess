@@ -1,9 +1,7 @@
 #include "types.h"
 #include "bitboard.h"
 #include "position.h"
-
-#include <iostream>
-#include <bitset>
+#include "movegen.h"
 
 using namespace Engine;
 

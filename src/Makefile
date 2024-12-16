@@ -5,7 +5,7 @@ COMPILER := g++
 FLAGS := -O2 -Wall -Werror -Wpedantic -g -std=c++20 -mbmi2
 
 
-FILES := main.cpp bitboard.cpp position.cpp
+FILES := main.cpp bitboard.cpp position.cpp movegen.cpp
 OBJECTS := $(patsubst %.cpp,$B/%.o,$(FILES))
 
 $B/main_engine: $(OBJECTS)

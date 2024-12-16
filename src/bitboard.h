@@ -83,6 +83,8 @@ constexpr Bitboard square_bb(Square s) {
 	return (1ULL << s);
 }
 
+
+
 inline Bitboard operator&(Bitboard b, Square s) { return b & square_bb(s); }
 inline Bitboard operator|(Bitboard b, Square s) { return b | square_bb(s); }
 inline Bitboard operator^(Bitboard b, Square s) { return b ^ square_bb(s); }
@@ -112,6 +114,15 @@ inline Square pop_lsb(Bitboard& b) {
 	return s;
 }
 
+inline Bitboard line_bb(Square s1, Square s2) { return Line[s1][s2]; }
+inline Bitboard line_bb(Square s1, Bitboard b) {
+	Bitboard line(0);
+	while (b) 
+		line |= pop_lsb(b);
+
+	return line;
+}
+
 
 template <Direction d>
 constexpr Bitboard shift(Bitboard b) {
@@ -130,6 +141,7 @@ constexpr Bitboard shift(Bitboard b) {
 	
 }
 
+// used to fill pawnattack array in bitboard.cpp
 template <Color c>
 constexpr Bitboard generate_pawn_attack(Bitboard b) {
 	return c == WHITE ? shift<NORTH_EAST>(b) | shift<NORTH_WEST>(b)

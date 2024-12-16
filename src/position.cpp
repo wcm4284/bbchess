@@ -183,6 +183,7 @@ Bitboard Position::pinned(Color us, PieceType pinnedTo) const {
 
 				// I need PseudoAttacks because line could generate a hit, but be a false positive
 				// in the case that a rook is on the same diagonal as the king, or vice versa.
+				// can't use attack_bb because that would stop at the pinned piece
 				Square pinner      = pop_lsb(pinners);
 				Bitboard line      = Line[pinner][king];
 				Bitboard attacks   = PseudoAttacks[pt][pinner];
@@ -207,4 +208,16 @@ Bitboard Position::pinned(Color us, PieceType pinnedTo) const {
 	}
 	return pinned;
 }
+
+Bitboard Position::checkers() const {
+	// assume this method is getting called by whoever is moving
+	Bitboard checkers(0);
+	Color Us = sideToMove;
+
+	Square ksq = king_on(Us);
+
+	return checkers;
+
+}
+	
 } // namespace Engine

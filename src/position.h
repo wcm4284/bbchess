@@ -36,6 +36,11 @@ class Position {
 		// also probably be used for move ordering
 		// @returns pieces of Color that are pinned to PieceType
 		Bitboard pinned(Color, PieceType = KING) const;
+		
+		// returns a bitboard filled with pieces that are currently attacking a king.
+		// since both kings cannot be in check at the same time, we have no need to
+		// pass a color through
+		Bitboard checkers() const;
 
 		inline Bitboard king_on(Color) const;
 
