@@ -12,7 +12,8 @@ int main() {
 	Position p;
 	p.init();
 
-	std::cout << Bitboards::pretty(p.king_on(WHITE)) << std::endl;
+	std::cout << Bitboards::pretty(line_bb(SQ_B1, SQ_A4)) << std::endl;
+
 
 
 

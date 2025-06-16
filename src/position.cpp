@@ -207,14 +207,25 @@ Bitboard Position::pinned(Color us, PieceType pinnedTo) const {
 	return pinned;
 }
 
+// returns all pieces currently checking a king.
+// should ideally only be able to include pieces
+// of the opposite color to who is moving, since
+// that is how the rules of the game shape out
+// however, until I test and confirm, we will
+// ask as though that is not the case
 Bitboard Position::checkers() const {
-	// assume this method is getting called by whoever is moving
+	
 	Bitboard checkers(0);
-	Color Us = sideToMove;
-	Square ksq = king_on(Us);
-	Bitboard occ = pieces();
+//	Bitboard occ = pieces();
 
+//	for (Color color : {WHITE, BLACK}) {
 
+		// all we need to do is draw a line from us to the king,
+		// and see if it hits anything
+
+//		Color Us = color;
+//		Square ksq = king_on(Us);
+//	}
 
 
 	return checkers;
