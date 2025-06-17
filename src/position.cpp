@@ -161,7 +161,8 @@ Bitboard Position::pinned(Color us, PieceType pinnedTo) const {
 	while (pinnedToBB) {
 
 		// I call this king because it is the important square here, 
-		// not necessarily because it is referring to the king
+		// not necessarily because it is referring to the king, although
+		// it can refer to the king
 		Square king = pop_lsb(pinnedToBB);
 		
 		for (PieceType pt : { BISHOP, ROOK, QUEEN }) {
@@ -212,20 +213,44 @@ Bitboard Position::pinned(Color us, PieceType pinnedTo) const {
 // of the opposite color to who is moving, since
 // that is how the rules of the game shape out
 // however, until I test and confirm, we will
-// ask as though that is not the case
+// act as though that is not the case
 Bitboard Position::checkers() const {
 	
 	Bitboard checkers(0);
-//	Bitboard occ = pieces();
+	Bitboard occ = pieces();
 
-//	for (Color color : {WHITE, BLACK}) {
 
-		// all we need to do is draw a line from us to the king,
-		// and see if it hits anything
+	for (Color color : { WHITE, BLACK }) {
+		
+		Square ksq = king_on(color);
+		Color them = ~color;
 
-//		Color Us = color;
-//		Square ksq = king_on(Us);
-//	}
+		for (PieceType pt : { BISHOP, ROOK, QUEEN }) {
+			
+			Bitboard attacks = attacks_bb(ksq, occ, pt);
+			
+			// I think this is okay, it shouldn't be possible
+			// for two rooks/bishops/queens to be checking
+			// the king at the same time. TODO: confirm
+			if (attacks &= pieces(them, pt)) {
+				checkers |= attacks;}
+
+		}
+
+		// knight
+		Bitboard knights = pieces(them, KNIGHT);
+		if (knights &= PseudoAttacks[KNIGHT][ksq]) {
+			checkers |= knights;}
+
+		// pawn
+		Bitboard pawns = pieces(them, PAWN);
+		if (pawns &= PawnAttacks[color][ksq]) {
+			checkers |= pawns;}
+
+
+		
+	}
+	
 
 
 	return checkers;

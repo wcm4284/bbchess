@@ -109,6 +109,7 @@ inline Square lsb(Bitboard b) {
 }
 
 inline Square pop_lsb(Bitboard& b) {
+	assert(b != 0);
 	Square s = lsb(b);
 	b ^= s;
 	return s;
@@ -172,6 +173,8 @@ template <PieceType pt>
 constexpr Bitboard attacks_bb(Square s, Bitboard occupancy) {
 
 	assert(pt != PAWN);
+	assert(pt != KNIGHT);
+	assert(pt != KING);
 	assert(is_ok(s));
 
 	switch (pt) {
@@ -188,7 +191,9 @@ constexpr Bitboard attacks_bb(Square s, Bitboard occupancy) {
 }
 
 inline Bitboard attacks_bb(Square s, Bitboard occupancy, PieceType pt) {
-	assert (pt != PAWN);
+	assert(pt != PAWN);
+	assert(pt != KNIGHT);
+	assert(pt != KING);
 	assert(is_ok(s));
 
 	switch (pt) {

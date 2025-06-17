@@ -1,8 +1,8 @@
 SHELL := bash
 
-B := Build
+B := ../build
 COMPILER := g++
-FLAGS := -O2 -Wall -Werror -Wpedantic -g -std=c++20 -mbmi2
+FLAGS := -O2 -Wall -Wextra -Wpedantic -g -std=c++20 -mbmi2
 
 
 FILES := main.cpp bitboard.cpp position.cpp movegen.cpp

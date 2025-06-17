@@ -12,10 +12,7 @@ int main() {
 	Position p;
 	p.init();
 
-	std::cout << Bitboards::pretty(line_bb(SQ_B1, SQ_A4)) << std::endl;
-
-
-
+	std::cout << Bitboards::pretty(attacks_bb(SQ_A1, square_bb(SQ_A2), KNIGHT)) << std::endl;
 
 	return 0;
 
