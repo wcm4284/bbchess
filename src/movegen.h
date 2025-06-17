@@ -15,7 +15,7 @@ enum GenType {
 	LEGAL
 };
 
-class ExtMove : public Move {
+struct ExtMove : public Move {
 
 	void operator=(Move m) { data = m.raw(); }
 	operator float() const = delete;
