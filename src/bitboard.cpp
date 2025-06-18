@@ -56,8 +56,8 @@ void Bitboards::init() {
 
 	for (Square s1 = SQ_A1; s1 <= SQ_H8; ++s1) {
 
-		PawnAttacks[WHITE][s1] = generate_pawn_attack<WHITE>(square_bb(s1));
-		PawnAttacks[BLACK][s1] = generate_pawn_attack<BLACK>(square_bb(s1));
+		PseudoAttacks[WHITE][s1] = generate_pawn_attack<WHITE>(square_bb(s1));
+		PseudoAttacks[BLACK][s1] = generate_pawn_attack<BLACK>(square_bb(s1));
 
 		for (int step : { -17, -15, -10, -6, 6, 10, 15, 17 } ) {
 

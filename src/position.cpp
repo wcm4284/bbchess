@@ -239,12 +239,12 @@ Bitboard Position::checkers() const {
 
 		// knight
 		Bitboard knights = pieces(them, KNIGHT);
-		if (knights &= PseudoAttacks[KNIGHT][ksq]) {
+		if (knights &= attacks_bb<KNIGHT>(ksq)) {
 			checkers |= knights;}
 
 		// pawn
 		Bitboard pawns = pieces(them, PAWN);
-		if (pawns &= PawnAttacks[color][ksq]) {
+		if (pawns &= attacks_bb<PAWN>(ksq, color)) {
 			checkers |= pawns;}
 
 

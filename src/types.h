@@ -168,7 +168,7 @@ enum File : int {
 enum MoveType {
 	NORMAL,
 	PROMOTION = 1 << 14,
-	CAPTURE   = 2 << 14,
+	CASTLING  = 2 << 14,
 	ENPASSANT = 3 << 14
 	
 };

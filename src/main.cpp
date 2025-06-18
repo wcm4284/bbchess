@@ -12,7 +12,7 @@ int main() {
 	Position p;
 	p.init();
 
-	std::cout << Bitboards::pretty(attacks_bb(SQ_A1, square_bb(SQ_A2), QUEEN)) << std::endl;
+	std::cout << Bitboards::pretty(attacks_bb<PAWN>(SQ_E3, BLACK)) << std::endl;
 
 	return 0;
 

@@ -42,7 +42,6 @@ constexpr Bitboard rank_bb(Square s) { return Rank1 << (8 * rank_of(s)); }
 extern Bitboard Line[SQUARE_NB][SQUARE_NB];
 extern Bitboard Between[SQUARE_NB][SQUARE_NB];
 extern Bitboard PseudoAttacks[PIECE_TYPE_NB][SQUARE_NB];
-extern Bitboard PawnAttacks[COLOR_NB][SQUARE_NB];
 
 // courtesy of chessprogramming.org/Magic_Bitboards
 // attempting the "Fancy" approach
@@ -170,11 +169,15 @@ template<>
 inline int distance<Square>(Square s1, Square s2) { return std::max(distance<File>(s1, s2), distance<Rank>(s1, s2)); }
 
 template <PieceType pt>
+constexpr Bitboard attacks_bb(Square s, Color c = COLOR_NB) {
+	assert((pt != PAWN) || (c < COLOR_NB));
+	return pt == PAWN ? PseudoAttacks[c][s] : PseudoAttacks[pt][s];
+}
+
+template <PieceType pt>
 constexpr Bitboard attacks_bb(Square s, Bitboard occupancy) {
 
 	assert(pt != PAWN);
-	assert(pt != KNIGHT);
-	assert(pt != KING);
 	assert(is_ok(s));
 
 	switch (pt) {
@@ -184,6 +187,8 @@ constexpr Bitboard attacks_bb(Square s, Bitboard occupancy) {
 			return Magics[s][pt - BISHOP].attacks_bb(occupancy);
 		case QUEEN:
 			return Magics[s][0].attacks_bb(occupancy) | Magics[s][1].attacks_bb(occupancy);
+		default:
+			return PseudoAttacks[pt][s];
 	}
 
 	return 0;
@@ -192,8 +197,6 @@ constexpr Bitboard attacks_bb(Square s, Bitboard occupancy) {
 
 inline Bitboard attacks_bb(Square s, Bitboard occupancy, PieceType pt) {
 	assert(pt != PAWN);
-	assert(pt != KNIGHT);
-	assert(pt != KING);
 	assert(is_ok(s));
 
 	switch (pt) {
@@ -203,7 +206,7 @@ inline Bitboard attacks_bb(Square s, Bitboard occupancy, PieceType pt) {
 		case QUEEN:
 			return Magics[s][0].attacks_bb(occupancy) | Magics[s][1].attacks_bb(occupancy);
 		default:
-			return 0;
+			return PseudoAttacks[pt][s];
 	}
 
 	return 0;
