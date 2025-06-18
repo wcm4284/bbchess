@@ -136,6 +136,9 @@ ExtMove* generate(const Position& pos, ExtMove* list) {
 					   : generate_all_moves<BLACK, T>(pos, list);
 }
 
-template ExtMove* generate<NON_EVASIONS>(const Position& pos, ExtMove* list);
+template ExtMove* generate<NON_EVASIONS>(const Position&, ExtMove*);
+template ExtMove* generate<CAPTURES>(const Position&, ExtMove*);
+template ExtMove* generate<EVASIONS>(const Position&, ExtMove*);
+template ExtMove* generate<QUIET>(const Position&, ExtMove*);
 
 } // namespace Engine
