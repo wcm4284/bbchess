@@ -210,6 +210,8 @@ constexpr File file_of(Square s) { return File(s & 7); }
 
 constexpr Rank rank_of(Square s) { return Rank(s >> 3); }
 
+constexpr Rank relative_rank(Rank r, Color c) { return Rank(c == WHITE ? r : RANK_8 - r); }
+
 class Move {
 
 	friend std::ostream& operator<<(std::ostream& os, const Move& mv) {

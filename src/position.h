@@ -67,7 +67,7 @@ std::ostream& operator<<(std::ostream& os, const Position& pos);
 inline Bitboard Position::pieces(PieceType pt) const { return byType[pt]; }
 
 template<typename... PieceTypes>
-inline Bitboard Position::pieces(PieceType pt, PieceTypes... pts) const { return pieces | pieces(pts...); }
+inline Bitboard Position::pieces(PieceType pt, PieceTypes... pts) const { return pieces(pt) | pieces(pts...); }
 
 inline Bitboard Position::pieces(Color c) const { return byColor[c]; }
 
