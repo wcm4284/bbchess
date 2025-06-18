@@ -4,6 +4,8 @@
 
 #include <cassert>
 #include <cstdint>
+#include <array>
+#include <string>
 #include <iostream>
 
 // look at stockfish for compiler stuff?
@@ -120,6 +122,18 @@ enum Square : int {
 	SQUARE_NB   = 64
 };
 
+// defined twice, but wanted it here and too lazy to get rid of it elsewhere
+const std::array<std::string, SQUARE_NB> printSquare = {
+	"a1", "b1", "c1", "d1", "e1", "f1", "g1", "h1",
+	"a2", "b2", "c2", "d2", "e2", "f2", "g2", "h2", 
+	"a3", "b3", "c3", "d3", "e3", "f3", "g3", "h3",
+	"a4", "b4", "c4", "d4", "e4", "f4", "g4", "h4",
+	"a5", "b5", "c5", "d5", "e5", "f5", "g5", "h5",
+	"a6", "b6", "c6", "d6", "e6", "f6", "g6", "h6",
+	"a7", "b7", "c7", "d7", "e7", "f7", "g7", "h7",
+	"a8", "b8", "c8", "d7", "e8", "f8", "g8", "h8"
+};
+
 enum Direction {
 
 	NORTH = 8,
@@ -215,21 +229,21 @@ constexpr Rank relative_rank(Rank r, Color c) { return Rank(c == WHITE ? r : RAN
 class Move {
 
 	friend std::ostream& operator<<(std::ostream& os, const Move& mv) {
-		return os << "src: " << mv.from_sq() << ", dst: " << mv.to_sq() << ", pc: "
+		return os << "src: " << printSquare[mv.from_sq()] << ", dst: " << printSquare[mv.to_sq()] << ", pc: "
 		          << (mv.promote_to() + 2) << ", mt: " << mv.type() << "\n";
 	}
 
 	public:
+		constexpr Move() : data(0) {}
 		constexpr explicit Move(uint16_t data) : data(data) {}
 
-		constexpr Move(Square to, Square from) : data(from & (to << 6)) {}
+		constexpr Move(Square to, Square from) : data(from | (to << 6)) {}
 
 
 		inline Square from_sq() const { return Square(data & 0x3f); }
-		inline Square to_sq() const { return Square(data & 0xfb0); }
-		inline Piece promote_to() const { return Piece(data & 0x3000); }
-		inline MoveType type() const { return MoveType(data & 0xb000); }
-
+		inline Square to_sq() const { return Square((data & 0xfc0) >> 6); }
+		inline Piece promote_to() const { return Piece((data & 0x3000) >> 12); }
+		inline MoveType type() const { return MoveType(data & 0xc000); }
 
 		template <MoveType T>
 		constexpr static Move make(Square to, Square from, PieceType pt = KNIGHT) {

@@ -29,12 +29,32 @@ ExtMove* generate(const Position&, ExtMove*);
 
 template <GenType T>
 class MoveList {
+	
+	// for debugging purposes, print all moves in the list
+	friend std::ostream& operator<<(std::ostream& os, const MoveList& l) {
+		
+		const ExtMove* curr = l.list;
+		while (curr != l.last) {
+			if (l.verbose) {
+				Bitboard b = move_bb(*curr);
+				os << Bitboards::pretty(b) << std::endl;}
 
-	MoveList(const Position& pos) : 
-		last(generate<T>(pos, list)) {}
+			os << *curr++ << std::endl;}
+
+		return os;
+	}
+
+	public:
+		MoveList() = default;
+		MoveList(const Position& pos) : 
+			last(generate<T>(pos, list)), verbose(false) {}
+
+		MoveList(const Position& pos, bool v) :
+			last(generate<T>(pos, list)), verbose(v) {}
 
 	private:
 		ExtMove list[MAX_MOVES], *last;
+		bool verbose;
 
 };
 

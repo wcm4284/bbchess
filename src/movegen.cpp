@@ -23,7 +23,6 @@ ExtMove* generate_moves(Bitboard target, const Position& pos, ExtMove* list) {
 		moves &= target;
 
 		while (moves) {
-
 			Square dst = pop_lsb(moves);
 			*list++ = Move::make<NORMAL>(dst, curr_sq);}
 
@@ -42,41 +41,55 @@ ExtMove* generate_promotions(Square to, Square from, ExtMove* list) {
 
 template <Color us, GenType type>
 ExtMove* generate_pawn_moves(Bitboard target, const Position& pos, ExtMove* list) {
-
-	Square en_pass = pos.en_passant();
-	Bitboard pawns = pos.pieces(us, PAWN);
-	Bitboard empty_squares = ~pos.pieces();
+	
 	constexpr Direction up = us == WHITE ? NORTH : SOUTH;
-	constexpr Bitboard promotion_rank = us == WHITE ? Rank7 : Rank2;
+	constexpr Bitboard rank_7 = us == WHITE ? Rank7 : Rank2;
+	constexpr Bitboard rank_3 = us == WHITE ? Rank3 : Rank6;
+	Bitboard pawns_on_7 = pos.pieces(us, PAWN) & rank_7;
+	Bitboard pawns_off_7 = pos.pieces(us, PAWN) & ~rank_7;
+	Bitboard empty_sqs = ~pos.pieces() & target;
+	Bitboard attackable_sqs = pos.pieces(~us) & target;
+	Square ep_sq = pos.en_passant();
 
-	while (pawns) {
+	// promotions
+	while (pawns_on_7) {
+		Square curr_sq = pop_lsb(pawns_on_7);
 
-		Square curr_sq = pop_lsb(pawns);
-		Bitboard curr_bb = square_bb(curr_sq);
+		// generate attacking promos
+		Bitboard moves = attacks_bb<PAWN>(curr_sq, us) & attackable_sqs;
+		while (moves) {
+			generate_promotions(pop_lsb(moves), curr_sq, list);}
 		
-
-		// captures
-		Bitboard attacks = attacks_bb<PAWN>(curr_sq, us) & pos.pieces(~us) & target;			
-
-		while (attacks) {
-			// special case where a capture is also a promotion move
-			if (promotion_rank & curr_sq) {
-				list = generate_promotions(pop_lsb(attacks), curr_sq, list);} 
-			else {
-				*list++ = Move::make<NORMAL>(pop_lsb(attacks), curr_sq);}
-
-		}
-
-		if ((attacks = (attacks_bb<PAWN>(curr_sq, us) & en_pass))) {
-			*list++ = Move::make<ENPASSANT>(pop_lsb(attacks), curr_sq);}
-
-
-
-		// normal moves
-		// Bitboard b1 = shift<up>(curr_sq); 
-		
-				
+		Bitboard promo;
+		if ((promo = shift<up>(square_bb(curr_sq)) & empty_sqs)) {
+			generate_promotions(pop_lsb(promo), curr_sq, list);}	
 	}
+
+	Bitboard b1 = shift<up>(pawns_off_7) & empty_sqs;
+	Bitboard b2 = shift<up>(b1 & rank_3) & empty_sqs;
+
+	while (b1) {
+		Square sq = pop_lsb(b1);
+		*list++ = Move::make<NORMAL>(sq, sq - up);}
+	
+	while (b2) {
+		Square sq = pop_lsb(b2);
+		*list++ = Move::make<NORMAL>(sq, sq - up - up);}
+
+	// captures
+	while (pawns_off_7) {
+		Square curr_sq = pop_lsb(pawns_off_7);
+
+		Bitboard atts = attacks_bb<PAWN>(curr_sq, us) & attackable_sqs;
+		while (atts) {
+			*list++ = Move::make<NORMAL>(pop_lsb(atts), curr_sq);}
+
+		Bitboard ep = attacks_bb<PAWN>(curr_sq, us) & ep_sq;
+		while (ep) {
+			// en passant capture
+			*list++ = Move::make<ENPASSANT>(pop_lsb(ep), curr_sq);}
+	}
+
 	return list;
 }
 
@@ -85,7 +98,7 @@ ExtMove* generate_all_moves(const Position& pos, ExtMove* list) {
 
 	Square ksq = pos.king_on(us);
 
-
+	// if we are in double check we can skip any non king moves
 	if ((T != EVASIONS) || !more_than_one(pos.checkers())) {
 
 		Bitboard target		 =   T == EVASIONS ? line_bb(ksq, lsb(pos.checkers()))
@@ -102,6 +115,14 @@ ExtMove* generate_all_moves(const Position& pos, ExtMove* list) {
 
 	}
 
+	Bitboard king_moves = attacks_bb<KING>(ksq) & ~pos.pieces(us);
+
+	while (king_moves) {
+		Square dst = pop_lsb(king_moves);
+		*list++ = Move::make<NORMAL>(dst, ksq);}
+
+	// castling moves! 
+
 	return list;
 }
 
@@ -114,4 +135,7 @@ ExtMove* generate(const Position& pos, ExtMove* list) {
 	return us == WHITE ? generate_all_moves<WHITE, T>(pos, list)
 					   : generate_all_moves<BLACK, T>(pos, list);
 }
+
+template ExtMove* generate<NON_EVASIONS>(const Position& pos, ExtMove* list);
+
 } // namespace Engine

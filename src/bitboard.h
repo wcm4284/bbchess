@@ -82,6 +82,12 @@ constexpr Bitboard square_bb(Square s) {
 	return (1ULL << s);
 }
 
+template <typename... Squares>
+inline Bitboard square_bb(Square s, Squares... sqs) { return square_bb(sqs...) | s; }
+
+inline Bitboard move_bb(const Move& m) {
+	return square_bb(m.to_sq(), m.from_sq());}
+
 inline Bitboard operator&(Bitboard b, Square s) { return b & square_bb(s); }
 inline Bitboard operator|(Bitboard b, Square s) { return b | square_bb(s); }
 inline Bitboard operator^(Bitboard b, Square s) { return b ^ square_bb(s); }
@@ -94,9 +100,6 @@ inline Bitboard operator|(Square s, Bitboard b) { return b | s; }
 inline Bitboard operator^(Square s, Bitboard b) { return b ^ s; }
 
 constexpr bool more_than_one(Bitboard b) { return b & (b - 1); }
-
-template <typename... Squares>
-inline Bitboard square_bb(Square s, Squares... sqs) { return square_bb(sqs...) | s; }
 
 inline Square lsb(Bitboard b) {
 
