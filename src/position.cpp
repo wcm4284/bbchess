@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <string_view>
+#include <unordered_map>
 
 namespace Engine {
 
@@ -91,6 +92,106 @@ void Position::init() {
 	fiftyMoveCount = 0;
 	CastlingRight = ANY_CASTLING;
 
+}
+
+void Position::set_fen(std::string_view fen) {
+	
+	const std::unordered_map<char, Piece> piece_conversion = {
+		{'p', B_PAWN},
+		{'P', W_PAWN},
+		{'n', B_KNIGHT},
+		{'N', W_KNIGHT},
+		{'b', B_BISHOP},
+		{'B', W_BISHOP},
+		{'r', B_ROOK},
+		{'R', W_ROOK},
+		{'q', B_QUEEN},
+		{'Q', W_QUEEN},
+		{'k', B_KING},
+		{'K', W_KING}
+	};
+	
+	int sq = 56;
+	int idx = 0;
+	while ( sq >= 0 ) {
+		// there is probably a better way to do this,
+		// but this works so whatever
+		char temp;
+		switch (temp = fen[idx++]) {
+			case 'p':
+			case 'P':
+			case 'n':
+			case 'N':
+			case 'b':
+			case 'B':
+			case 'r':
+			case 'R':
+			case 'q':
+			case 'Q':
+			case 'k':
+			case 'K':
+				board[sq++] = piece_conversion.at(temp);
+				break;
+			case ' ':
+			case '/':
+				sq -= 16;
+				break;
+			default:
+				for (int i = 0; i < temp - '0'; ++i) {
+					board[sq++] = NO_PIECE;}
+				break;
+		}
+	}
+
+	sideToMove = fen[idx++] == 'w' ? WHITE : BLACK;	
+	++idx;
+
+	char t;
+	CastlingRight = 0;
+	while ((t = fen[idx++]) != ' ') {
+		switch ( t ) {
+			case 'K':
+				CastlingRight |= WHITE_OO;
+				break;
+			case 'k':
+				CastlingRight |= BLACK_OO;
+				break;
+			case 'Q':
+				CastlingRight |= WHITE_OOO;
+				break;
+			case 'q':
+				CastlingRight |= BLACK_OOO;
+				break;
+			default:
+				break;
+		}
+	}
+	
+	if ((t = fen[idx++]) != '-') {
+		char file = t;
+		char rank = fen[idx++];
+
+		enPassant = Square(((rank - '1') * 8) + (file - 'a'));
+	} else { enPassant = SQ_NONE; }
+	++idx;
+	fiftyMoveCount = 0;
+	while ((t = fen[idx++]) != ' ') {
+		fiftyMoveCount *= 10;
+		fiftyMoveCount += t - '0';}
+	
+	gamePly = 0;
+	while (idx < (int)fen.size()) {
+		gamePly *= 10;
+		gamePly += fen[idx++] - '0';}
+
+	--gamePly;
+	gamePly *= 2;
+
+	std::cout << "gamePly: " << gamePly << std::endl;
+
+	if (sideToMove == BLACK) ++gamePly;
+
+	return;
 }
 
 std::string Position::fen() const {

@@ -12,8 +12,7 @@ int main() {
 	Position p;
 	p.init();
 
-	MoveList<NON_EVASIONS> list = MoveList<NON_EVASIONS>(p, true);
-	std::cout << list << std::endl;
+	p.set_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
 
 	std::cout << p << std::endl;
 
