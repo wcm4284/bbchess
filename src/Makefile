@@ -2,8 +2,14 @@ SHELL := bash
 
 B := ../build
 COMPILER := g++
-FLAGS := -O2 -Wall -Wextra -Wpedantic -g -std=c++20 -mbmi2
 
+DEBUG ?= 0
+
+ifeq ($(DEBUG),1)
+	FLAGS := -O0 -g -Wall -Wextra -Wpedantic -std=c++20 -mbmi2
+else
+	FLAGS := -O2 -Wall -Wextra -Wpedantic -std=c++20 -mbmi2
+endif
 
 FILES := main.cpp bitboard.cpp position.cpp movegen.cpp
 OBJECTS := $(patsubst %.cpp,$B/%.o,$(FILES))
@@ -23,6 +29,9 @@ all: $(FILES)
 
 clean:
 	@rm -r $B
+
+debug:
+	make DEBUG=1
 
 run: $B/main_engine
 	@$B/main_engine
