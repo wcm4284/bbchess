@@ -173,8 +173,10 @@ void Position::set_fen(std::string_view fen) {
 
 		enPassant = Square(((rank - '1') * 8) + (file - 'a'));
 	} else { enPassant = SQ_NONE; }
+
 	++idx;
 	fiftyMoveCount = 0;
+
 	while ((t = fen[idx++]) != ' ') {
 		fiftyMoveCount *= 10;
 		fiftyMoveCount += t - '0';}
@@ -187,10 +189,71 @@ void Position::set_fen(std::string_view fen) {
 	--gamePly;
 	gamePly *= 2;
 
-	std::cout << "gamePly: " << gamePly << std::endl;
 
 	if (sideToMove == BLACK) ++gamePly;
 
+	byColor[WHITE] = byColor[BLACK] = byType[PAWN] = byType[KNIGHT] = byType[BISHOP] =
+	byType[ROOK] = byType[QUEEN] = byType[KING] = byType[ALL_PIECES] = 0;
+
+
+	// gotta fix up byColor and byType now!!
+	for (Square sq = SQ_A1; sq <= SQ_H8; ++sq) {
+		Piece curr = board[sq];
+		switch (curr) {
+			case W_PAWN:
+				byColor[WHITE] |= square_bb(sq);
+				byType[PAWN] |= square_bb(sq);
+				break;
+			case W_KNIGHT:
+				byColor[WHITE] |= square_bb(sq);
+				byType[KNIGHT] |= square_bb(sq);
+				break;
+			case W_BISHOP:
+				byColor[WHITE] |= square_bb(sq);
+				byType[BISHOP] |= square_bb(sq);
+				break;
+			case W_ROOK:
+				byColor[WHITE] |= square_bb(sq);
+				byType[ROOK] |= square_bb(sq);
+				break;
+			case W_QUEEN:
+				byColor[WHITE] |= square_bb(sq);
+				byType[QUEEN] |= square_bb(sq);
+				break;
+			case W_KING:
+				byColor[WHITE] |= square_bb(sq);
+				byType[KING] |= square_bb(sq);
+				break;
+			case B_PAWN:
+				byColor[BLACK] |= square_bb(sq);
+				byType[PAWN] |= square_bb(sq);
+				break;
+			case B_KNIGHT:
+				byColor[BLACK] |= square_bb(sq);
+				byType[KNIGHT] |= square_bb(sq);
+				break;
+			case B_BISHOP:
+				byColor[BLACK] |= square_bb(sq);
+				byType[BISHOP] |= square_bb(sq);
+				break;
+			case B_ROOK:
+				byColor[BLACK] |= square_bb(sq);
+				byType[ROOK] |= square_bb(sq);
+				break;
+			case B_QUEEN:
+				byColor[BLACK] |= square_bb(sq);
+				byType[QUEEN] |= square_bb(sq);
+				break;
+			case B_KING:
+				byColor[BLACK] |= square_bb(sq);
+				byType[KING] |= square_bb(sq);
+				break;
+			default:
+				break;
+		}
+		
+	}
+	byType[ALL_PIECES] = byColor[WHITE] | byColor[BLACK];
 	return;
 }
 

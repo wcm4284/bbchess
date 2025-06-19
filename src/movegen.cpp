@@ -83,11 +83,13 @@ ExtMove* generate_pawn_moves(Bitboard target, const Position& pos, ExtMove* list
 		Bitboard atts = attacks_bb<PAWN>(curr_sq, us) & attackable_sqs;
 		while (atts) {
 			*list++ = Move::make<NORMAL>(pop_lsb(atts), curr_sq);}
-
-		Bitboard ep = attacks_bb<PAWN>(curr_sq, us) & ep_sq;
-		while (ep) {
-			// en passant capture
-			*list++ = Move::make<ENPASSANT>(pop_lsb(ep), curr_sq);}
+		
+		if (ep_sq != SQ_NONE) {
+			Bitboard ep = attacks_bb<PAWN>(curr_sq, us) & ep_sq;
+			while (ep) {
+				// en passant capture
+				*list++ = Move::make<ENPASSANT>(pop_lsb(ep), curr_sq);}
+		}
 	}
 
 	return list;

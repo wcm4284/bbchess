@@ -78,6 +78,8 @@ extern Magic Magics[SQUARE_NB][2];
 
 
 constexpr Bitboard square_bb(Square s) {
+	if (!is_ok(s)) {
+		std::cout << "Failed assertion is_ok(s) with value " << s << std::endl;}
 	assert(is_ok(s));
 	return (1ULL << s);
 }
