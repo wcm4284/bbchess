@@ -124,6 +124,7 @@ ExtMove* generate_all_moves(const Position& pos, ExtMove* list) {
 		*list++ = Move::make<NORMAL>(dst, ksq);}
 
 	// castling moves! 
+	 
 
 	return list;
 }

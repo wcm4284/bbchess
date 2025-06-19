@@ -26,6 +26,9 @@ class Position {
 		Bitboard pieces(Color) const;
 		template<typename... PieceTypes>
 		Bitboard pieces(Color, PieceTypes...) const;
+
+		bool capture(Move*) const;
+		bool empty(Square) const;
 		
 		// used for printing to console
 		constexpr Piece piece_on(Square) const;
@@ -43,11 +46,27 @@ class Position {
 		// pass a color through
 		Bitboard checkers() const;
 
+		inline bool can_castle(CastlingRights) const;
+
+
+		void put_piece(Piece, Square);
+		void move_piece(Square, Square);
+		Piece remove_piece(Square);
+		
+
+		void do_move(Move*);
+		void undo_move();
+
 		inline Square king_on(Color) const;
 
-
-
 		void init();
+
+		struct Info {
+			Piece capturedPiece;
+			Square enPassant;
+			Move lastMove; 
+			Info *prev;
+		};
 
 
 	private:
@@ -59,6 +78,7 @@ class Position {
 		int fiftyMoveCount;
 		int gamePly;
 		int CastlingRight;
+		Info *st;
 
 };
 
@@ -79,6 +99,9 @@ constexpr Color Position::to_play() const { return sideToMove; }
 constexpr Square Position::en_passant() const { return enPassant; }
 
 inline Square Position::king_on(Color us) const { return lsb(pieces(us, KING)); }
+
+inline bool Position::capture(Move *m) const { return !empty(m->to_sq()); }
+inline bool Position::empty(Square s) const { return board[s] == NO_PIECE; }
 
 } // namespace Engine
 

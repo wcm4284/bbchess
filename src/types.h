@@ -226,6 +226,10 @@ constexpr Rank rank_of(Square s) { return Rank(s >> 3); }
 
 constexpr Rank relative_rank(Rank r, Color c) { return Rank(c == WHITE ? r : RANK_8 - r); }
 
+constexpr Color color_of(Piece pc) { return pc >= B_PAWN ? BLACK : WHITE; }
+
+constexpr PieceType type_of(Piece pc) { return PieceType(pc >= B_PAWN ? pc - 8 : pc); }
+
 class Move {
 
 	friend std::ostream& operator<<(std::ostream& os, const Move& mv) {
@@ -244,6 +248,8 @@ class Move {
 		inline Square to_sq() const { return Square((data & 0xfc0) >> 6); }
 		inline Piece promote_to() const { return Piece((data & 0x3000) >> 12); }
 		inline MoveType type() const { return MoveType(data & 0xc000); }
+		inline bool is_ok() const { return from_sq() >= SQ_A1 && from_sq() <= SQ_H8 &&
+									to_sq() >= SQ_A1 && to_sq() <= SQ_H8 && from_sq() != to_sq(); }
 
 		template <MoveType T>
 		constexpr static Move make(Square to, Square from, PieceType pt = KNIGHT) {

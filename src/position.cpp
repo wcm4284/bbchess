@@ -316,6 +316,34 @@ std::string Position::fen() const {
 	return s += "\n";
 }
 
+// this function assumes that the castling right being passed through is available
+// it is checking to make sure the appropriate squares are empty.
+inline bool Position::can_castle(CastlingRights cr) const {
+
+	constexpr Bitboard whiteOObb = 0x60;
+	constexpr Bitboard whiteOOObb = 0xe;
+	constexpr Bitboard blackOObb = whiteOObb << 56;
+	constexpr Bitboard blackOOObb = whiteOOObb << 56;
+
+	// invert occupancy because we need to make sure that the squares are empty
+	Bitboard occ = ~pieces();
+
+	switch (cr) {
+		case WHITE_OO:
+			return (whiteOObb & occ) == whiteOObb;
+		case WHITE_OOO:
+			return (whiteOOObb & occ) == whiteOOObb;
+		case BLACK_OO:
+			return (blackOObb & occ) == blackOObb;
+		case BLACK_OOO:
+			return (blackOOObb & occ) == blackOOObb;
+		default:
+			assert(false);
+			return false;
+	}
+	
+}
+
 Bitboard Position::pinned(Color us, PieceType pinnedTo) const {
 
 	Bitboard pinned(0);
@@ -410,14 +438,70 @@ Bitboard Position::checkers() const {
 		Bitboard pawns = pieces(them, PAWN);
 		if (pawns &= attacks_bb<PAWN>(ksq, color)) {
 			checkers |= pawns;}
-
-
-		
 	}
 	
-
-
 	return checkers;
+
+}
+
+void Position::put_piece(Piece pc, Square s) {
+
+	assert(empty(s));
+
+	board[s] = pc;
+
+	byColor[color_of(pc)] ^= s;
+	byType[type_of(pc)] ^= s;
+	byType[ALL_PIECES] ^= s;
+
+	return;
+
+}
+
+void Position::move_piece(Square to, Square from) {
+
+	assert(empty(to));
+
+	Piece pc = board[from];
+	Bitboard bb = square_bb(to, from);
+
+	byColor[color_of(pc)] ^= bb;
+	byType[type_of(pc)] ^= bb;
+	byType[ALL_PIECES] ^= bb;
+
+	board[from] = NO_PIECE;
+	board[to] = pc;
+
+	return;
+}
+
+Piece Position::remove_piece(Square s) {
+	assert(!empty(s));
+
+	Piece pc = board[s];
+	board[s] = NO_PIECE;
+
+	byColor[color_of(pc)] ^= s;
+	byType[type_of(pc)] ^= s;
+	byType[ALL_PIECES] ^= s;
+	
+	return pc;
+}
+
+void Position::do_move(Move *m) {
+	assert(m->is_ok());
+
+	Square to = m->to_sq();
+	Square from = m->from_sq();
+	
+	if (capture(m))
+		st->capturedPiece = remove_piece(to);
+	else 
+		st->capturedPiece = NO_PIECE;
+
+}
+
+void Position::undo_move() {
 
 }
 	
