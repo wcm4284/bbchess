@@ -318,7 +318,7 @@ std::string Position::fen() const {
 
 // this function assumes that the castling right being passed through is available
 // it is checking to make sure the appropriate squares are empty.
-inline bool Position::can_castle(CastlingRights cr) const {
+bool Position::can_castle(CastlingRights cr) const {
 
 	constexpr Bitboard whiteOObb = 0x60;
 	constexpr Bitboard whiteOOObb = 0xe;
@@ -498,6 +498,8 @@ void Position::do_move(Move *m) {
 		st->capturedPiece = remove_piece(to);
 	else 
 		st->capturedPiece = NO_PIECE;
+
+	move_piece(to, from);
 
 }
 

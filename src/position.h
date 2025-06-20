@@ -46,7 +46,7 @@ class Position {
 		// pass a color through
 		Bitboard checkers() const;
 
-		inline bool can_castle(CastlingRights) const;
+		bool can_castle(CastlingRights) const;
 
 
 		void put_piece(Piece, Square);

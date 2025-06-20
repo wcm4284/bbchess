@@ -19,13 +19,11 @@ int main() {
 //j	std::cout << p << std::endl;
 //	std::cout << ml << std::endl;
 
-	Bitboard OObb = 0x60;
-	Bitboard OOObb = 0xe;
 
-	std::cout << Bitboards::pretty(OObb << 56) << std::endl;
-	std::cout << Bitboards::pretty(OOObb << 56) << std::endl;
-
-
+	std::cout << p.can_castle(WHITE_OO) << std::endl;
+	std::cout << p.can_castle(WHITE_OOO) << std::endl;
+	std::cout << p.can_castle(BLACK_OO) << std::endl;
+	std::cout << p.can_castle(BLACK_OOO) << std::endl;
 	return 0;
 
 }
