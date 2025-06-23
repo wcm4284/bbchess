@@ -316,6 +316,24 @@ std::string Position::fen() const {
 	return s += "\n";
 }
 
+Bitboard Position::attacked_squares(Color us) const {
+	Bitboard attacked(0);
+
+	Bitboard pawns = pieces(us, PAWN);
+
+	while (pawns) {
+		attacked |= attacks_bb<PAWN>(pop_lsb(pawns), us);}
+	
+	Bitboard occ = pieces();
+	for (PieceType pt : { KNIGHT, BISHOP, ROOK, QUEEN, KING} ) {
+		Bitboard stuffs = pieces(us, pt);
+		while (stuffs) {
+			attacked |= attacks_bb(pop_lsb(stuffs), occ, pt);}}
+
+
+	return attacked;
+}
+
 // this function assumes that the castling right being passed through is available
 // it is checking to make sure the appropriate squares are empty.
 bool Position::can_castle(CastlingRights cr) const {

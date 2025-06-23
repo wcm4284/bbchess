@@ -45,6 +45,10 @@ class Position {
 		// since both kings cannot be in check at the same time, we have no need to
 		// pass a color through
 		Bitboard checkers() const;
+	
+		// returns a bitboard containing all the squares attacked by color.
+		// used for castle checks and king move checks
+		Bitboard attacked_squares(Color) const;
 
 		bool can_castle(CastlingRights) const;
 
