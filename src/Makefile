@@ -6,7 +6,7 @@ COMPILER := g++
 DEBUG ?= 0
 
 ifeq ($(DEBUG),1)
-	FLAGS := -O0 -g -Wall -Wextra -Wpedantic -std=c++20 -mbmi2
+	FLAGS := -O0 -g -Wall -Wextra -Wpedantic -std=c++20 -mbmi2 -DDEBUG
 else
 	FLAGS := -O2 -Wall -Wextra -Wpedantic -std=c++20 -mbmi2
 endif
