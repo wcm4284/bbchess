@@ -1,5 +1,8 @@
 #include "movegen.h"
 
+#include <unordered_map>
+#include <array>
+
 namespace Engine {
 
 template <Color us, PieceType pt>
@@ -99,14 +102,20 @@ template <Color us, GenType T>
 ExtMove* generate_all_moves(const Position& pos, ExtMove* list) {
 
 	Square ksq = pos.king_on(us);
+	Bitboard checkers = pos.checkers();
 
 	// if we are in double check we can skip any non king moves
-	if ((T != EVASIONS) || !more_than_one(pos.checkers())) {
+	if ((T != EVASIONS) || !more_than_one(checkers)) {
 
-		Bitboard target		 =   T == EVASIONS ? line_bb(ksq, lsb(pos.checkers()))
+		Bitboard target		 =   T == EVASIONS ? line_bb(ksq, lsb(checkers)) | lsb(checkers)
 							   : T == NON_EVASIONS ? ~pos.pieces(us)
 							   : T == CAPTURES ? pos.pieces(~us)
 							   : ~pos.pieces();
+
+		#ifdef DEBUG
+			std::cout << "Move target BB\n";
+			std::cout << Bitboards::pretty(target) << std::endl;
+		#endif
 
 
 		list = generate_pawn_moves<us, T>(target, pos, list);
@@ -124,8 +133,31 @@ ExtMove* generate_all_moves(const Position& pos, ExtMove* list) {
 		*list++ = Move::make<NORMAL>(dst, ksq);}
 
 	// castling moves! 
-	 
+	// gotta figure out the quickest way to check if we're castling across a check
+	// for now, we will ignore that
+	
+	// we can't castle if we're in check
+	if constexpr (T != EVASIONS) {
 
+		std::unordered_map<CastlingRights, Square> m = {
+			{WHITE_OO, SQ_G1},
+			{WHITE_OOO, SQ_C1},
+			{BLACK_OO, SQ_G8},
+			{BLACK_OOO, SQ_C8}
+		};
+
+		constexpr std::array<CastlingRights, 2> crs = (us == WHITE)
+						? std::array<CastlingRights, 2>{WHITE_OO, WHITE_OOO}
+						: std::array<CastlingRights, 2>{BLACK_OO, BLACK_OOO};
+
+		for (CastlingRights cr : crs) {
+			if (pos.can_castle(cr)) {
+				*list++ = Move::make<CASTLING>(m[cr], ksq);}}
+	}
+
+
+
+	
 	return list;
 }
 
@@ -143,5 +175,18 @@ template ExtMove* generate<NON_EVASIONS>(const Position&, ExtMove*);
 template ExtMove* generate<CAPTURES>(const Position&, ExtMove*);
 template ExtMove* generate<EVASIONS>(const Position&, ExtMove*);
 template ExtMove* generate<QUIET>(const Position&, ExtMove*);
+
+template <>
+ExtMove* generate<LEGAL>(const Position& pos, ExtMove* list) {
+	Color us = pos.to_play();
+	Bitboard pinned = pos.pinned(us);
+	Bitboard checkers = pos.checkers();
+
+		
+
+
+
+	return list;
+}
 
 } // namespace Engine
