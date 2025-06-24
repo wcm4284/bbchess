@@ -509,16 +509,16 @@ Piece Position::remove_piece(Square s) {
 	return pc;
 }
 
-void Position::do_move(Move *m) {
+void Position::do_move(Info& nst, Move *m) {
 	assert(m->is_ok());
 
 	Square to = m->to_sq();
 	Square from = m->from_sq();
 	
 	if (capture(m))
-		st->capturedPiece = remove_piece(to);
+		nst.capturedPiece = remove_piece(to);
 	else 
-		st->capturedPiece = NO_PIECE;
+		nst.capturedPiece = NO_PIECE;
 
 	move_piece(to, from);
 

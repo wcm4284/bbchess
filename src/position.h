@@ -16,6 +16,13 @@ class Position {
 		Position() = default;
 		Position(const Position&) = delete;
 
+		struct Info {
+			Piece capturedPiece;
+			Square enPassant;
+			Move lastMove; 
+			Info *prev;
+		};
+
 		void set_fen(std::string_view); // maybe a string is fine
 		std::string fen() const;
 		
@@ -57,7 +64,7 @@ class Position {
 		void move_piece(Square, Square);
 		Piece remove_piece(Square);
 		
-		void do_move(Move*);
+		void do_move(Info&, Move*);
 		void undo_move();
 
 		bool legal_move(Move*) const;
@@ -65,13 +72,6 @@ class Position {
 		inline Square king_on(Color) const;
 
 		void init();
-
-		struct Info {
-			Piece capturedPiece;
-			Square enPassant;
-			Move lastMove; 
-			Info *prev;
-		};
 
 
 	private:
