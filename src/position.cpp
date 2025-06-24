@@ -345,16 +345,19 @@ bool Position::can_castle(CastlingRights cr) const {
 
 	// invert occupancy because we need to make sure that the squares are empty
 	Bitboard occ = ~pieces();
+	Bitboard safe_squares = ~attacked_squares(~sideToMove);
+	Bitboard heheha = Bitboard(0xc) << 56;
 
 	switch (cr) {
 		case WHITE_OO:
-			return (whiteOObb & occ) == whiteOObb;
+			return ((whiteOObb & occ) == whiteOObb) && ((whiteOObb & safe_squares) == whiteOObb);
 		case WHITE_OOO:
-			return (whiteOOObb & occ) == whiteOOObb;
+			return ((whiteOOObb & occ) == whiteOOObb) && ((0xc & safe_squares) == 0xc);
 		case BLACK_OO:
-			return (blackOObb & occ) == blackOObb;
+			return ((blackOObb & occ) == blackOObb) && ((blackOObb & safe_squares) == blackOObb);
 		case BLACK_OOO:
-			return (blackOOObb & occ) == blackOOObb;
+			return ((blackOOObb & occ) == blackOOObb) && ((heheha & safe_squares) == heheha);
+			break;
 		default:
 			assert(false);
 			return false;

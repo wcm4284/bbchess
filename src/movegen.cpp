@@ -126,7 +126,7 @@ ExtMove* generate_all_moves(const Position& pos, ExtMove* list) {
 
 	}
 
-	Bitboard king_moves = attacks_bb<KING>(ksq) & ~pos.pieces(us) & ~attacked_squares(~us);
+	Bitboard king_moves = attacks_bb<KING>(ksq) & ~pos.pieces(us) & ~pos.attacked_squares(~us);
 
 
 	while (king_moves) {
