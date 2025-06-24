@@ -522,6 +522,12 @@ void Position::do_move(Move *m) {
 
 	move_piece(to, from);
 
+	if (m->type() == CASTLING) {
+
+	} else if (m->type() == ENPASSANT) {
+
+	}
+
 }
 
 void Position::undo_move() {

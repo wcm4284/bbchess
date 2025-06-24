@@ -99,7 +99,7 @@ ExtMove* generate_pawn_moves(Bitboard target, const Position& pos, ExtMove* list
 }
 
 template <Color us, GenType T>
-ExtMove* generate_all_moves(const Position& pos, ExtMove* list) {
+ExtMove* generate_all(const Position& pos, ExtMove* list) {
 
 	Square ksq = pos.king_on(us);
 	Bitboard checkers = pos.checkers();
@@ -168,8 +168,8 @@ ExtMove* generate(const Position& pos, ExtMove* list) {
 	Color us = pos.to_play();
 
 
-	return us == WHITE ? generate_all_moves<WHITE, T>(pos, list)
-					   : generate_all_moves<BLACK, T>(pos, list);
+	return us == WHITE ? generate_all<WHITE, T>(pos, list)
+					   : generate_all<BLACK, T>(pos, list);
 }
 
 template ExtMove* generate<NON_EVASIONS>(const Position&, ExtMove*);
@@ -183,8 +183,16 @@ ExtMove* generate<LEGAL>(const Position& pos, ExtMove* list) {
 	Bitboard pinned = pos.pinned(us);
 	Bitboard checkers = pos.checkers();
 
-		
+	ExtMove* cur = list;
 
+	list = checkers ? generate<EVASIONS>(pos, list) : generate<NON_EVASIONS>(pos, list);
+
+	while (cur != list) {
+		if ( (pinned & cur->from_sq()) ) {
+			
+			*cur = *(--list);}
+		else {
+			++cur;}}
 
 
 	return list;
