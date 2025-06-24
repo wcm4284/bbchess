@@ -50,16 +50,17 @@ class Position {
 		// used for castle checks and king move checks
 		Bitboard attacked_squares(Color) const;
 
-		bool can_castle(CastlingRights) const;
 
+		bool can_castle(CastlingRights) const;
 
 		void put_piece(Piece, Square);
 		void move_piece(Square, Square);
 		Piece remove_piece(Square);
 		
-
 		void do_move(Move*);
 		void undo_move();
+
+		bool legal_move(Move*) const;
 
 		inline Square king_on(Color) const;
 

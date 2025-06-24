@@ -533,5 +533,39 @@ void Position::do_move(Move *m) {
 void Position::undo_move() {
 
 }
+
+bool Position::legal_move(Move* m) const {
+
+#ifdef DEBUG
+	std::cout << "checking legality of move " << *m << std::endl;
+#endif
+
+	// what we need to check:
+	// en passant moves
+	// pinned moves
+	Color us = sideToMove;
+	Square from = m->from_sq();
+	Square to = m->to_sq();
+	Square ksq = king_on(us);
+
+
+
+	// start with en pass
+	if (m->type() == ENPASSANT) {
+	
+		Square capsq = to - push_dir(us);
+
+		Bitboard occ = (pieces() ^ from ^ capsq) | to;
+
+		return (!(attacks_bb<ROOK>(ksq, occ) & pieces(~us, ROOK, QUEEN)) && 
+				!(attacks_bb<BISHOP>(ksq, occ) & pieces(~us, BISHOP, QUEEN)));
+	}
+
+	Bitboard pin = pinned(us);
+
+	assert(pin & from);
+
+	return !(pin & from) || (line_bb(to, ksq) & from); 
+}
 	
 } // namespace Engine

@@ -45,7 +45,7 @@ ExtMove* generate_promotions(Square to, Square from, ExtMove* list) {
 template <Color us, GenType type>
 ExtMove* generate_pawn_moves(Bitboard target, const Position& pos, ExtMove* list) {
 	
-	constexpr Direction up = us == WHITE ? NORTH : SOUTH;
+	constexpr Direction up = push_dir(us);
 	constexpr Bitboard rank_7 = us == WHITE ? Rank7 : Rank2;
 	constexpr Bitboard rank_3 = us == WHITE ? Rank3 : Rank6;
 	Bitboard pawns_on_7 = pos.pieces(us, PAWN) & rank_7;
@@ -188,7 +188,7 @@ ExtMove* generate<LEGAL>(const Position& pos, ExtMove* list) {
 	list = checkers ? generate<EVASIONS>(pos, list) : generate<NON_EVASIONS>(pos, list);
 
 	while (cur != list) {
-		if ( (pinned & cur->from_sq()) ) {
+		if ( ((pinned & cur->from_sq()) || (cur->type() == ENPASSANT)) && !pos.legal_move(cur)) {
 			
 			*cur = *(--list);}
 		else {
