@@ -21,6 +21,17 @@ namespace {
 		"a8", "b8", "c8", "d8", "e8", "f8", "g8", "h8",
 		"-"
 	};
+
+	const CastlingRights right_update[64] = {
+		~WHITE_OOO, ANY_CASTLING, ANY_CASTLING, ANY_CASTLING, ~WHITE_CASTLING, ANY_CASTLING, ANY_CASTLING, ~WHITE_OO,
+		ANY_CASTLING, ANY_CASTLING, ANY_CASTLING, ANY_CASTLING, ANY_CASTLING, ANY_CASTLING, ANY_CASTLING, ANY_CASTLING,
+		ANY_CASTLING, ANY_CASTLING, ANY_CASTLING, ANY_CASTLING, ANY_CASTLING, ANY_CASTLING, ANY_CASTLING, ANY_CASTLING,
+		ANY_CASTLING, ANY_CASTLING, ANY_CASTLING, ANY_CASTLING, ANY_CASTLING, ANY_CASTLING, ANY_CASTLING, ANY_CASTLING,
+		ANY_CASTLING, ANY_CASTLING, ANY_CASTLING, ANY_CASTLING, ANY_CASTLING, ANY_CASTLING, ANY_CASTLING, ANY_CASTLING,
+		ANY_CASTLING, ANY_CASTLING, ANY_CASTLING, ANY_CASTLING, ANY_CASTLING, ANY_CASTLING, ANY_CASTLING, ANY_CASTLING,
+		ANY_CASTLING, ANY_CASTLING, ANY_CASTLING, ANY_CASTLING, ANY_CASTLING, ANY_CASTLING, ANY_CASTLING, ANY_CASTLING,
+		~BLACK_OOO, ANY_CASTLING, ANY_CASTLING, ANY_CASTLING, ~BLACK_CASTLING, ANY_CASTLING, ANY_CASTLING, ~BLACK_OO
+	};
 }
 	
 std::ostream& operator<<(std::ostream& os, const Position& pos) {
@@ -509,20 +520,48 @@ Piece Position::remove_piece(Square s) {
 	return pc;
 }
 
-void Position::do_move(Info& nst, Move *m) {
+void Position::do_move(Info *nst, Move *m) {
 	assert(m->is_ok());
+
+#ifdef DEBUG
+	std::cout << "Making move " << *m << std::endl;
+#endif
+
+	//nst->prev = st;
+	//nst->lastMove = *m;
+	//nst->ep_sq = enPassant;
 
 	Square to = m->to_sq();
 	Square from = m->from_sq();
 	
-	if (capture(m))
-		nst.capturedPiece = remove_piece(to);
-	else 
-		nst.capturedPiece = NO_PIECE;
+	// update castling rights
+	CastlingRight &= right_update[to];
+	CastlingRight &= right_update[from];
+	
+//	if (capture(m))
+	//j	nst->capturedPiece = remove_piece(to);
+	//else 
+	//	nst->capturedPiece = NO_PIECE;
 
-	move_piece(to, from);
+	if (m->type() == PROMOTION) {
+		remove_piece(from);
+		put_piece(m->promote_to(), to);}
+	else 
+		move_piece(to, from);
 
 	if (m->type() == CASTLING) {
+	
+		if (to == SQ_C1) 
+			move_piece(SQ_D1, SQ_A1);	
+		
+		else if (to == SQ_G1)
+			move_piece(SQ_F1, SQ_H1);
+
+		else if (to == SQ_C8)
+			move_piece(SQ_D8, SQ_A8);
+
+		else
+			move_piece(SQ_F8, SQ_H8);
 
 	} else if (m->type() == ENPASSANT) {
 

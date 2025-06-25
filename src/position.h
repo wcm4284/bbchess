@@ -18,7 +18,7 @@ class Position {
 
 		struct Info {
 			Piece capturedPiece;
-			Square enPassant;
+			Square ep_sq;
 			Move lastMove; 
 			Info *prev;
 		};
@@ -64,7 +64,7 @@ class Position {
 		void move_piece(Square, Square);
 		Piece remove_piece(Square);
 		
-		void do_move(Info&, Move*);
+		void do_move(Info*, Move*);
 		void undo_move();
 
 		bool legal_move(Move*) const;

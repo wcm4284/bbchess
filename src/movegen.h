@@ -52,6 +52,8 @@ class MoveList {
 		MoveList(const Position& pos, bool v) :
 			last(generate<T>(pos, list)), verbose(v) {}
 
+		Move& operator[](int i) { return list[i]; }
+
 	private:
 		ExtMove list[MAX_MOVES], *last;
 		bool verbose;
