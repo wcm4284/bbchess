@@ -34,12 +34,16 @@ class MoveList {
 	friend std::ostream& operator<<(std::ostream& os, const MoveList& l) {
 		
 		const ExtMove* curr = l.list;
+		int idx = 0;
 		while (curr != l.last) {
 			if (l.verbose) {
 				Bitboard b = move_bb(*curr);
 				os << Bitboards::pretty(b) << std::endl;}
 
+			os << "idx " << idx++ << " "; 
 			os << *curr++ << std::endl;}
+
+
 
 		return os;
 	}

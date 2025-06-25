@@ -113,7 +113,7 @@ ExtMove* generate_all(const Position& pos, ExtMove* list) {
 							   : ~pos.pieces();
 
 		#ifdef DEBUG
-			std::cout << "Move target BB\n";
+			std::cout << "Printing target BB for move generation\n";
 			std::cout << Bitboards::pretty(target) << std::endl;
 		#endif
 
