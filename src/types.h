@@ -5,6 +5,7 @@
 #include <cassert>
 #include <cstdint>
 #include <array>
+#include <unordered_map>
 #include <string>
 #include <iostream>
 
@@ -185,6 +186,24 @@ enum MoveType {
 	
 };
 
+namespace {
+
+	std::unordered_map<MoveType, std::string> mt_conv = {
+		{NORMAL, "normal"},
+		{PROMOTION, "promotion"},
+		{CASTLING, "castle"},
+		{ENPASSANT, "en passant"}
+	};
+
+	std::unordered_map<PieceType, std::string> pt_conv = {
+		{KNIGHT, "knight"},
+		{BISHOP, "bishop"},
+		{ROOK, "rook"},
+		{QUEEN, "queen"}
+	};
+
+}
+
 #define ENABLE_INC_OPERATOR_ON(T) \
 		inline T& operator++(T& t) { return t = T(int(t) + 1); } \
 		inline T& operator--(T& t) { return t = T(int(t) - 1); }
@@ -235,8 +254,14 @@ constexpr PieceType type_of(Piece pc) { return PieceType(pc >= B_PAWN ? pc - 8 :
 class Move {
 
 	friend std::ostream& operator<<(std::ostream& os, const Move& mv) {
-		return os << "src: " << printSquare[mv.from_sq()] << ", dst: " << printSquare[mv.to_sq()] << ", pc: "
-		          << (mv.promote_to() + 2) << ", mt: " << mv.type() << "\n";
+		os << "from: " << printSquare[mv.from_sq()] << ", to: " << printSquare[mv.to_sq()] << 
+		", mt: " << mt_conv[mv.type()];
+
+		if (mv.type() == PROMOTION) 
+			return os << ", pt: " << pt_conv[PieceType(mv.promote_to() + 2)] << std::endl;
+
+		return os << std::endl;
+
 	}
 
 	public:
