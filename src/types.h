@@ -208,6 +208,8 @@ inline Square& operator-=(Square& s, Direction d) { return s = s - d; }
 // toggle color
 constexpr Color operator~(Color c) { return Color(c ^ BLACK); }
 
+constexpr CastlingRights operator~(CastlingRights cr) { return CastlingRights(~cr & 0x1f); }
+
 // flip rank A1 -> A8
 constexpr Square flip_rank(Square s) { return Square(s ^ SQ_A8); }
 
