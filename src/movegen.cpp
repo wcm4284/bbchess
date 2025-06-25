@@ -155,9 +155,6 @@ ExtMove* generate_all(const Position& pos, ExtMove* list) {
 			if (pos.can_castle(cr)) {
 				*list++ = Move::make<CASTLING>(m[cr], ksq);}}
 	}
-
-
-
 	
 	return list;
 }
