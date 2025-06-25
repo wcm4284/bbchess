@@ -41,7 +41,7 @@ class MoveList {
 				os << Bitboards::pretty(b) << std::endl;}
 
 			os << "idx " << idx++ << " "; 
-			os << *curr++ << std::endl;}
+			os << *curr++;}
 
 
 
