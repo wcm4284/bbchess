@@ -345,9 +345,10 @@ Bitboard Position::attacked_squares(Color us) const {
 	return attacked;
 }
 
-// this function assumes that the castling right being passed through is available
-// it is checking to make sure the appropriate squares are empty.
 bool Position::can_castle(CastlingRights cr) const {
+
+	if (!(cr & CastlingRight)) 
+		return false;
 
 	constexpr Bitboard whiteOObb = 0x60;
 	constexpr Bitboard whiteOOObb = 0xe;
@@ -423,7 +424,7 @@ Bitboard Position::pinned(Color us, PieceType pinnedTo) const {
 					if (more_than_one(line &= occ)) {
 						return Bitboard(0);}
 					
-					if (!more_than_one(line &= pieces(us))) {
+					if (!more_than_one(line &= pieces(us)) && line) {
 						pinned |= pop_lsb(line);}
 				}
 			}
@@ -565,7 +566,16 @@ void Position::do_move(Info *nst, Move *m) {
 
 	} else if (m->type() == ENPASSANT) {
 
+		Square capsq = to - push_dir(sideToMove);
+		//nst->capturedPiece = PAWN;
+		assert(type_of(piece_on(capsq)) == PAWN);
+		remove_piece(capsq);
+
 	}
+
+
+	++gamePly;
+	sideToMove = ~sideToMove;
 
 }
 
