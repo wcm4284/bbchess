@@ -17,9 +17,9 @@ class Position {
 		Position(const Position&) = delete;
 
 		struct Info {
-			Piece capturedPiece;
-			Square ep_sq;
-			Move lastMove; 
+			Piece capturedPiece; // at this position, what piece did we capture? 
+			Square ep_sq; // at this position, what is the eq_sq
+			Move move_made; // at this position, what move did we make? 
 		};
 
 		void set_fen(std::string_view); // maybe a string is fine

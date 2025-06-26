@@ -270,6 +270,8 @@ void Position::set_fen(std::string_view fen) {
 		
 	}
 	byType[ALL_PIECES] = byColor[WHITE] | byColor[BLACK];
+
+	assert( pieces(WHITE, KING) && pieces(BLACK, KING));
 	return;
 }
 
@@ -532,13 +534,19 @@ void Position::do_move(Move *m) {
 #ifdef DEBUG
 	std::cout << "Making move " << *m << std::endl;
 #endif
-	++st;
 
-	st->lastMove = *m;
+	st->move_made = *m;
 
 	Square to = m->to_sq();
 	Square from = m->from_sq();
 	
+	if (capture(m) || m->type() == ENPASSANT)
+		st->capturedPiece = m->type() == ENPASSANT ? make_piece(PAWN, ~sideToMove) : remove_piece(to);
+	else 
+		st->capturedPiece = NO_PIECE;
+
+	++st;
+
 	// update castling rights
 	CastlingRight &= right_update[to];
 	CastlingRight &= right_update[from];
@@ -547,12 +555,6 @@ void Position::do_move(Move *m) {
 		st->ep_sq = from - push_dir(sideToMove);
 	else
 		st->ep_sq = SQ_NONE;
-
-
-	if (capture(m))
-		st->capturedPiece = remove_piece(to);
-	else 
-		st->capturedPiece = NO_PIECE;
 
 
 	if (m->type() == PROMOTION) {
@@ -578,7 +580,6 @@ void Position::do_move(Move *m) {
 	} else if (m->type() == ENPASSANT) {
 
 		Square capsq = to - push_dir(sideToMove);
-		st->capturedPiece = make_piece(PAWN, ~sideToMove);
 		assert(type_of(piece_on(capsq)) == PAWN);
 		remove_piece(capsq);
 
