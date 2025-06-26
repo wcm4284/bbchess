@@ -111,6 +111,8 @@ void Position::init() {
 }
 
 void Position::set_fen(std::string_view fen) {
+
+	st = history;
 	
 	const std::unordered_map<char, Piece> piece_conversion = {
 		{'p', B_PAWN},
