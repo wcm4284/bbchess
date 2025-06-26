@@ -26,6 +26,8 @@ using Bitboard = uint64_t;
 constexpr int MAX_MOVES = 256;
 constexpr int MAX_PLY = 246;
 
+
+
 enum Color {
 	WHITE,
 	BLACK,

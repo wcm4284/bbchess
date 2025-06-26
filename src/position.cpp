@@ -32,6 +32,9 @@ namespace {
 		ANY_CASTLING, ANY_CASTLING, ANY_CASTLING, ANY_CASTLING, ANY_CASTLING, ANY_CASTLING, ANY_CASTLING, ANY_CASTLING,
 		~BLACK_OOO, ANY_CASTLING, ANY_CASTLING, ANY_CASTLING, ~BLACK_CASTLING, ANY_CASTLING, ANY_CASTLING, ~BLACK_OO
 	};
+	
+	// this is a pretty temp solution, will prob get changed at some point
+	Position::Info history[MAX_PLY * 3];
 }
 	
 std::ostream& operator<<(std::ostream& os, const Position& pos) {
@@ -56,6 +59,8 @@ std::ostream& operator<<(std::ostream& os, const Position& pos) {
 }
 	
 void Position::init() {
+
+	st = history;
 
 	sideToMove = WHITE;
 	byType[PAWN]   = 0xFF00000000FF00;
@@ -99,7 +104,7 @@ void Position::init() {
 	}
 
 	gamePly = 0;
-	enPassant = SQ_NONE;
+	st->ep_sq = SQ_NONE;
 	fiftyMoveCount = 0;
 	CastlingRight = ANY_CASTLING;
 
@@ -182,8 +187,8 @@ void Position::set_fen(std::string_view fen) {
 		char file = t;
 		char rank = fen[idx++];
 
-		enPassant = Square(((rank - '1') * 8) + (file - 'a'));
-	} else { enPassant = SQ_NONE; }
+		st->ep_sq = Square(((rank - '1') * 8) + (file - 'a'));
+	} else { st->ep_sq = SQ_NONE; }
 
 	++idx;
 	fiftyMoveCount = 0;
@@ -320,7 +325,7 @@ std::string Position::fen() const {
 		if (CastlingRight & BLACK_OOO)
 			s += "q";
 	}
-	s += " " + PrintSquare[enPassant];
+	s += " " + PrintSquare[st->ep_sq];
 	s += " " + std::to_string(fiftyMoveCount);
 	s += " " + std::to_string((gamePly / 2) + 1);
 
@@ -521,16 +526,15 @@ Piece Position::remove_piece(Square s) {
 	return pc;
 }
 
-void Position::do_move(Info *nst, Move *m) {
+void Position::do_move(Move *m) {
 	assert(m->is_ok());
 
 #ifdef DEBUG
 	std::cout << "Making move " << *m << std::endl;
 #endif
+	++st;
 
-	nst->prev = st;
-	nst->lastMove = *m;
-	nst->ep_sq = enPassant;
+	st->lastMove = *m;
 
 	Square to = m->to_sq();
 	Square from = m->from_sq();
@@ -540,15 +544,15 @@ void Position::do_move(Info *nst, Move *m) {
 	CastlingRight &= right_update[from];
 
 	if (type_of(piece_on(from)) == PAWN && distance<Square>(to, from) == 2) 
-		enPassant = from - push_dir(sideToMove);
+		st->ep_sq = from - push_dir(sideToMove);
 	else
-		enPassant = SQ_NONE;
+		st->ep_sq = SQ_NONE;
 
 
 	if (capture(m))
-		nst->capturedPiece = remove_piece(to);
+		st->capturedPiece = remove_piece(to);
 	else 
-		nst->capturedPiece = NO_PIECE;
+		st->capturedPiece = NO_PIECE;
 
 
 	if (m->type() == PROMOTION) {
@@ -574,14 +578,11 @@ void Position::do_move(Info *nst, Move *m) {
 	} else if (m->type() == ENPASSANT) {
 
 		Square capsq = to - push_dir(sideToMove);
-		nst->capturedPiece = make_piece(PAWN, ~sideToMove);
+		st->capturedPiece = make_piece(PAWN, ~sideToMove);
 		assert(type_of(piece_on(capsq)) == PAWN);
 		remove_piece(capsq);
 
 	}
-
-
-
 
 	++gamePly;
 	sideToMove = ~sideToMove;

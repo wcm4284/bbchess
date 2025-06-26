@@ -20,7 +20,6 @@ class Position {
 			Piece capturedPiece;
 			Square ep_sq;
 			Move lastMove; 
-			Info *prev;
 		};
 
 		void set_fen(std::string_view); // maybe a string is fine
@@ -64,7 +63,7 @@ class Position {
 		void move_piece(Square, Square);
 		Piece remove_piece(Square);
 		
-		void do_move(Info*, Move*);
+		void do_move(Move*);
 		void undo_move();
 
 		bool legal_move(Move*) const;
@@ -79,7 +78,6 @@ class Position {
 		Bitboard byType[PIECE_TYPE_NB];
 		Bitboard byColor[COLOR_NB];
 		Color sideToMove;
-		Square enPassant;
 		int fiftyMoveCount;
 		int gamePly;
 		int CastlingRight;
@@ -101,7 +99,7 @@ inline Bitboard Position::pieces(Color c, PieceTypes... pts) const { return piec
 
 constexpr Piece Position::piece_on(Square s) const { return board[s]; }
 constexpr Color Position::to_play() const { return sideToMove; }
-constexpr Square Position::en_passant() const { return enPassant; }
+constexpr Square Position::en_passant() const { return st->ep_sq; }
 
 inline Square Position::king_on(Color us) const { return lsb(pieces(us, KING)); }
 
