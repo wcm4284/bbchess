@@ -11,7 +11,7 @@ else
 	FLAGS := -O2 -Wall -Wextra -Wpedantic -std=c++20 -mbmi2
 endif
 
-FILES := main.cpp bitboard.cpp position.cpp movegen.cpp
+FILES := main.cpp bitboard.cpp position.cpp movegen.cpp search.cpp
 OBJECTS := $(patsubst %.cpp,$B/%.o,$(FILES))
 
 $B/main_engine: $(OBJECTS)
