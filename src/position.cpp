@@ -528,9 +528,9 @@ void Position::do_move(Info *nst, Move *m) {
 	std::cout << "Making move " << *m << std::endl;
 #endif
 
-	//nst->prev = st;
-	//nst->lastMove = *m;
-	//nst->ep_sq = enPassant;
+	nst->prev = st;
+	nst->lastMove = *m;
+	nst->ep_sq = enPassant;
 
 	Square to = m->to_sq();
 	Square from = m->from_sq();
@@ -538,15 +538,22 @@ void Position::do_move(Info *nst, Move *m) {
 	// update castling rights
 	CastlingRight &= right_update[to];
 	CastlingRight &= right_update[from];
-	
-//	if (capture(m))
-	//j	nst->capturedPiece = remove_piece(to);
-	//else 
-	//	nst->capturedPiece = NO_PIECE;
+
+	if (type_of(piece_on(from)) == PAWN && distance<Square>(to, from) == 2) 
+		enPassant = from - push_dir(sideToMove);
+	else
+		enPassant = SQ_NONE;
+
+
+	if (capture(m))
+		nst->capturedPiece = remove_piece(to);
+	else 
+		nst->capturedPiece = NO_PIECE;
+
 
 	if (m->type() == PROMOTION) {
 		remove_piece(from);
-		put_piece(m->promote_to(), to);}
+		put_piece(make_piece(m->promote_to(), sideToMove), to);}
 	else 
 		move_piece(to, from);
 
@@ -567,11 +574,13 @@ void Position::do_move(Info *nst, Move *m) {
 	} else if (m->type() == ENPASSANT) {
 
 		Square capsq = to - push_dir(sideToMove);
-		//nst->capturedPiece = PAWN;
+		nst->capturedPiece = make_piece(PAWN, ~sideToMove);
 		assert(type_of(piece_on(capsq)) == PAWN);
 		remove_piece(capsq);
 
 	}
+
+
 
 
 	++gamePly;
@@ -580,6 +589,8 @@ void Position::do_move(Info *nst, Move *m) {
 }
 
 void Position::undo_move() {
+
+//	Move undo = *st->lastMove; 
 
 }
 

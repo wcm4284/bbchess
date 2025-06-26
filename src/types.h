@@ -229,6 +229,8 @@ constexpr Color operator~(Color c) { return Color(c ^ BLACK); }
 
 constexpr CastlingRights operator~(CastlingRights cr) { return CastlingRights(~int(cr) & 0x1f); }
 
+constexpr Piece make_piece(PieceType p, Color c) { return Piece(int(p) + (int(c) * 8)); }
+
 // flip rank A1 -> A8
 constexpr Square flip_rank(Square s) { return Square(s ^ SQ_A8); }
 
@@ -258,7 +260,7 @@ class Move {
 		", mt: " << mt_conv[mv.type()];
 
 		if (mv.type() == PROMOTION) 
-			return os << ", pt: " << pt_conv[PieceType(mv.promote_to() + 2)] << std::endl;
+			return os << ", pt: " << pt_conv[mv.promote_to()] << std::endl;
 
 		return os << std::endl;
 
@@ -273,7 +275,7 @@ class Move {
 
 		inline Square from_sq() const { return Square(data & 0x3f); }
 		inline Square to_sq() const { return Square((data & 0xfc0) >> 6); }
-		inline Piece promote_to() const { return Piece((data & 0x3000) >> 12); }
+		inline PieceType promote_to() const { return PieceType(((data & 0x3000) >> 12) + 2); }
 		inline MoveType type() const { return MoveType(data & 0xc000); }
 		inline bool is_ok() const { return from_sq() >= SQ_A1 && from_sq() <= SQ_H8 &&
 									to_sq() >= SQ_A1 && to_sq() <= SQ_H8 && from_sq() != to_sq(); }

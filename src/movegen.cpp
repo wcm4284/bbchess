@@ -35,9 +35,10 @@ ExtMove* generate_moves(Bitboard target, const Position& pos, ExtMove* list) {
 }
 
 ExtMove* generate_promotions(Square to, Square from, ExtMove* list) {
+
 	
-	for (PieceType pt : { KNIGHT, BISHOP, ROOK, QUEEN }) {
-		*list++ = Move::make<PROMOTION>(to, from, pt);}
+	for (PieceType pt : { KNIGHT, BISHOP, ROOK, QUEEN }) 
+		*list++ = Move::make<PROMOTION>(to, from, pt);
 
 	return list;
 }
@@ -54,18 +55,21 @@ ExtMove* generate_pawn_moves(Bitboard target, const Position& pos, ExtMove* list
 	Bitboard attackable_sqs = pos.pieces(~us) & target;
 	Square ep_sq = pos.en_passant();
 
+
 	// promotions
 	while (pawns_on_7) {
 		Square curr_sq = pop_lsb(pawns_on_7);
 
 		// generate attacking promos
 		Bitboard moves = attacks_bb<PAWN>(curr_sq, us) & attackable_sqs;
+
 		while (moves) {
-			generate_promotions(pop_lsb(moves), curr_sq, list);}
+			list = generate_promotions(pop_lsb(moves), curr_sq, list);}
 		
 		Bitboard promo;
 		if ((promo = shift<up>(square_bb(curr_sq)) & empty_sqs)) {
-			generate_promotions(pop_lsb(promo), curr_sq, list);}	
+
+			list = generate_promotions(pop_lsb(promo), curr_sq, list);}	
 	}
 
 	Bitboard b1 = shift<up>(pawns_off_7) & empty_sqs;
@@ -185,11 +189,10 @@ ExtMove* generate<LEGAL>(const Position& pos, ExtMove* list) {
 	list = checkers ? generate<EVASIONS>(pos, list) : generate<NON_EVASIONS>(pos, list);
 
 	while (cur != list) {
-		if ( ((pinned & cur->from_sq()) || (cur->type() == ENPASSANT)) && !pos.legal_move(cur)) {
-			
-			*cur = *(--list);}
-		else {
-			++cur;}}
+		if ( ((pinned & cur->from_sq()) || (cur->type() == ENPASSANT)) && !pos.legal_move(cur)) 
+			*cur = *(--list);
+		else
+			++cur;}
 
 
 	return list;
