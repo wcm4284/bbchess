@@ -230,6 +230,8 @@ inline Square& operator-=(Square& s, Direction d) { return s = s - d; }
 constexpr Color operator~(Color c) { return Color(c ^ BLACK); }
 
 constexpr CastlingRights operator~(CastlingRights cr) { return CastlingRights(~int(cr) & 0x1f); }
+inline CastlingRights& operator|=(CastlingRights& c, CastlingRights cr) { return c = CastlingRights(c | cr); }
+inline CastlingRights& operator&=(CastlingRights& c, CastlingRights cr) { return c = CastlingRights(c & cr); }
 
 constexpr Piece make_piece(PieceType p, Color c) { return Piece(int(p) + (int(c) * 8)); }
 

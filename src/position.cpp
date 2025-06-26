@@ -106,7 +106,7 @@ void Position::init() {
 	gamePly = 0;
 	st->ep_sq = SQ_NONE;
 	fiftyMoveCount = 0;
-	CastlingRight = ANY_CASTLING;
+	st->cr = ANY_CASTLING;
 
 }
 
@@ -163,20 +163,20 @@ void Position::set_fen(std::string_view fen) {
 	++idx;
 
 	char t;
-	CastlingRight = 0;
+	st->cr = CastlingRights(0);
 	while ((t = fen[idx++]) != ' ') {
 		switch ( t ) {
 			case 'K':
-				CastlingRight |= WHITE_OO;
+				st->cr |= WHITE_OO;
 				break;
 			case 'k':
-				CastlingRight |= BLACK_OO;
+				st->cr |= BLACK_OO;
 				break;
 			case 'Q':
-				CastlingRight |= WHITE_OOO;
+				st->cr |= WHITE_OOO;
 				break;
 			case 'q':
-				CastlingRight |= BLACK_OOO;
+				st->cr |= BLACK_OOO;
 				break;
 			default:
 				break;
@@ -315,16 +315,16 @@ std::string Position::fen() const {
 	}
 	s += (sideToMove == WHITE) ? " w" : " b";
 	s += " ";
-	if (!CastlingRight) {
+	if (!st->cr) {
 		s += "-";
 	} else {
-		if (CastlingRight & WHITE_OO)
+		if (st->cr & WHITE_OO)
 			s += "K";
-		if (CastlingRight & WHITE_OOO)
+		if (st->cr & WHITE_OOO)
 			s += "Q";
-		if (CastlingRight & BLACK_OO)
+		if (st->cr & BLACK_OO)
 			s += "k";
-		if (CastlingRight & BLACK_OOO)
+		if (st->cr & BLACK_OOO)
 			s += "q";
 	}
 	s += " " + PrintSquare[st->ep_sq];
@@ -354,7 +354,7 @@ Bitboard Position::attacked_squares(Color us) const {
 
 bool Position::can_castle(CastlingRights cr) const {
 
-	if (!(cr & CastlingRight)) 
+	if (!(cr & st->cr)) 
 		return false;
 
 	constexpr Bitboard whiteOObb = 0x60;
@@ -547,9 +547,11 @@ void Position::do_move(Move *m) {
 
 	++st;
 
+	st->cr = (st - 1)->cr;
+
 	// update castling rights
-	CastlingRight &= right_update[to];
-	CastlingRight &= right_update[from];
+	st->cr &= right_update[to];
+	st->cr &= right_update[from];
 
 	if (type_of(piece_on(from)) == PAWN && distance<Square>(to, from) == 2) 
 		st->ep_sq = from - push_dir(sideToMove);
@@ -592,7 +594,48 @@ void Position::do_move(Move *m) {
 
 void Position::undo_move() {
 
-//	Move undo = *st->lastMove; 
+	--st;
+	--gamePly;
+	sideToMove = ~sideToMove;
+
+	Move m = st->move_made;
+
+	// backwards bc we're undoing move 
+	Square from = m.to_sq();
+	Square to = m.from_sq();
+
+
+	if (m.type() == PROMOTION) {
+		remove_piece(from);
+		put_piece(make_piece(PAWN, sideToMove), to);}
+	else
+		move_piece(to, from);
+	
+	Piece cap;
+		
+	if (m.type() == ENPASSANT) {
+		put_piece(make_piece(PAWN, ~sideToMove), from - push_dir(sideToMove));} 
+	else if ((cap = st->capturedPiece) != NO_PIECE) 
+		put_piece(cap, from);
+
+
+
+	else if (m.type() == CASTLING) {
+		
+		if (from == SQ_G1) 
+			move_piece(SQ_H1, SQ_F1);
+
+		else if ( from == SQ_C1 ) 
+			move_piece(SQ_A1, SQ_D1);
+
+		else if ( from == SQ_G8 ) 
+			move_piece(SQ_H8, SQ_F8);
+
+		else
+			move_piece(SQ_A8, SQ_D8);
+		
+	}
+
 
 }
 

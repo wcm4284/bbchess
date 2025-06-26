@@ -20,6 +20,7 @@ class Position {
 			Piece capturedPiece; // at this position, what piece did we capture? 
 			Square ep_sq; // at this position, what is the eq_sq
 			Move move_made; // at this position, what move did we make? 
+			CastlingRights cr; // at this position, what was our castling rights?
 		};
 
 		void set_fen(std::string_view); // maybe a string is fine
@@ -80,7 +81,6 @@ class Position {
 		Color sideToMove;
 		int fiftyMoveCount;
 		int gamePly;
-		int CastlingRight;
 		Info *st;
 
 };
