@@ -7,7 +7,7 @@
 namespace Engine {
 
 
-int perft(std::string, int);
+uint64_t perft(std::string, int);
 
 Move recursive_search(Position&, int); 
 

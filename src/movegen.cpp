@@ -51,7 +51,7 @@ ExtMove* generate_pawn_moves(Bitboard target, const Position& pos, ExtMove* list
 	constexpr Bitboard rank_3 = us == WHITE ? Rank3 : Rank6;
 	Bitboard pawns_on_7 = pos.pieces(us, PAWN) & rank_7;
 	Bitboard pawns_off_7 = pos.pieces(us, PAWN) & ~rank_7;
-	Bitboard empty_sqs = ~pos.pieces() & target;
+	Bitboard empty_sqs = ~pos.pieces();
 	Bitboard attackable_sqs = pos.pieces(~us) & target;
 	Square ep_sq = pos.en_passant();
 
@@ -67,14 +67,14 @@ ExtMove* generate_pawn_moves(Bitboard target, const Position& pos, ExtMove* list
 			list = generate_promotions(pop_lsb(moves), curr_sq, list);}
 		
 		Bitboard promo;
-		if ((promo = shift<up>(square_bb(curr_sq)) & empty_sqs)) {
+		if ((promo = shift<up>(square_bb(curr_sq)) & empty_sqs & target)) {
 
 			list = generate_promotions(pop_lsb(promo), curr_sq, list);}	
 	}
 
 	Bitboard b1 = shift<up>(pawns_off_7) & empty_sqs;
-	Bitboard b2 = shift<up>(b1 & rank_3) & empty_sqs;
-
+	Bitboard b2 = shift<up>(b1 & rank_3) & empty_sqs & target;
+	b1 &= target;
 	while (b1) {
 		Square sq = pop_lsb(b1);
 		*list++ = Move::make<NORMAL>(sq, sq - up);}
@@ -111,7 +111,7 @@ ExtMove* generate_all(const Position& pos, ExtMove* list) {
 	// if we are in double check we can skip any non king moves
 	if ((T != EVASIONS) || !more_than_one(checkers)) {
 
-		Bitboard target		 =   T == EVASIONS ? line_bb(ksq, lsb(checkers))
+		Bitboard target		 =   T == EVASIONS ? line_bb(ksq, lsb(checkers)) | lsb(checkers)
 							   : T == NON_EVASIONS ? ~pos.pieces(us)
 							   : T == CAPTURES ? pos.pieces(~us)
 							   : ~pos.pieces();

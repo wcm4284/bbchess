@@ -347,7 +347,7 @@ Bitboard Position::attacked_squares(Color us) const {
 	while (pawns) {
 		attacked |= attacks_bb<PAWN>(pop_lsb(pawns), us);}
 	
-	Bitboard occ = pieces();
+	Bitboard occ = pieces() & ~pieces(~us, KING);
 	for (PieceType pt : { KNIGHT, BISHOP, ROOK, QUEEN, KING} ) {
 		Bitboard stuffs = pieces(us, pt);
 		while (stuffs) {
