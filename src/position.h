@@ -25,6 +25,8 @@ class Position {
 
 		void set_fen(std::string_view); // maybe a string is fine
 		std::string fen() const;
+
+		std::string dress_move(Move) const;
 		
 		// used for move generation
 		Bitboard pieces(PieceType pt = ALL_PIECES) const;
