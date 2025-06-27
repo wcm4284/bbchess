@@ -30,7 +30,12 @@ clean:
 	@rm -r $B
 
 debug:
-	make DEBUG=1
+	@make DEBUG=1
+
+rdebug: debug
+	@echo "Running..."
+	@echo
+	@$B/main_engine
 
 run: $B/main_engine
 	@echo "Running..."
