@@ -11,19 +11,18 @@ else
 	FLAGS := -O2 -Wall -Wextra -Wpedantic -std=c++20 -mbmi2
 endif
 
-FILES := main.cpp bitboard.cpp position.cpp movegen.cpp search.cpp
+FILES := bitboard.cpp position.cpp movegen.cpp search.cpp main.cpp
 OBJECTS := $(patsubst %.cpp,$B/%.o,$(FILES))
 
 $B/main_engine: $(OBJECTS)
 	@echo "Linking $@"
-	$(COMPILER) -o $@ $(OBJECTS) $(FLAGS)
+	@$(COMPILER) -o $@ $(OBJECTS) $(FLAGS)
 
 
 $B/%.o : %.cpp Makefile
 	@echo "compiling $<"
 	@mkdir -p $(B)
-	$(COMPILER) -I. -c -MD -MF $B/$*.d -o $B/$*.o $< $(FLAGS) -DUSE_PEXT
-
+	@$(COMPILER) -I. -c -MD -MF $B/$*.d -o $B/$*.o $< $(FLAGS) -DUSE_PEXT
 
 all: $(FILES)
 
@@ -34,6 +33,8 @@ debug:
 	make DEBUG=1
 
 run: $B/main_engine
+	@echo "Running..."
+	@echo
 	@$B/main_engine
 
 -include $(patsubst %.cpp,$B/%.d,$(FILES))
