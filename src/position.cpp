@@ -10,18 +10,6 @@ namespace {
 
 	constexpr std::string_view PieceToChar(" PNBRQK  pnbrqk");
 
-	const std::string PrintSquare[65] = {
-		"a1", "b1", "c1", "d1", "e1", "f1", "g1", "h1",
-		"a2", "b2", "c2", "d2", "e2", "f2", "g2", "h2",
-		"a3", "b3", "c3", "d3", "e3", "f3", "g3", "h3",
-		"a4", "b4", "c4", "d4", "e4", "f4", "g4", "h4",
-		"a5", "b5", "c5", "d5", "e5", "f5", "g5", "h5",
-		"a6", "b6", "c6", "d6", "e6", "f6", "g6", "h6",
-		"a7", "b7", "c7", "d7", "e7", "f7", "g7", "h7",
-		"a8", "b8", "c8", "d8", "e8", "f8", "g8", "h8",
-		"-"
-	};
-
 	const CastlingRights right_update[64] = {
 		~WHITE_OOO, ANY_CASTLING, ANY_CASTLING, ANY_CASTLING, ~WHITE_CASTLING, ANY_CASTLING, ANY_CASTLING, ~WHITE_OO,
 		ANY_CASTLING, ANY_CASTLING, ANY_CASTLING, ANY_CASTLING, ANY_CASTLING, ANY_CASTLING, ANY_CASTLING, ANY_CASTLING,
@@ -68,7 +56,7 @@ void Position::init() {
 	byType[KNIGHT] = 0x4200000000000042;
 	byType[ROOK]   = square_bb(SQ_A8) | square_bb(SQ_A1) | square_bb(SQ_H8) | square_bb(SQ_H1);
 	byType[QUEEN]  = square_bb(SQ_D1) | square_bb(SQ_D8);
-	byType[KING]   = square_bb(SQ_E1) | square_bb(SQ_E1);
+	byType[KING]   = square_bb(SQ_E1) | square_bb(SQ_E8);
 
 	byColor[WHITE] = 0xFFFF;
 	byColor[BLACK] = byColor[WHITE] << 48;
@@ -105,6 +93,8 @@ void Position::init() {
 
 	gamePly = 0;
 	st->ep_sq = SQ_NONE;
+
+	std::cout << printSquare[st->ep_sq] << std::endl;
 	fiftyMoveCount = 0;
 	st->cr = ANY_CASTLING;
 
@@ -329,11 +319,24 @@ std::string Position::fen() const {
 		if (st->cr & BLACK_OOO)
 			s += "q";
 	}
-	s += " " + PrintSquare[st->ep_sq];
+	s += " " + printSquare[st->ep_sq];
 	s += " " + std::to_string(fiftyMoveCount);
 	s += " " + std::to_string((gamePly / 2) + 1);
 
 	return s += "\n";
+}
+
+std::string Position::dress_move(Move m) const {
+
+	return printSquare[m.from_sq()] + printSquare[m.to_sq()];
+
+	std::string res;
+	if (type_of(piece_on(m.from_sq())) != PAWN)
+		res += PieceToChar[piece_on(m.from_sq())];
+
+	res += printSquare[m.to_sq()];
+
+	return res;
 }
 
 Bitboard Position::attacked_squares(Color us) const {
@@ -457,6 +460,8 @@ Bitboard Position::checkers() const {
 	for (Color color : { WHITE, BLACK }) {
 		
 		Square ksq = king_on(color);
+
+		assert(ksq != SQ_NONE);
 		Color them = ~color;
 
 		for (PieceType pt : { BISHOP, ROOK, QUEEN }) {
