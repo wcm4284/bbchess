@@ -32,18 +32,11 @@ class MoveList {
 	
 	// for debugging purposes, print all moves in the list
 	friend std::ostream& operator<<(std::ostream& os, const MoveList& l) {
-		
+
 		const ExtMove* curr = l.list;
-		int idx = 0;
+		
 		while (curr != l.last) {
-			if (l.verbose) {
-				Bitboard b = move_bb(*curr);
-				os << Bitboards::pretty(b) << std::endl;}
-
-			os << "idx " << idx++ << " "; 
 			os << *curr++;}
-
-
 
 		return os;
 	}
@@ -51,16 +44,17 @@ class MoveList {
 	public:
 		MoveList() = default;
 		MoveList(const Position& pos) : 
-			last(generate<T>(pos, list)), verbose(false) {}
-
-		MoveList(const Position& pos, bool v) :
-			last(generate<T>(pos, list)), verbose(v) {}
+			last(generate<T>(pos, list)) {}
 
 		Move& operator[](int i) { return list[i]; }
 
+		ExtMove* begin() { return list; }
+		ExtMove* end() { return last; }
+		const ExtMove* begin() const { return list; }
+		const ExtMove* end() const { return last; }
+
 	private:
 		ExtMove list[MAX_MOVES], *last;
-		bool verbose;
 
 };
 

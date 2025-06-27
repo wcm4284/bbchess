@@ -111,7 +111,7 @@ ExtMove* generate_all(const Position& pos, ExtMove* list) {
 	// if we are in double check we can skip any non king moves
 	if ((T != EVASIONS) || !more_than_one(checkers)) {
 
-		Bitboard target		 =   T == EVASIONS ? line_bb(ksq, lsb(checkers)) | lsb(checkers)
+		Bitboard target		 =   T == EVASIONS ? line_bb(ksq, lsb(checkers))
 							   : T == NON_EVASIONS ? ~pos.pieces(us)
 							   : T == CAPTURES ? pos.pieces(~us)
 							   : ~pos.pieces();
