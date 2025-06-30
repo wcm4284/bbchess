@@ -424,21 +424,11 @@ Bitboard Position::pinned(Color us, PieceType pinnedTo) const {
 				// can't use attack_bb because that would stop at the pinned piece
 				Square pinner      = pop_lsb(pinners);
 				Bitboard line      = line_bb(pinner, king);
-				Bitboard attacks   = PseudoAttacks[pt][pinner];
 
-				if (attacks & king) {
+				if (line &= PseudoAttacks[pt][pinner]) {
 
-					// we hit the king! now use line
-					// since a piece belonging to them could also be blocking,
-					// we probably need to use the whole occupancy to check.
-					// then use & with what we have left to see if pieces are white.
-					Bitboard occ = pieces();
-					if (more_than_one(line &= occ)) {
-						return Bitboard(0);}
-					
-					if (!more_than_one(line &= pieces(us)) && line) {
-						pinned |= pop_lsb(line);}
-				}
+					if (!more_than_one(line &= pieces()) && line) {
+						pinned |= pop_lsb(line);}}
 			}
 		}
 	}
@@ -561,7 +551,7 @@ void Position::do_move(Move *m) {
 	st->cr &= right_update[from];
 
 	if (type_of(piece_on(from)) == PAWN && distance<Square>(to, from) == 2) 
-		st->ep_sq = from - push_dir(sideToMove);
+		st->ep_sq = to - push_dir(sideToMove);
 	else
 		st->ep_sq = SQ_NONE;
 
@@ -651,6 +641,7 @@ bool Position::legal_move(Move* m) const {
 #ifdef DEBUG
 	std::cout << "checking legality of move " << *m << std::endl;
 #endif
+			
 
 	// what we need to check:
 	// en passant moves
@@ -677,7 +668,7 @@ bool Position::legal_move(Move* m) const {
 
 	assert(pin & from);
 
-	return !(pin & from) || (line_bb(to, ksq) & from); 
+	return !(pin & from) || (line_bb(to, ksq) & from) || (line_bb(from, ksq) & to); 
 }
 	
 } // namespace Engine

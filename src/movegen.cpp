@@ -20,9 +20,6 @@ ExtMove* generate_moves(Bitboard target, const Position& pos, ExtMove* list) {
 
 		Bitboard moves = attacks_bb<pt>(curr_sq, occ);
 		
-		// i'm going to operate under the assumption that
-		// this line removes the possibility of us moving
-		// onto our own piece
 		moves &= target;
 
 		while (moves) {
