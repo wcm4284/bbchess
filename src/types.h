@@ -242,6 +242,8 @@ constexpr Square flip_rank(Square s) { return Square(s ^ SQ_A8); }
 // flip file A1 -> H1
 constexpr Square flip_file(Square s) { return Square(s ^ SQ_H1); }
 
+constexpr Square flip_square(Square s) { return flip_rank(flip_file(s)); }
+
 constexpr bool is_ok(Square s) { return s >= SQ_A1 && s <= SQ_H8; }
 
 constexpr Direction push_dir(Color c) { return c == WHITE ? NORTH : SOUTH; }
