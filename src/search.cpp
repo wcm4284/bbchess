@@ -1,5 +1,6 @@
 #include "search.h"
 #include "movegen.h"
+#include "evaluate.h"
 
 namespace Engine {
 
@@ -36,11 +37,48 @@ uint64_t perft(std::string fen, int depth) {
 	return perft(p, depth, depth);
 }
 
+Value negamax(Position& p, int depth) {
+
+	Color us = p.to_play();
+
+	if (depth == 0)
+		return us == WHITE ? static_eval(p) : -static_eval(p);
 
 
-Move iterative_deepening([[maybe_unused]] Position& p) {
-	Move best_move;	
-	return best_move;
+	MoveList<LEGAL> ml = MoveList<LEGAL>(p);
+
+	Value best_val = -VALUE_INFINITE;
+
+	for (Move& m : ml) {
+		p.do_move(&m);
+		best_val = std::max(best_val, negamax(p, depth - 1));
+		p.undo_move();
+	}
+
+	return best_val;
+}
+
+Move search(Position& p, int depth) {
+
+	MoveList<LEGAL> ml = MoveList<LEGAL>(p);
+
+	Move best;
+	Value b_val = -VALUE_INFINITE;
+
+	for (Move& m : ml) {
+		p.do_move(&m);
+		Value v = negamax(p, depth - 1);
+		p.undo_move();
+
+		if (v > b_val) {
+			b_val = v;
+			best = m;}
+	}
+
+	return best;
+}
+Move iterative_deepening(Position& p, int depth) {
+	return search(p, depth);
 
 }
 
