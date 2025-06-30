@@ -19,6 +19,8 @@
 	#define pext(b, m) 0
 #endif
 
+#define popcnt(x) __builtin_popcountll(x)
+
 namespace Engine {
 
 using Bitboard = uint64_t;
@@ -104,7 +106,7 @@ enum Piece {
 
 constexpr Value PieceValues[PIECE_NB] = {
 	VALUE_ZERO, PawnValue, KnightValue, BishopValue, RookValue, QueenValue, VALUE_ZERO, VALUE_ZERO,
-	VALUE_ZERO, PawnValue, KnightValue, BishopValue, RookValue, QueenValue, VALUE_ZERO, VALUE_ZERO
+	VALUE_ZERO, -PawnValue, -KnightValue, -BishopValue, -RookValue, -QueenValue, VALUE_ZERO, VALUE_ZERO
 };
 
 enum Square : int {
@@ -123,7 +125,6 @@ enum Square : int {
 	SQUARE_NB   = 64
 };
 
-// defined twice, but wanted it here and too lazy to get rid of it elsewhere
 const std::array<std::string, 65> printSquare = {
 	"a1", "b1", "c1", "d1", "e1", "f1", "g1", "h1",
 	"a2", "b2", "c2", "d2", "e2", "f2", "g2", "h2", 
@@ -150,7 +151,7 @@ enum Direction {
 
 };
 
-// Ranks are the horizontal rows
+// Ranks are the rows
 enum Rank : int {
 	
 	RANK_1,
@@ -165,7 +166,7 @@ enum Rank : int {
 	RANK_NB = 8
 };
 
-// Files are the vertical rows
+// Files are the columns
 enum File : int {
 
 	FILE_A,
@@ -186,7 +187,6 @@ enum MoveType {
 	PROMOTION = 1 << 14,
 	CASTLING  = 2 << 14,
 	ENPASSANT = 3 << 14
-	
 };
 
 namespace {
