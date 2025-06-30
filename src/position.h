@@ -43,6 +43,7 @@ class Position {
 		constexpr Piece piece_on(Square) const;
 		constexpr Color to_play() const;
 		constexpr Square en_passant() const;
+		constexpr int ply() const;
 		
 		// determines if any pieces are pinned to PieceType
 		// will be primarily used for evaluation, but can
@@ -102,6 +103,7 @@ inline Bitboard Position::pieces(Color c, PieceTypes... pts) const { return piec
 constexpr Piece Position::piece_on(Square s) const { return board[s]; }
 constexpr Color Position::to_play() const { return sideToMove; }
 constexpr Square Position::en_passant() const { return st->ep_sq; }
+constexpr int Position::ply() const { return gamePly; }
 
 inline Square Position::king_on(Color us) const { return lsb(pieces(us, KING)); }
 
