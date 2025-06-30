@@ -34,6 +34,19 @@ class MoveList {
 	friend std::ostream& operator<<(std::ostream& os, const MoveList& l) {
 
 		const ExtMove* curr = l.list;
+		os << "Printing ML of type ";
+
+		if constexpr(T == EVASIONS)
+			os << "EVASIONS";
+		else if constexpr(T == CAPTURES)
+			os << "CAPTURES";
+		else if constexpr(T == NON_EVASIONS)
+			os << "NON_EVASIONS";
+		else if constexpr(T == QUIET)
+			os << "QUIET";
+		else
+			os << "LEGAL";
+		os << std::endl;
 		
 		while (curr != l.last) {
 			os << *curr++;}
