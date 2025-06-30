@@ -3,6 +3,8 @@
 #include "evaluate.h"
 
 namespace Engine {
+using namespace Search;
+
 
 uint64_t perft(Position& p, int max, int depth) {
 
@@ -51,18 +53,21 @@ Value negamax(Position& p, int depth) {
 
 	for (Move& m : ml) {
 		p.do_move(&m);
-		best_val = std::max(best_val, negamax(p, depth - 1));
+		Value v = negamax(p, depth - 1);
 		p.undo_move();
+
+		if (v > best_val) {
+			best_val = v;
+			pv_table[p.ply()] = m;}
 	}
 
 	return best_val;
 }
 
-Move search(Position& p, int depth) {
+void search(Position& p, int depth) {
 
 	MoveList<LEGAL> ml = MoveList<LEGAL>(p);
 
-	Move best;
 	Value b_val = -VALUE_INFINITE;
 
 	for (Move& m : ml) {
@@ -72,13 +77,17 @@ Move search(Position& p, int depth) {
 
 		if (v > b_val) {
 			b_val = v;
-			best = m;}
+			pv_table[p.ply()] = m;}
 	}
 
-	return best;
 }
-Move iterative_deepening(Position& p, int depth) {
-	return search(p, depth);
+void Search::iterative_deepening(Position& p, int depth) {
+	// populate pv table
+	search(p, depth);
+	
+	std::cout << "Printing PV table:" << std::endl;
+	for (int i = 0; i < depth; ++i) {
+		std::cout << pv_table[i + p.ply()];}
 
 }
 
