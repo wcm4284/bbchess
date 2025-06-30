@@ -11,7 +11,7 @@ else
 	FLAGS := -O2 -Wall -Wextra -Wpedantic -std=c++20 -mbmi2
 endif
 
-FILES := bitboard.cpp position.cpp movegen.cpp search.cpp main.cpp
+FILES := bitboard.cpp position.cpp movegen.cpp search.cpp evaluate.cpp main.cpp
 OBJECTS := $(patsubst %.cpp,$B/%.o,$(FILES))
 
 $B/main_engine: $(OBJECTS)
@@ -33,12 +33,10 @@ debug:
 	@make DEBUG=1
 
 rdebug: debug
-	@echo "Running..."
 	@echo
 	@$B/main_engine
 
 run: $B/main_engine
-	@echo "Running..."
 	@echo
 	@$B/main_engine
 
