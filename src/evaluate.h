@@ -6,6 +6,6 @@
 namespace Engine {
 
 
-Value static_eval(const Position&);
+Value evaluate(const Position&);
 
 } // namespace Engine
