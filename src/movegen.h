@@ -65,6 +65,7 @@ class MoveList {
 		ExtMove* end() { return last; }
 		const ExtMove* begin() const { return list; }
 		const ExtMove* end() const { return last; }
+		size_t size() const { return last - list; }
 
 	private:
 		ExtMove list[MAX_MOVES], *last;
