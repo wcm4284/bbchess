@@ -39,7 +39,7 @@ uint64_t perft(std::string fen, int depth) {
 	return perft(p, depth, depth);
 }
 
-Value negamax(Position& p, int depth) {
+Value negamax(Position& p, int depth, int ply) {
 
 	if (depth == 0)
 		return p.to_play() == WHITE ? evaluate(p) : -evaluate(p);
@@ -50,12 +50,16 @@ Value negamax(Position& p, int depth) {
 	
 	for (Move& m : ml) {
 		p.do_move(&m);
-		Value v = -negamax(p, depth - 1);
+		Value v = -negamax(p, depth - 1, ply + 1);
 		p.undo_move();
 
 		if (v > b_val) {
 			b_val = v;
-			pv_table[p.ply()] = m;}
+			
+			for (int i = 0; i < depth - 1; ++i) {
+				pv_table[ply][i + 1] = pv_table[ply + 1][i];}
+
+			pv_table[ply][0] = m;}
 	}
 	
 	return b_val;
@@ -63,11 +67,11 @@ Value negamax(Position& p, int depth) {
 
 void Search::iterative_deepening(Position& p, int depth) {
 	// populate pv table
-	negamax(p, depth);
+	negamax(p, depth, 0);
 	
 	std::cout << "Printing PV table:" << std::endl;
 	for (int i = 0; i < depth; ++i) {
-		std::cout << pv_table[i + p.ply()];}
+		std::cout << pv_table[0][i];}
 
 }
 

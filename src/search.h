@@ -18,7 +18,7 @@ namespace Search {
 	*/
 	void iterative_deepening(Position&, int);
 		
-	inline Move pv_table[MAX_PLY];
+	inline Move pv_table[MAX_PLY][MAX_PLY];
 }
 
 } // namespace Engine
