@@ -52,10 +52,12 @@ Value evaluate(const Position& pos) {
 
 	while (w_knights) {
 		Square sq = pop_lsb(w_knights);
+		eval += popcnt(PseudoAttacks[KNIGHT][sq]) * 3;
 		eval += knightSquareValue[sq];}
 
 	while (b_knights) {
 		Square sq = flip_square(pop_lsb(b_knights));
+		eval -= popcnt(PseudoAttacks[KNIGHT][sq]) * 3;
 		eval -= knightSquareValue[sq];}
 
 
