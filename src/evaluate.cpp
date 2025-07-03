@@ -30,6 +30,8 @@ namespace {
 }
 
 Value evaluate(const Position& pos) {
+
+	++evaluations;
 	Value eval = 0;
 
 	for (Color c : {WHITE, BLACK} ) {

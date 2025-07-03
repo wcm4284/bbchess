@@ -6,6 +6,7 @@
 namespace Engine {
 
 
+inline int evaluations;
 Value evaluate(const Position&);
 
 } // namespace Engine

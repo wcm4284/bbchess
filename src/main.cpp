@@ -11,17 +11,21 @@ int main() {
 
 	Bitboards::init();
 
-	std::string fen = "rnbqkbnr/pppppppp/1P6/8/8/8/PPPPPP1P/RNBQKBNR w KQkq - 0 1";
+
+	std::string fen = "r4rk1/1pp1qppp/p1np1n2/2b1p1B1/2B1P1b1/P1NP1N2/1PP1QPPP/R4RK1 w - - 0 10";
 	
 	Position p;
 	p.init();
 	std::cout << p << std::endl;
 
-	std::cout << evaluate(p) << std::endl;
+	Search::iterative_deepening(p, 6);
 
-	std::cout << p.ply() << std::endl;
+	std::cout << Search::searched << std::endl;
 
-	Search::iterative_deepening(p, 5);
+	std::cout << "evaluations: " << evaluations << std::endl;
+
+	std::cout << "extra nodes searched: " << Search::extras << std::endl;
+
 
 	return 0;
 

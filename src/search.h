@@ -17,7 +17,9 @@ namespace Search {
 	   the line it discovered was "best"
 	*/
 	void iterative_deepening(Position&, int);
-		
+	
+	inline int extras;
+	inline int searched;
 	inline Move pv_table[MAX_PLY][MAX_PLY];
 }
 

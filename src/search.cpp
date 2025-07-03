@@ -41,8 +41,10 @@ uint64_t Search::perft(std::string fen, int depth) {
 
 
 Value qsearch(Position& p, int alpha, int beta) {
+
+	++Search::searched;
 	
-	Value eval = evaluate(p);
+	Value eval = p.to_play() == WHITE ? evaluate(p) : -evaluate(p);
 
 	if (eval >= beta)
 		return beta;
@@ -52,10 +54,12 @@ Value qsearch(Position& p, int alpha, int beta) {
 
 	MoveList<CAPTURES> ml = MoveList<CAPTURES>(p);
 
-	if (ml.size() == 0) {
-		return p.to_play() == WHITE ? evaluate(p) : -evaluate(p);}
-	
+	if (ml.size() == 0)
+		return eval;
+
 	for (Move& m : ml) {
+
+		++Search::extras;
 		p.do_move(&m);
 		Value val = -qsearch(p, -beta, -alpha);
 		p.undo_move();
