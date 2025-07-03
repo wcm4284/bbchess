@@ -105,19 +105,15 @@ ExtMove* generate_all(const Position& pos, ExtMove* list) {
 	Square ksq = pos.king_on(us);
 	Bitboard checkers = pos.checkers();
 
+	Bitboard target;
+
 	// if we are in double check we can skip any non king moves
 	if ((T != EVASIONS) || !more_than_one(checkers)) {
 
-		Bitboard target		 =   T == EVASIONS ? line_bb(ksq, lsb(checkers)) | lsb(checkers)
+		target =   T == EVASIONS ? line_bb(ksq, lsb(checkers)) | lsb(checkers)
 							   : T == NON_EVASIONS ? ~pos.pieces(us)
-							   : T == CAPTURES ? pos.pieces(~us)
+							   : T == CAPTURES ? pos.pieces(~us) & ~pos.pieces(KING)
 							   : ~pos.pieces();
-
-		#ifdef DEBUG
-			std::cout << "Printing target BB for move generation\n";
-			std::cout << Bitboards::pretty(target) << std::endl;
-		#endif
-
 
 		list = generate_pawn_moves<us, T>(target, pos, list);
 		list = generate_moves<us, KNIGHT>(target, pos, list);
@@ -127,7 +123,7 @@ ExtMove* generate_all(const Position& pos, ExtMove* list) {
 
 	}
 
-	Bitboard king_moves = attacks_bb<KING>(ksq) & ~pos.pieces(us) & ~pos.attacked_squares(~us);
+	Bitboard king_moves = attacks_bb<KING>(ksq) & (T == EVASIONS ? ~pos.pieces(us) : target);
 
 
 	while (king_moves) {
@@ -184,9 +180,12 @@ ExtMove* generate<LEGAL>(const Position& pos, ExtMove* list) {
 	ExtMove* cur = list;
 
 	list = checkers ? generate<EVASIONS>(pos, list) : generate<NON_EVASIONS>(pos, list);
-
+	
 	while (cur != list) {
-		if ( ((pinned & cur->from_sq()) || (cur->type() == ENPASSANT)) && !pos.legal_move(cur)) 
+
+		assert(!(cur->to_sq() & pos.pieces(KING)));
+		if ( ((pinned & cur->from_sq()) || (cur->type() == ENPASSANT) ||
+			(cur->from_sq() == pos.king_on(us))) && !pos.legal_move(cur)) 
 			*cur = *(--list);
 		else
 			++cur;}
