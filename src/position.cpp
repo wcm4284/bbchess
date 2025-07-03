@@ -450,8 +450,10 @@ Bitboard Position::checkers() const {
 	for (Color color : { WHITE, BLACK }) {
 		
 		Square ksq = king_on(color);
-
-		assert(ksq != SQ_NONE);
+		
+		if (!is_ok(ksq)) {
+			std::cout << *this << std::endl;}
+		assert(is_ok(ksq));
 		Color them = ~color;
 
 		for (PieceType pt : { BISHOP, ROOK, QUEEN }) {
@@ -527,10 +529,6 @@ Piece Position::remove_piece(Square s) {
 
 void Position::do_move(Move *m) {
 	assert(m->is_ok());
-
-#ifdef DEBUG
-	std::cout << "Making move " << *m << std::endl;
-#endif
 
 	st->move_made = *m;
 
@@ -638,11 +636,6 @@ void Position::undo_move() {
 
 bool Position::legal_move(Move* m) const {
 
-#ifdef DEBUG
-	std::cout << "checking legality of move " << *m << std::endl;
-#endif
-			
-
 	// what we need to check:
 	// en passant moves
 	// pinned moves
@@ -651,7 +644,9 @@ bool Position::legal_move(Move* m) const {
 	Square to = m->to_sq();
 	Square ksq = king_on(us);
 
-
+	
+	if (from == ksq) 
+		return !(to & attacked_squares(~us));
 
 	// start with en pass
 	if (m->type() == ENPASSANT) {
