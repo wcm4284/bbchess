@@ -3,7 +3,6 @@
 #include "evaluate.h"
 
 namespace Engine {
-using namespace Search;
 
 
 uint64_t perft(Position& p, int max, int depth) {
@@ -31,7 +30,7 @@ uint64_t perft(Position& p, int max, int depth) {
 
 }
 
-uint64_t perft(std::string fen, int depth) {
+uint64_t Search::perft(std::string fen, int depth) {
 
 	Position p;
 	p.set_fen(fen);
@@ -39,39 +38,76 @@ uint64_t perft(std::string fen, int depth) {
 	return perft(p, depth, depth);
 }
 
-Value negamax(Position& p, int depth, int ply) {
 
-	if (depth == 0)
-		return p.to_play() == WHITE ? evaluate(p) : -evaluate(p);
 
-	MoveList<LEGAL> ml = MoveList<LEGAL>(p);
+Value qsearch(Position& p, int alpha, int beta) {
+	
+	Value eval = evaluate(p);
 
-	Value b_val = -VALUE_INFINITE;
+	if (eval >= beta)
+		return beta;
+
+	if (eval > alpha)
+		alpha = eval;
+
+	MoveList<CAPTURES> ml = MoveList<CAPTURES>(p);
+
+	if (ml.size() == 0) {
+		return p.to_play() == WHITE ? evaluate(p) : -evaluate(p);}
 	
 	for (Move& m : ml) {
 		p.do_move(&m);
-		Value v = -negamax(p, depth - 1, ply + 1);
+		Value val = -qsearch(p, -beta, -alpha);
 		p.undo_move();
+		
+		if (val >= beta) 
+			return beta;
 
-		if (v > b_val) {
-			b_val = v;
-			
-			for (int i = 0; i < depth - 1; ++i) {
-				pv_table[ply][i + 1] = pv_table[ply + 1][i];}
 
-			pv_table[ply][0] = m;}
+		if ( val > alpha ) 
+			alpha = val;
+		
 	}
 	
-	return b_val;
+	return alpha;
+}
+
+Value negamax(Position& p, int alpha, int beta, int depth, int ply) {
+
+	if (depth == 0) {
+		return qsearch(p, alpha, beta);}
+
+	MoveList<LEGAL> ml = MoveList<LEGAL>(p);
+
+	for (Move& m : ml) {
+		p.do_move(&m);
+		Value v = -negamax(p, -beta, -alpha, depth - 1, ply + 1);
+		p.undo_move();
+		
+		if (v >= beta) 
+			return beta;
+
+		if (v > alpha) {
+			alpha = v;
+
+			for (int i = 0; i < depth - 1; ++i) {
+				Search::pv_table[ply][i + 1] = Search::pv_table[ply + 1][i];}
+
+			Search::pv_table[ply][0] = m;
+
+		}
+	}
+	
+	return alpha;
 }
 
 void Search::iterative_deepening(Position& p, int depth) {
 	// populate pv table
-	negamax(p, depth, 0);
+	negamax(p, -VALUE_INF, VALUE_INF, depth, 0);
 	
 	std::cout << "Printing PV table:" << std::endl;
 	for (int i = 0; i < depth; ++i) {
-		std::cout << pv_table[0][i];}
+		std::cout << Search::pv_table[0][i];}
 
 }
 
