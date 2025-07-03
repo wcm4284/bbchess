@@ -5,11 +5,7 @@ COMPILER := g++
 
 DEBUG ?= 0
 
-ifeq ($(DEBUG),1)
-	FLAGS := -O0 -g -Wall -Wextra -Wpedantic -std=c++20 -mbmi2 -DDEBUG
-else
-	FLAGS := -O2 -Wall -Wextra -Wpedantic -std=c++20 -mbmi2
-endif
+FLAGS := -O0 -g -Wall -Wextra -Wpedantic -std=c++20 -mbmi2
 
 FILES := bitboard.cpp position.cpp movegen.cpp search.cpp evaluate.cpp main.cpp
 OBJECTS := $(patsubst %.cpp,$B/%.o,$(FILES))
@@ -28,13 +24,6 @@ all: $(FILES)
 
 clean:
 	@rm -r $B
-
-debug:
-	@make DEBUG=1
-
-rdebug: debug
-	@echo
-	@$B/main_engine
 
 run: $B/main_engine
 	@echo
