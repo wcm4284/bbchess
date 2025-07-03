@@ -1,6 +1,6 @@
 #include "search.h"
-#include "movegen.h"
 #include "evaluate.h"
+#include "moveorder.h"
 
 namespace Engine {
 
@@ -52,15 +52,16 @@ Value qsearch(Position& p, int alpha, int beta) {
 	if (eval > alpha)
 		alpha = eval;
 
-	MoveList<CAPTURES> ml = MoveList<CAPTURES>(p);
+	MoveOrder<CAPTURES> mo = MoveOrder<CAPTURES>(p);
 
-	if (ml.size() == 0)
+	if (mo.size() == 0)
 		return eval;
-
-	for (Move& m : ml) {
+	
+	Move* m;
+	while ( (m = mo.next_move()) ) {
 
 		++Search::extras;
-		p.do_move(&m);
+		p.do_move(m);
 		Value val = -qsearch(p, -beta, -alpha);
 		p.undo_move();
 		
@@ -81,13 +82,14 @@ Value negamax(Position& p, int alpha, int beta, int depth, int ply) {
 	if (depth == 0) {
 		return qsearch(p, alpha, beta);}
 
-	MoveList<LEGAL> ml = MoveList<LEGAL>(p);
+	MoveOrder<LEGAL> mo = MoveOrder<LEGAL>(p);
 
-	if (ml.size() == 0) 
+	if (mo.size() == 0) 
 		return p.checkers() ? VALUE_MATE - p.ply() : 0;
-
-	for (Move& m : ml) {
-		p.do_move(&m);
+	
+	Move* m;
+	while ( (m = mo.next_move()) ) {
+		p.do_move(m);
 		Value v = -negamax(p, -beta, -alpha, depth - 1, ply + 1);
 		p.undo_move();
 		
@@ -100,7 +102,7 @@ Value negamax(Position& p, int alpha, int beta, int depth, int ply) {
 			for (int i = 0; i < depth - 1; ++i) {
 				Search::pv_table[ply][i + 1] = Search::pv_table[ply + 1][i];}
 
-			Search::pv_table[ply][0] = m;
+			Search::pv_table[ply][0] = *m;
 
 		}
 	}
