@@ -50,9 +50,8 @@ class MoveList {
 
 		int c = 1;
 		
-		while (curr != l.last) {
-
-			os << c++ << ": " << *curr++;}
+		while (curr != l.last) 
+			os << c++ << ": " << *curr++;
 
 		return os;
 	}
