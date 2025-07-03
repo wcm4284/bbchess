@@ -1,9 +1,12 @@
+#include <chrono>
+
 #include "types.h"
 #include "bitboard.h"
 #include "position.h"
 #include "movegen.h"
 #include "search.h"
 #include "evaluate.h"
+#include "moveorder.h"
 
 using namespace Engine;
 
@@ -16,16 +19,29 @@ int main() {
 	
 	Position p;
 	p.init();
+	//p.set_fen(fen);
 	std::cout << p << std::endl;
+
+//	std::cout << MoveList<LEGAL>(p);
+	
+	MoveOrder<LEGAL> mo(p);
+
+	Move* m;
+
+	auto start = std::chrono::high_resolution_clock::now();
 
 	Search::iterative_deepening(p, 6);
 
-	std::cout << Search::searched << std::endl;
+	auto end = std::chrono::high_resolution_clock::now();
 
-	std::cout << "evaluations: " << evaluations << std::endl;
+	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
 
-	std::cout << "extra nodes searched: " << Search::extras << std::endl;
+	std::cout << "Time taken " << duration.count() << " ms" << std::endl;
 
+	std::cout << "\n\n\n";
+
+	while ((m = mo.next_move()))
+		std::cout << *m;
 
 	return 0;
 
