@@ -71,7 +71,7 @@ using Value = int;
 constexpr Value VALUE_ZERO     = 0;
 constexpr Value VALUE_DRAW     = 0;
 constexpr Value VALUE_NONE     = 32002;
-constexpr Value VALUE_INFINITE = 32001;
+constexpr Value VALUE_INF = 32001;
 
 constexpr Value VALUE_MATE             = 32000;
 constexpr Value VALUE_MATE_IN_MAX_PLY  = VALUE_MATE - MAX_PLY;
@@ -263,8 +263,8 @@ constexpr PieceType type_of(Piece pc) { return PieceType(pc >= B_PAWN ? pc - 8 :
 class Move {
 
 	friend std::ostream& operator<<(std::ostream& os, const Move& mv) {
-		os << "from: " << printSquare[mv.from_sq()] << ", to: " << printSquare[mv.to_sq()] << 
-		", mt: " << mt_conv[mv.type()];
+		os << "from " << printSquare[mv.from_sq()] << " to " << printSquare[mv.to_sq()] << 
+		"; mt: " << mt_conv[mv.type()];
 
 		if (mv.type() == PROMOTION) 
 			return os << ", pt: " << pt_conv[mv.promote_to()] << std::endl;
