@@ -83,6 +83,9 @@ Value negamax(Position& p, int alpha, int beta, int depth, int ply) {
 
 	MoveList<LEGAL> ml = MoveList<LEGAL>(p);
 
+	if (ml.size() == 0) 
+		return p.checkers() ? VALUE_MATE - p.ply() : 0;
+
 	for (Move& m : ml) {
 		p.do_move(&m);
 		Value v = -negamax(p, -beta, -alpha, depth - 1, ply + 1);
