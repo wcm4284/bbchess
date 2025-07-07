@@ -20,7 +20,7 @@ struct ExtMove : public Move {
 	void operator=(Move m) { data = m.raw(); }
 	operator float() const = delete;
 
-	int value;
+	uint16_t value;
 
 };
 
