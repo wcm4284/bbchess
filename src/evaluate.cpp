@@ -34,9 +34,8 @@ Value evaluate(const Position& pos) {
 	++evaluations;
 	Value eval = 0;
 
-	for (Color c : {WHITE, BLACK} ) {
-		for (PieceType pt : { PAWN, KNIGHT, BISHOP, ROOK, QUEEN } ) {
-			eval += popcnt(pos.pieces(c, pt)) * PieceValues[make_piece(pt, c)];}}
+	for (PieceType pt : { PAWN, KNIGHT, BISHOP, ROOK, QUEEN } ) 
+		eval += (popcnt(pos.pieces(WHITE, pt)) - popcnt(pos.pieces(BLACK, pt))) * PieceValues[pt];
 
 	Bitboard w_pawns = pos.pieces(WHITE, PAWN);
 	Bitboard b_pawns = pos.pieces(BLACK, PAWN);

@@ -104,9 +104,9 @@ enum Piece {
 
 };
 
-constexpr Value PieceValues[PIECE_NB] = {
-	VALUE_ZERO, PawnValue, KnightValue, BishopValue, RookValue, QueenValue, VALUE_ZERO, VALUE_ZERO,
-	VALUE_ZERO, -PawnValue, -KnightValue, -BishopValue, -RookValue, -QueenValue, VALUE_ZERO, VALUE_ZERO
+constexpr Value PieceValues[PIECE_TYPE_NB] = {
+	VALUE_ZERO, PawnValue, KnightValue, BishopValue, RookValue, QueenValue, VALUE_ZERO//, VALUE_ZERO
+	//VALUE_ZERO, -PawnValue, -KnightValue, -BishopValue, -RookValue, -QueenValue, VALUE_ZERO, VALUE_ZERO
 };
 
 enum Square : int {
