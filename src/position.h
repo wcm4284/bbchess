@@ -41,6 +41,7 @@ class Position {
 		
 		// used for printing to console
 		constexpr Piece piece_on(Square) const;
+		constexpr PieceType pt_on(Square) const;
 		constexpr Color to_play() const;
 		constexpr Square en_passant() const;
 		constexpr int ply() const;
@@ -101,6 +102,7 @@ template<typename... PieceTypes>
 inline Bitboard Position::pieces(Color c, PieceTypes... pts) const { return pieces(c) & pieces(pts...); }
 
 constexpr Piece Position::piece_on(Square s) const { return board[s]; }
+constexpr PieceType Position::pt_on(Square s) const { return type_of(piece_on(s)); }
 constexpr Color Position::to_play() const { return sideToMove; }
 constexpr Square Position::en_passant() const { return st->ep_sq; }
 constexpr int Position::ply() const { return gamePly; }
