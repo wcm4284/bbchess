@@ -18,6 +18,8 @@ enum GenType {
 struct ExtMove : public Move {
 
 	void operator=(Move m) { data = m.raw(); }
+	bool operator<(const ExtMove& e) { return value < e.value; }
+	bool operator>(const ExtMove& e) { return value > e.value; }
 	operator float() const = delete;
 
 	uint16_t value;
