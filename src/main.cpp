@@ -19,29 +19,23 @@ int main() {
 	
 	Position p;
 	p.init();
-	//p.set_fen(fen);
+//	p.set_fen(fen);
 	std::cout << p << std::endl;
-
-//	std::cout << MoveList<LEGAL>(p);
-	
 	MoveOrder<LEGAL> mo(p);
+	
 
-	Move* m;
+	for (int i = 1; i <= 7; ++i) {
+		auto start = std::chrono::high_resolution_clock::now();
 
-	auto start = std::chrono::high_resolution_clock::now();
+		Search::iterative_deepening(p, i);
 
-	Search::iterative_deepening(p, 6);
+		auto end = std::chrono::high_resolution_clock::now();
 
-	auto end = std::chrono::high_resolution_clock::now();
+		auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
 
-	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+		std::cout << "Time taken " << duration.count() << " ms" << std::endl;
 
-	std::cout << "Time taken " << duration.count() << " ms" << std::endl;
-
-	std::cout << "\n\n\n";
-
-	while ((m = mo.next_move()))
-		std::cout << *m;
+		std::cout << "\n\n\n";}
 
 	return 0;
 
