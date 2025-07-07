@@ -114,9 +114,11 @@ void Search::iterative_deepening(Position& p, int depth) {
 	// populate pv table
 	negamax(p, -VALUE_INF, VALUE_INF, depth, 0);
 	
-	std::cout << "Printing PV table:" << std::endl;
-	for (int i = 0; i < depth; ++i) {
-		std::cout << Search::pv_table[0][i];}
+	std::cout << "Printing PV table with " << ((p.to_play() == WHITE) ? "white " : "black ") << "to play:" << std::endl;
+	
+
+	for (int i = 0; i < depth; ++i) 
+		std::cout << (i + 1) << ". " << p.dress_move(Search::pv_table[0][i]) << "\n";
 
 }
 
