@@ -263,7 +263,7 @@ constexpr PieceType type_of(Piece pc) { return PieceType(pc >= B_PAWN ? pc - 8 :
 class Move {
 
 	friend std::ostream& operator<<(std::ostream& os, const Move& mv) {
-		os << "from " << printSquare[mv.from_sq()] << " to " << printSquare[mv.to_sq()] << 
+		os << printSquare[mv.from_sq()] << " to " << printSquare[mv.to_sq()] << 
 		"; mt: " << mt_conv[mv.type()];
 
 		if (mv.type() == PROMOTION) 
