@@ -31,8 +31,8 @@ namespace {
 
 Value evaluate(const Position& pos) {
 
-	++evaluations;
 	Value eval = 0;
+	Bitboard occ = pos.pieces();
 
 	for (PieceType pt : { PAWN, KNIGHT, BISHOP, ROOK, QUEEN } ) 
 		eval += (popcnt(pos.pieces(WHITE, pt)) - popcnt(pos.pieces(BLACK, pt))) * PieceValues[pt];
@@ -60,6 +60,17 @@ Value evaluate(const Position& pos) {
 		Square sq = flip_square(pop_lsb(b_knights));
 		eval -= popcnt(PseudoAttacks[KNIGHT][sq]) * 3;
 		eval -= knightSquareValue[sq];}
+
+	Bitboard w_bishops = pos.pieces(WHITE, BISHOP);
+	Bitboard b_bishops = pos.pieces(BLACK, BISHOP);
+
+	while (w_bishops) {
+		Square sq = pop_lsb(w_bishops);
+		eval += popcnt(attacks_bb<BISHOP>(sq, occ)) * 3;}
+
+	while (b_bishops) {
+		Square sq = flip_square(pop_lsb(b_bishops));
+		eval -= popcnt(attacks_bb<BISHOP>(sq, occ)) * 3;}
 
 
 	return eval;
