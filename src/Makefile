@@ -36,8 +36,4 @@ clean:
 	@rm -r $B
 	@rm engine
 
-run: $B/main_engine
-	@echo
-	@$B/main_engine
-
 -include $(patsubst %.cpp,$B/%.d,$(FILES))
