@@ -50,11 +50,9 @@ Value evaluate(const Position& pos) {
 	}
 
 	while (b_pawns) {
-		Square sq = flip_rank(pop_lsb(b_pawns));
-		eval -= pc_cntbs[flip_rank(sq)] = -pawnSquareValue[sq];
+		Square sq = pop_lsb(b_pawns);
+		eval += pc_cntbs[sq] = -pawnSquareValue[flip_rank(sq)];
 	}	
-
-	std::cout << "Eval after pawns: " << eval << std::endl;
 
 	Bitboard w_knights = pos.pieces(WHITE, KNIGHT);
 	Bitboard b_knights = pos.pieces(BLACK, KNIGHT);
@@ -67,13 +65,11 @@ Value evaluate(const Position& pos) {
 	}
 
 	while (b_knights) {
-		Square sq = flip_rank(pop_lsb(b_knights));
+		Square sq = pop_lsb(b_knights);
 		Value vis = popcnt(PseudoAttacks[KNIGHT][sq]) * 3;
-		Value sq_val = knightSquareValue[sq];
-		eval += pc_cntbs[flip_rank(sq)] = -vis - sq_val;
+		Value sq_val = knightSquareValue[flip_rank(sq)];
+		eval += pc_cntbs[sq] = -vis - sq_val;
 	}
-
-	std::cout << "Eval after knights: " << eval << std::endl;
 
 	Bitboard w_bishops = pos.pieces(WHITE, BISHOP);
 	Bitboard b_bishops = pos.pieces(BLACK, BISHOP);
@@ -85,9 +81,9 @@ Value evaluate(const Position& pos) {
 	}
 
 	while (b_bishops) {
-		Square sq = flip_square(pop_lsb(b_bishops));
+		Square sq = pop_lsb(b_bishops);
 		Value vis = popcnt(attacks_bb<BISHOP>(sq, occ)) * 3;
-		eval += pc_cntbs[flip_square(sq)] = -vis;
+		eval += pc_cntbs[sq] = -vis;
 	}
 
 
