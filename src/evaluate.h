@@ -7,4 +7,10 @@ namespace Engine {
 
 Value evaluate(const Position&);
 
+namespace Eval {
+
+std::string pretty(const Position&);
+
+}
+
 } // namespace Engine

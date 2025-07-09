@@ -6,9 +6,10 @@
 
 namespace Engine {
 
+constexpr std::string_view PieceToChar(" PNBRQK  pnbrqk");
+
 namespace {
 
-	constexpr std::string_view PieceToChar(" PNBRQK  pnbrqk");
 
 	const CastlingRights right_update[64] = {
 		~WHITE_OOO, ANY_CASTLING, ANY_CASTLING, ANY_CASTLING, ~WHITE_CASTLING, ANY_CASTLING, ANY_CASTLING, ~WHITE_OO,
@@ -337,6 +338,10 @@ std::string Position::dress_move(Move m) const {
 	res += printSquare[m.to_sq()];
 
 	return res;
+}
+
+char Position::piece_str(Square s) const {
+	return PieceToChar[piece_on(s)];
 }
 
 Bitboard Position::attacked_squares(Color us) const {

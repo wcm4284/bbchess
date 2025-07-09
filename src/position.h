@@ -27,6 +27,7 @@ class Position {
 		std::string fen() const;
 
 		std::string dress_move(Move) const;
+		char piece_str(Square) const;
 		
 		// used for move generation
 		Bitboard pieces(PieceType pt = ALL_PIECES) const;
