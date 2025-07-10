@@ -30,19 +30,20 @@ uint64_t perft(Position& p, int max, int depth) {
 
 }
 
-uint64_t Search::perft(std::string fen, int depth) {
+void Search::perft(std::string fen, int depth) {
 
 	Position p;
 	p.set_fen(fen);
 
-	return perft(p, depth, depth);
+	uint64_t nodes = perft(p, depth, depth);
+
+	std::cout << "\nNodes Searched: " << nodes << "\n\n";
 }
 
 
 
-Value qsearch(Position& p, int alpha, int beta) {
+Value qsearch(Position& p, int alpha, int beta, int ply) {
 
-	++Search::searched;
 	
 	Value eval = p.to_play() == WHITE ? evaluate(p) : -evaluate(p);
 
@@ -52,41 +53,47 @@ Value qsearch(Position& p, int alpha, int beta) {
 	if (eval > alpha)
 		alpha = eval;
 
-	MoveOrder<CAPTURES> mo = MoveOrder<CAPTURES>(p);
-
+	MoveOrder<CAPTURES> mo(p);
+	
+	// this doesn't deal with stalemate, which is technically a problem,
+	// but until i'm faced with the scenario where it is i'll leave it
 	if (mo.size() == 0)
 		return eval;
-	
+
+	Value best_val = -VALUE_INF;
 	Move* m;
 	while ( (m = mo.next_move()) ) {
 
-		++Search::extras;
 		p.do_move(m);
-		Value val = -qsearch(p, -beta, -alpha);
+		Value val = -qsearch(p, -beta, -alpha, ply + 1);
 		p.undo_move();
 		
 		if (val >= beta) 
 			return beta;
 
 
-		if ( val > alpha ) 
-			alpha = val;
+		if ( val > best_val ) {
+			best_val = val;		
+			if ( val > alpha ) 
+				alpha = val;
 		
+		}	
 	}
 	
-	return alpha;
+	return best_val;
 }
 
 Value negamax(Position& p, int alpha, int beta, int depth, int ply) {
 
-	if (depth == 0) {
-		return qsearch(p, alpha, beta);}
+	if (depth == 0) 
+		return qsearch(p, alpha, beta, ply);
 
-	MoveOrder<LEGAL> mo = MoveOrder<LEGAL>(p);
+	MoveOrder<LEGAL> mo(p);
 
 	if (mo.size() == 0) 
-		return p.checkers() ? VALUE_MATE - p.ply() : 0;
-	
+		return p.checkers() ? -VALUE_MATE + ply : 0;
+
+	Value best_val = -VALUE_INF;	
 	Move* m;
 	while ( (m = mo.next_move()) ) {
 		p.do_move(m);
@@ -96,26 +103,42 @@ Value negamax(Position& p, int alpha, int beta, int depth, int ply) {
 		if (v >= beta) 
 			return beta;
 
-		if (v > alpha) {
-			alpha = v;
+		if (v > best_val) {
 
-			for (int i = 0; i < depth - 1; ++i) {
-				Search::pv_table[ply][i + 1] = Search::pv_table[ply + 1][i];}
+			best_val = v;
 
-			Search::pv_table[ply][0] = *m;
+			if (v > alpha) {
+				alpha = v;
 
+				for (int i = 0; i < depth - 1; ++i) {
+					Search::pv_table[ply][i + 1] = Search::pv_table[ply + 1][i];}
+
+				Search::pv_table[ply][0] = *m;
+			}
 		}
 	}
 	
-	return alpha;
+	return best_val;
 }
 
 void Search::iterative_deepening(Position& p, int depth) {
 	// populate pv table
-	negamax(p, -VALUE_INF, VALUE_INF, depth, 0);
+	Value score = negamax(p, -VALUE_INF, VALUE_INF, depth, 0);
 	
-	std::cout << "Printing PV table with " << ((p.to_play() == WHITE) ? "white " : "black ") << "to play:" << std::endl;
+
+	bool mate = (score >= VALUE_MATE_IN_MAX_PLY || score <= VALUE_MATED_IN_MAX_PLY);
+
+	if (score >= VALUE_MATE_IN_MAX_PLY)
+		depth = VALUE_MATE - score;
+
+	else if ( score <= VALUE_MATED_IN_MAX_PLY)
+		depth = VALUE_MATE + score;
+
 	
+	if (mate)
+		std::cout << "mate ";
+
+	std::cout << "pv ";
 
 	for (int i = 0; i < depth; ++i) 
 		std::cout << (i + 1) << ". " << p.dress_move(Search::pv_table[0][i]) << "\n";
