@@ -85,13 +85,19 @@ Value qsearch(Position& p, int alpha, int beta, int ply) {
 
 Value negamax(Position& p, int alpha, int beta, int depth, int ply) {
 
+	alpha = std::max(mated_in(ply), alpha);
+	beta = std::min(mate_in(ply), beta);
+
+	if (alpha >= beta)
+		return alpha;
+
 	if (depth == 0) 
 		return qsearch(p, alpha, beta, ply);
 
 	MoveOrder<LEGAL> mo(p);
 
 	if (mo.size() == 0) 
-		return p.checkers() ? -VALUE_MATE + ply : 0;
+		return p.checkers() ? mated_in(ply) : VALUE_DRAW;
 
 	Value best_val = -VALUE_INF;	
 	Move* m;

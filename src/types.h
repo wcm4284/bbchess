@@ -260,6 +260,9 @@ constexpr Color color_of(Piece pc) { return pc >= B_PAWN ? BLACK : WHITE; }
 
 constexpr PieceType type_of(Piece pc) { return PieceType(pc >= B_PAWN ? pc - 8 : pc); }
 
+constexpr Value mated_in(int ply) { return -VALUE_MATE + ply; }
+constexpr Value mate_in(int ply)  { return  VALUE_MATE - ply; }
+
 class Move {
 
 	friend std::ostream& operator<<(std::ostream& os, const Move& mv) {
