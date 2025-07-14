@@ -29,7 +29,7 @@ namespace {
 		-5, -5, -5, -5, -5, -5, -5, -5
 	};
 
-	Value pc_cntbs[SQUARE_NB];
+	Value pieceContributions[SQUARE_NB];
 
 }
 
@@ -46,12 +46,12 @@ Value evaluate(const Position& pos) {
 
 	while (w_pawns) {
 		Square sq = pop_lsb(w_pawns);
-		eval += pc_cntbs[sq] = pawnSquareValue[sq];
+		eval += pieceContributions[sq] = pawnSquareValue[sq];
 	}
 
 	while (b_pawns) {
 		Square sq = pop_lsb(b_pawns);
-		eval += pc_cntbs[sq] = -pawnSquareValue[flip_rank(sq)];
+		eval += pieceContributions[sq] = -pawnSquareValue[flip_rank(sq)];
 	}	
 
 	Bitboard w_knights = pos.pieces(WHITE, KNIGHT);
@@ -61,14 +61,14 @@ Value evaluate(const Position& pos) {
 		Square sq = pop_lsb(w_knights);
 		Value vis = popcnt(PseudoAttacks[KNIGHT][sq]) * 3;
 		Value sq_val = knightSquareValue[sq];
-		eval += pc_cntbs[sq] = vis + sq_val;
+		eval += pieceContributions[sq] = vis + sq_val;
 	}
 
 	while (b_knights) {
 		Square sq = pop_lsb(b_knights);
 		Value vis = popcnt(PseudoAttacks[KNIGHT][sq]) * 3;
 		Value sq_val = knightSquareValue[flip_rank(sq)];
-		eval += pc_cntbs[sq] = -vis - sq_val;
+		eval += pieceContributions[sq] = -vis - sq_val;
 	}
 
 	Bitboard w_bishops = pos.pieces(WHITE, BISHOP);
@@ -77,13 +77,13 @@ Value evaluate(const Position& pos) {
 	while (w_bishops) {
 		Square sq = pop_lsb(w_bishops);
 		Value vis = popcnt(attacks_bb<BISHOP>(sq, occ)) * 3;
-		eval += pc_cntbs[sq] = vis;
+		eval += pieceContributions[sq] = vis;
 	}
 
 	while (b_bishops) {
 		Square sq = pop_lsb(b_bishops);
 		Value vis = popcnt(attacks_bb<BISHOP>(sq, occ)) * 3;
-		eval += pc_cntbs[sq] = -vis;
+		eval += pieceContributions[sq] = -vis;
 	}
 
 
@@ -95,7 +95,7 @@ Value evaluate(const Position& pos) {
 std::string Eval::pretty(const Position& p) {
 
 	// reset and populate array
-	for (Value& v : pc_cntbs)
+	for (Value& v : pieceContributions)
 		v = 0;
 
 	Value v = evaluate(p);
@@ -123,7 +123,7 @@ std::string Eval::pretty(const Position& p) {
 			if ( pt == KING || pt == NO_PIECE_TYPE)
 				out << "      ";
 			else
-				out << float(pc_cntbs[make_square(f, r)]) / 100 << " ";
+				out << float(pieceContributions[make_square(f, r)]) / 100 << " ";
 		}
 
 	out << "|\n";
