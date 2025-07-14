@@ -94,8 +94,6 @@ void Position::init() {
 
 	gamePly = 0;
 	st->ep_sq = SQ_NONE;
-
-	std::cout << printSquare[st->ep_sq] << std::endl;
 	fiftyMoveCount = 0;
 	st->cr = ANY_CASTLING;
 
