@@ -12,7 +12,7 @@ FLAGS := -O2 -g -Wall -Wextra -Wpedantic -std=c++20 -mbmi2
 endif
 
 
-FILES := bitboard.cpp position.cpp movegen.cpp search.cpp evaluate.cpp main.cpp moveorder.cpp
+FILES := bitboard.cpp position.cpp movegen.cpp search.cpp evaluate.cpp main.cpp moveorder.cpp thread.cpp engine.cpp uciengine.cpp
 OBJECTS := $(patsubst %.cpp,$B/%.o,$(FILES))
 
 $B/main_engine: $(OBJECTS)
