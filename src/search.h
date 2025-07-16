@@ -7,18 +7,30 @@
 namespace Engine {
 
 namespace Search {
-	
 
-	void perft(std::string, int);
+class Worker {
 
-	/* side effect of modifying pv_table
-	   places moves found in its search in
-	   pv_table, can be printed to find
-	   the line it discovered was "best"
-	*/
-	void iterative_deepening(Position&, int);
+
+	public:
+
+		Worker() = default;
+
+		void perft(int);
+		void start_searching();
+
+
+
+	private:
+		
+		void iterative_deepening(Position&);
+		Value search(Position&, int, int, int, int);
+		Value qsearch(Position&, int, int, int);
+
+		Move pv_table[MAX_PLY][MAX_PLY];
+
+};
 	
-	inline Move pv_table[MAX_PLY][MAX_PLY];
-}
+	
+} // namespace Search
 
 } // namespace Engine

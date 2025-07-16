@@ -30,19 +30,14 @@ uint64_t perft(Position& p, int max, int depth) {
 
 }
 
-void Search::perft(std::string fen, int depth) {
+void Search::Worker::perft(int depth) {
 
-	Position p;
-	p.set_fen(fen);
-
-	uint64_t nodes = perft(p, depth, depth);
-
-	std::cout << "\nNodes Searched: " << nodes << "\n\n";
+	//uint64_t nodes = perft(p, depth, depth);
 }
 
 
 
-Value qsearch(Position& p, int alpha, int beta, int ply) {
+Value Search::Worker::qsearch(Position& p, int alpha, int beta, int ply) {
 
 	
 	Value eval = p.to_play() == WHITE ? evaluate(p) : -evaluate(p);
@@ -83,7 +78,7 @@ Value qsearch(Position& p, int alpha, int beta, int ply) {
 	return best_val;
 }
 
-Value negamax(Position& p, int alpha, int beta, int depth, int ply) {
+Value Search::Worker::search(Position& p, int alpha, int beta, int depth, int ply) {
 
 	alpha = std::max(mated_in(ply), alpha);
 	beta = std::min(mate_in(ply), beta);
@@ -103,7 +98,7 @@ Value negamax(Position& p, int alpha, int beta, int depth, int ply) {
 	Move* m;
 	while ( (m = mo.next_move()) ) {
 		p.do_move(m);
-		Value v = -negamax(p, -beta, -alpha, depth - 1, ply + 1);
+		Value v = -search(p, -beta, -alpha, depth - 1, ply + 1);
 		p.undo_move();
 		
 		if (v >= beta) 
@@ -117,9 +112,9 @@ Value negamax(Position& p, int alpha, int beta, int depth, int ply) {
 				alpha = v;
 
 				for (int i = 0; i < depth - 1; ++i) {
-					Search::pv_table[ply][i + 1] = Search::pv_table[ply + 1][i];}
+					pv_table[ply][i + 1] = pv_table[ply + 1][i];}
 
-				Search::pv_table[ply][0] = *m;
+				pv_table[ply][0] = *m;
 			}
 		}
 	}
@@ -127,28 +122,33 @@ Value negamax(Position& p, int alpha, int beta, int depth, int ply) {
 	return best_val;
 }
 
-void Search::iterative_deepening(Position& p, int depth) {
-	// populate pv table
-	Value score = negamax(p, -VALUE_INF, VALUE_INF, depth, 0);
+void Search::Worker::iterative_deepening(Position& p) {
+	// TODO fix depth (the 1)
+	Value score = search(p, -VALUE_INF, VALUE_INF, 1, 0);
 	
 
 	bool mate = (score >= VALUE_MATE_IN_MAX_PLY || score <= VALUE_MATED_IN_MAX_PLY);
 
+
+/*
 	if (score >= VALUE_MATE_IN_MAX_PLY)
 		depth = VALUE_MATE - score;
 
 	else if ( score <= VALUE_MATED_IN_MAX_PLY)
 		depth = VALUE_MATE + score;
-
+*/
 	
 	if (mate)
 		std::cout << "mate ";
 
 	std::cout << "pv ";
-
+/*
 	for (int i = 0; i < depth; ++i) 
-		std::cout << (i + 1) << ". " << p.dress_move(Search::pv_table[0][i]) << "\n";
+		std::cout << (i + 1) << ". " << p.dress_move(pv_table[0][i]) << "\n";
+		*/
 
 }
+
+void Search::Worker::start_searching() {}
 
 } // namespace Engine
