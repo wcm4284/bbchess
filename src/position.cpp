@@ -99,7 +99,7 @@ void Position::init() {
 
 }
 
-void Position::set_fen(std::string_view fen) {
+void Position::set(std::string_view fen) {
 
 	st = history;
 	

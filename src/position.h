@@ -23,7 +23,7 @@ class Position {
 			CastlingRights cr; // at this position, what was our castling rights?
 		};
 
-		void set_fen(std::string_view); // maybe a string is fine
+		void set(std::string_view); // maybe a string is fine
 		std::string fen() const;
 
 		std::string dress_move(Move) const;
