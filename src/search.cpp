@@ -30,7 +30,7 @@ uint64_t perft(Position& p, int max, int depth) {
 
 }
 
-void Search::Worker::perft(int depth) {
+void Search::Worker::perft() {
 
 	//uint64_t nodes = perft(p, depth, depth);
 }
@@ -149,6 +149,9 @@ void Search::Worker::iterative_deepening(Position& p) {
 
 }
 
-void Search::Worker::start_searching() {}
+void Search::Worker::start_searching() { 
+	// are we doing perft or iterative deepening?
+	std::cout << "search started\n";
+}
 
 } // namespace Engine
