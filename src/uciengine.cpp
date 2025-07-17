@@ -12,7 +12,7 @@ namespace {
 
 }
 
-UCIEngine::UCIEngine() : engine(10) {}
+UCIEngine::UCIEngine() : engine(1) {}
 
 void UCIEngine::loop() {
 
@@ -21,12 +21,11 @@ void UCIEngine::loop() {
 	do {
 
 		std::getline(std::cin, cmd);
-
 		std::istringstream is(cmd); 
-
 		is >> token;
 
-		if (token == "quit" || token == "exit") {}
+		if (token == "quit" || token == "exit")
+			engine.stop();
 
 
 		else if (token == "position") {
@@ -38,8 +37,8 @@ void UCIEngine::loop() {
 		}
 
 
-
 	} while (token != "quit" && token != "exit");
+
 }
 
 void UCIEngine::position(std::istringstream& is) {
@@ -67,23 +66,32 @@ void UCIEngine::position(std::istringstream& is) {
 
 void UCIEngine::go(std::istringstream& is) {
 
+	Search::SearchLimits limit = parse_limits(is);
+	
+	engine.set(limit);
+	engine.go();
+}
+
+Search::SearchLimits UCIEngine::parse_limits(std::istringstream& is) {
+
+	Search::SearchLimits limit;
+	
+
 	std::string token;
 	if (!(is >> token))
-		engine.go();
+		return limit;
 
-	if (token == "perft") {
-		
-		if (!(is >> token))
-			engine.perft();
-		else
-			engine.perft(std::stoi(token));
 
-	} else if (token == "depth") {
-		
-		is >> token;
-		engine.go(std::stoi(token));
+	if (token == "perft")
+		limit.perft = true;
 
-	}
+	else if (token == "depth")
+		limit.perft = false;
+
+	if (is >> token)
+		limit.depth = std::min(MAX_PLY,std::stoi(token));
+
+	return limit;	
 
 }
 

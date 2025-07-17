@@ -3,6 +3,7 @@
 #include <sstream>
 
 #include "engine.h"
+#include "search.h"
 
 namespace Engine {
 
@@ -17,6 +18,7 @@ class UCIEngine {
 	private:
 		void position(std::istringstream&);
 		void go(std::istringstream&);
+		Search::SearchLimits parse_limits(std::istringstream&);
 		void perft();
 		void start_searching();
 		
