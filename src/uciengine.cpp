@@ -1,5 +1,6 @@
 #include <iostream>
 #include <sstream>
+#include <chrono>
 
 #include "uciengine.h"
 
@@ -12,7 +13,7 @@ namespace {
 
 }
 
-UCIEngine::UCIEngine() : engine(1) {}
+UCIEngine::UCIEngine() : engine(2) {}
 
 void UCIEngine::loop() {
 
@@ -57,19 +58,29 @@ void UCIEngine::position(std::istringstream& is) {
 
 		}
 	}
-	
-	
-	std::cout << fen << "\n";
 
 	engine.set_position(fen);
 }
 
 void UCIEngine::go(std::istringstream& is) {
 
+	auto start = std::chrono::high_resolution_clock::now();
+		
+
 	Search::SearchLimits limit = parse_limits(is);
 	
 	engine.set(limit);
-	engine.go();
+
+	if (limit.perft)
+		engine.perft();
+	else	
+		engine.go();
+
+	auto end = std::chrono::high_resolution_clock::now();
+	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+
+	std::cout << "\nSearch took " << duration.count() << " ms\n\n";
+	engine.reset();
 }
 
 Search::SearchLimits UCIEngine::parse_limits(std::istringstream& is) {
@@ -78,18 +89,16 @@ Search::SearchLimits UCIEngine::parse_limits(std::istringstream& is) {
 	
 
 	std::string token;
-	if (!(is >> token))
+	if (!(is >> token)) {
 		return limit;
+	}
 
 
-	if (token == "perft")
-		limit.perft = true;
+	if (token == "perft") 
+		is >> limit.perft;
 
 	else if (token == "depth")
-		limit.perft = false;
-
-	if (is >> token)
-		limit.depth = std::min(MAX_PLY,std::stoi(token));
+		is >> limit.depth;
 
 	return limit;	
 

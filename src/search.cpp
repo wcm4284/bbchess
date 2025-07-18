@@ -5,36 +5,49 @@
 namespace Engine {
 
 
-uint64_t perft(Position& p, int max, int depth) {
+uint64_t Search::Worker::perft(Position& p, Depth depth) {
+	
+	assert(depth != 1);
 
 	if (depth == 0)
 		return 1;
 
-	MoveList<LEGAL> ml = MoveList<LEGAL>(p);
+	bool leaf = depth == 2;
 
-	uint64_t nodes = 0;
+	MoveList<LEGAL> moves(p);
+	
+	uint64_t cnt = 0;
+	for (auto& m : moves) {
 
-	for (Move m : ml) {
-		if (depth == max)
-			std::cout << p.dress_move(m) << ": ";
 		p.do_move(&m);
-		uint64_t new_nodes = perft(p, max, depth - 1);
-		if (depth == max)
-			std::cout << new_nodes << std::endl;
-		nodes += new_nodes;
+		cnt += leaf ? MoveList<LEGAL>(p).size() : perft(p, depth - 1);
 		p.undo_move();
+
 	}
 
-	return nodes;
-
-
+	return cnt;
 }
 
-void Search::Worker::perft() {
+void Search::Worker::perft(PerftMoves& rootMoves, std::vector<int>& searchIndices) {
+	
+	assert(limits.perft);
 
-	//uint64_t nodes = perft(p, depth, depth);
+	bool leaf = limits.perft == 2;
+
+	Position p;
+	p.set(rootPos.fen());
+
+
+	for (auto& idx : searchIndices) {
+		PerftMove& move = rootMoves[idx];
+		
+		p.do_move(&move.move);
+		nodes += move.node_count = leaf ? MoveList<LEGAL>(p).size() : perft(p, limits.perft - 1); 
+		p.undo_move();
+
+	}
+
 }
-
 
 
 Value Search::Worker::qsearch(Position& p, int alpha, int beta, int ply) {
@@ -122,36 +135,15 @@ Value Search::Worker::search(Position& p, int alpha, int beta, int depth, int pl
 	return best_val;
 }
 
-void Search::Worker::iterative_deepening(Position& p) {
-	// TODO fix depth (the 1)
-	Value score = search(p, -VALUE_INF, VALUE_INF, 1, 0);
-	
+void Search::Worker::iterative_deepening() {
 
-	bool mate = (score >= VALUE_MATE_IN_MAX_PLY || score <= VALUE_MATED_IN_MAX_PLY);
-
-
-/*
-	if (score >= VALUE_MATE_IN_MAX_PLY)
-		depth = VALUE_MATE - score;
-
-	else if ( score <= VALUE_MATED_IN_MAX_PLY)
-		depth = VALUE_MATE + score;
-*/
-	
-	if (mate)
-		std::cout << "mate ";
-
-	std::cout << "pv ";
-/*
-	for (int i = 0; i < depth; ++i) 
-		std::cout << (i + 1) << ". " << p.dress_move(pv_table[0][i]) << "\n";
-		*/
+	std::cout << "iterative deepening\n";
 
 }
 
 void Search::Worker::start_searching() { 
-	// are we doing perft or iterative deepening?
-	std::cout << "search started\n";
+	
+	iterative_deepening(); 
 }
 
 } // namespace Engine
