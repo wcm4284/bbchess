@@ -24,6 +24,7 @@
 namespace Engine {
 
 using Bitboard = uint64_t;
+using Depth = uint16_t;
 
 constexpr int MAX_MOVES = 256;
 constexpr int MAX_PLY = 246;
