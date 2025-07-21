@@ -182,22 +182,17 @@ void Position::set(std::string_view fen) {
 	} else { st->ep_sq = SQ_NONE; }
 
 	++idx;
-	fiftyMoveCount = 0;
 
-	while ((t = fen[idx++]) != ' ') {
-		fiftyMoveCount *= 10;
-		fiftyMoveCount += t - '0';}
-	
-	gamePly = 0;
-	while (idx < (int)fen.size()) {
-		gamePly *= 10;
-		gamePly += fen[idx++] - '0';}
-
-	--gamePly;
-	gamePly *= 2;
+	int start = idx;
+	while ((t = fen[idx++]) != ' ') {}
+	fiftyMoveCount = std::stoi(std::string(fen.substr(start, idx)));
 
 
-	if (sideToMove == BLACK) ++gamePly;
+
+	std::string fm = std::string(fen.substr(idx));
+	int fullMove = std::stoi(fm);
+	gamePly = (fullMove - 1) * 2 + (sideToMove == BLACK ? 1 : 0);
+	std::cout << "setting gamePly to " << gamePly << std::endl;
 
 	byColor[WHITE] = byColor[BLACK] = byType[PAWN] = byType[KNIGHT] = byType[BISHOP] =
 	byType[ROOK] = byType[QUEEN] = byType[KING] = byType[ALL_PIECES] = 0;
