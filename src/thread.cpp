@@ -92,7 +92,8 @@ void ThreadPool::set(Search::SearchLimits& limits, Position& pos) {
 	for (auto& th : threads) {
 		th->run_custom_job([&]() {
 			th->worker->limits = limits;
-			th->worker->rootPos = pos;
+			th->worker->rootPos.set(pos.fen());
+			th->worker->nodes = 0;
 		});
 
 	};
