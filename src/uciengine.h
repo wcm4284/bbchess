@@ -10,7 +10,8 @@ namespace Engine {
 class UCIEngine {
 
 	public:
-		UCIEngine();
+		UCIEngine() = default;
+		UCIEngine(int, char**); 
 
 		void loop();
 

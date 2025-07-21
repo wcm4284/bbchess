@@ -13,7 +13,8 @@ namespace {
 
 }
 
-UCIEngine::UCIEngine() : engine(2) {}
+UCIEngine::UCIEngine(int argc, char** argv) :
+	engine(argc == 0 ? 1 : std::stoi(*argv)) {}
 
 void UCIEngine::loop() {
 
@@ -69,6 +70,7 @@ void UCIEngine::go(std::istringstream& is) {
 
 	Search::SearchLimits limit = parse_limits(is);
 	
+	std::cout << "Running set\n";
 	engine.set(limit);
 
 	if (limit.perft)
@@ -80,7 +82,7 @@ void UCIEngine::go(std::istringstream& is) {
 	auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
 
 	std::cout << "\nSearch took " << duration.count() << " ms\n\n";
-	engine.reset();
+//	engine.reset();
 }
 
 Search::SearchLimits UCIEngine::parse_limits(std::istringstream& is) {
