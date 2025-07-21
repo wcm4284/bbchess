@@ -21,9 +21,6 @@ namespace {
 		ANY_CASTLING, ANY_CASTLING, ANY_CASTLING, ANY_CASTLING, ANY_CASTLING, ANY_CASTLING, ANY_CASTLING, ANY_CASTLING,
 		~BLACK_OOO, ANY_CASTLING, ANY_CASTLING, ANY_CASTLING, ~BLACK_CASTLING, ANY_CASTLING, ANY_CASTLING, ~BLACK_OO
 	};
-	
-	// this is a pretty temp solution, will prob get changed at some point
-	Position::Info history[MAX_PLY * 3];
 }
 	
 std::ostream& operator<<(std::ostream& os, const Position& pos) {
@@ -96,6 +93,8 @@ void Position::init() {
 	st->ep_sq = SQ_NONE;
 	fiftyMoveCount = 0;
 	st->cr = ANY_CASTLING;
+
+	pos_is_ok();
 
 }
 
@@ -192,7 +191,6 @@ void Position::set(std::string_view fen) {
 	std::string fm = std::string(fen.substr(idx));
 	int fullMove = std::stoi(fm);
 	gamePly = (fullMove - 1) * 2 + (sideToMove == BLACK ? 1 : 0);
-	std::cout << "setting gamePly to " << gamePly << std::endl;
 
 	byColor[WHITE] = byColor[BLACK] = byType[PAWN] = byType[KNIGHT] = byType[BISHOP] =
 	byType[ROOK] = byType[QUEEN] = byType[KING] = byType[ALL_PIECES] = 0;
@@ -256,6 +254,7 @@ void Position::set(std::string_view fen) {
 		
 	}
 	byType[ALL_PIECES] = byColor[WHITE] | byColor[BLACK];
+	pos_is_ok();
 
 	assert( pieces(WHITE, KING) && pieces(BLACK, KING));
 	return;
@@ -497,6 +496,12 @@ void Position::put_piece(Piece pc, Square s) {
 
 void Position::move_piece(Square to, Square from) {
 
+	if (!empty(to)) {
+		std::cout << "assertion failed\n";
+		std::cout << *this;
+		std::cout << printSquare[from] << printSquare[to] << std::endl;
+	}
+
 	assert(empty(to));
 
 	Piece pc = board[from];
@@ -527,8 +532,6 @@ Piece Position::remove_piece(Square s) {
 
 void Position::do_move(Move *m) {
 	assert(m->is_ok());
-
-	st->move_made = *m;
 
 	Square to = m->to_sq();
 	Square from = m->from_sq();
@@ -585,20 +588,18 @@ void Position::do_move(Move *m) {
 
 }
 
-void Position::undo_move() {
+void Position::undo_move(Move *m) {
 
 	--st;
 	--gamePly;
 	sideToMove = ~sideToMove;
 
-	Move m = st->move_made;
-
 	// backwards bc we're undoing move 
-	Square from = m.to_sq();
-	Square to = m.from_sq();
+	Square from = m->to_sq();
+	Square to = m->from_sq();
 
 
-	if (m.type() == PROMOTION) {
+	if (m->type() == PROMOTION) {
 		remove_piece(from);
 		put_piece(make_piece(PAWN, sideToMove), to);}
 	else
@@ -606,14 +607,14 @@ void Position::undo_move() {
 	
 	Piece cap;
 		
-	if (m.type() == ENPASSANT) {
+	if (m->type() == ENPASSANT) {
 		put_piece(make_piece(PAWN, ~sideToMove), from - push_dir(sideToMove));} 
 	else if ((cap = st->capturedPiece) != NO_PIECE) 
 		put_piece(cap, from);
 
 
 
-	else if (m.type() == CASTLING) {
+	else if (m->type() == CASTLING) {
 		
 		if (from == SQ_G1) 
 			move_piece(SQ_H1, SQ_F1);
@@ -662,6 +663,28 @@ bool Position::legal_move(Move* m) const {
 	assert(pin & from);
 
 	return !(pin & from) || (line_bb(to, ksq) & from) || (line_bb(from, ksq) & to); 
+}
+
+void Position::pos_is_ok() const {
+
+	for (Square sq = SQ_A1; sq <= SQ_H8; ++sq) {
+
+		Piece p = piece_on(sq);
+		if (p == NO_PIECE)
+			continue;
+
+		PieceType pt = type_of(p);
+		Color c = color_of(p);
+
+		Bitboard sqbb = square_bb(sq);
+
+		if (!(sqbb & pieces(c)))
+			assert(false && "color bitboard");
+
+		if (!(sqbb & pieces(pt)))
+			assert(false && "piece bitboard");
+
+	}
 }
 	
 } // namespace Engine

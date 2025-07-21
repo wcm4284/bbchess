@@ -19,7 +19,6 @@ class Position {
 		struct Info {
 			Piece capturedPiece; // at this position, what piece did we capture? 
 			Square ep_sq; // at this position, what is the eq_sq
-			Move move_made; // at this position, what move did we make? 
 			CastlingRights cr; // at this position, what was our castling rights?
 		};
 
@@ -70,7 +69,7 @@ class Position {
 		Piece remove_piece(Square);
 		
 		void do_move(Move*);
-		void undo_move();
+		void undo_move(Move*);
 
 		bool legal_move(Move*) const;
 
@@ -80,13 +79,15 @@ class Position {
 
 
 	private:
+		void pos_is_ok() const;
+
 		Piece board[SQUARE_NB];
 		Bitboard byType[PIECE_TYPE_NB];
 		Bitboard byColor[COLOR_NB];
 		Color sideToMove;
 		int fiftyMoveCount;
 		int gamePly;
-		Info *st;
+		Info history[MAX_PLY << 1], *st;
 
 };
 

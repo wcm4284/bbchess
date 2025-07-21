@@ -6,7 +6,7 @@ namespace Engine {
 
 
 uint64_t Search::Worker::perft(Position& p, Depth depth) {
-	
+
 	assert(depth != 1);
 
 	if (depth == 0)
@@ -21,7 +21,7 @@ uint64_t Search::Worker::perft(Position& p, Depth depth) {
 
 		p.do_move(&m);
 		cnt += leaf ? MoveList<LEGAL>(p).size() : perft(p, depth - 1);
-		p.undo_move();
+		p.undo_move(&m);
 
 	}
 
@@ -39,11 +39,12 @@ void Search::Worker::perft(PerftMoves& rootMoves, std::vector<int>& searchIndice
 
 
 	for (auto& idx : searchIndices) {
-		PerftMove& move = rootMoves[idx];
+		PerftMove& pm = rootMoves[idx];
+		Move *m = &pm.move;
 		
-		p.do_move(&move.move);
-		nodes += move.node_count = leaf ? MoveList<LEGAL>(p).size() : perft(p, limits.perft - 1); 
-		p.undo_move();
+		p.do_move(m);
+		nodes += pm.node_count = leaf ? MoveList<LEGAL>(p).size() : perft(p, limits.perft - 1); 
+		p.undo_move(m);
 
 	}
 
@@ -74,7 +75,7 @@ Value Search::Worker::qsearch(Position& p, int alpha, int beta, int ply) {
 
 		p.do_move(m);
 		Value val = -qsearch(p, -beta, -alpha, ply + 1);
-		p.undo_move();
+		p.undo_move(m);
 		
 		if (val >= beta) 
 			return beta;
@@ -112,7 +113,7 @@ Value Search::Worker::search(Position& p, int alpha, int beta, int depth, int pl
 	while ( (m = mo.next_move()) ) {
 		p.do_move(m);
 		Value v = -search(p, -beta, -alpha, depth - 1, ply + 1);
-		p.undo_move();
+		p.undo_move(m);
 		
 		if (v >= beta) 
 			return beta;
