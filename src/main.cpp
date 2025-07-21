@@ -10,11 +10,11 @@
 
 using namespace Engine;
 
-int main() {
+int main(int argc, char** argv ) {
 
 	Bitboards::init();
 
-	UCIEngine uci {};
+	UCIEngine uci {argc - 1, argv + 1};
 	uci.loop();
 	
 	return 0;
