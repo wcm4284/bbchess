@@ -18,8 +18,8 @@ enum GenType {
 struct ExtMove : public Move {
 
 	void operator=(Move m) { data = m.raw(); }
-	bool operator<(const ExtMove& e) { return value < e.value; }
-	bool operator>(const ExtMove& e) { return value > e.value; }
+	bool operator<(const ExtMove& e) const { return value < e.value; }
+	bool operator>(const ExtMove& e) const { return value > e.value; }
 	operator float() const = delete;
 
 	uint16_t value;
@@ -60,18 +60,23 @@ class MoveList {
 
 	public:
 		MoveList() = default;
-		MoveList(const Position& pos) : 
+		MoveList(const Position& pos) : idx(0), 
 			last(generate<T>(pos, list)) {}
 
 		Move& operator[](int i) { return list[i]; }
+
 
 		ExtMove* begin() { return list; }
 		ExtMove* end() { return last; }
 		const ExtMove* begin() const { return list; }
 		const ExtMove* end() const { return last; }
+		Move* next() { return &list[idx] == last ? nullptr : &list[idx++]; }
 		size_t size() const { return last - list; }
 
 	private:
+		int idx;
+
+	protected:
 		ExtMove list[MAX_MOVES], *last;
 
 };

@@ -2,6 +2,7 @@
 
 #include "position.h"
 #include "types.h"
+#include "movegen.h"
 
 #include <string>
 #include <vector> 
@@ -9,6 +10,9 @@
 namespace Engine {
 
 class ThreadPool;
+
+template <typename T>
+class MoveQueue;
 
 namespace Search {
 
@@ -48,7 +52,7 @@ class Worker {
 	private:
 		
 		void iterative_deepening();
-		void perft(PerftMoves&, std::vector<int>&);
+		void perft(MoveQueue< MoveList<LEGAL> >&);
 		uint64_t perft(Position&, Depth); 
 		Value search(Position&, int, int, int, int);
 		Value qsearch(Position&, int, int, int);

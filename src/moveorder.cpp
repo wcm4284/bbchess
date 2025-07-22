@@ -18,7 +18,7 @@ void rate_moves(const Position& p, ExtMove *f, ExtMove *l) {
 	
 void sort(const Position& p, ExtMove *f, ExtMove *l) {
 	rate_moves(p, f, l);
-	std::sort(f, l, std::greater<>());
+	std::stable_sort(f, l, std::greater<>());
 
 	return;
 }

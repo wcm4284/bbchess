@@ -1,3 +1,5 @@
+#include <sstream>
+
 #include "search.h"
 #include "evaluate.h"
 #include "moveorder.h"
@@ -28,7 +30,7 @@ uint64_t Search::Worker::perft(Position& p, Depth depth) {
 	return cnt;
 }
 
-void Search::Worker::perft(PerftMoves& rootMoves, std::vector<int>& searchIndices) {
+void Search::Worker::perft(MoveQueue<MoveList<LEGAL>>& rootMoves) {
 	
 	assert(limits.perft);
 
@@ -37,21 +39,30 @@ void Search::Worker::perft(PerftMoves& rootMoves, std::vector<int>& searchIndice
 	Position p;
 	p.set(rootPos.fen());
 
+	Move *m;
+	uint64_t cnt = 0;
+	while ( (m = rootMoves.next()) ) {
 
-	for (auto& idx : searchIndices) {
-		PerftMove& pm = rootMoves[idx];
-		Move *m = &pm.move;
+		assert(m);
 		
 		p.do_move(m);
-		nodes += pm.node_count = leaf ? MoveList<LEGAL>(p).size() : perft(p, limits.perft - 1); 
+		nodes += cnt = leaf ? MoveList<LEGAL>(p).size() : perft(p, limits.perft - 1);
 		p.undo_move(m);
+	
+
+		// this gives us a "race condition" in that the nodes will likely
+		// not all be printed in the same order every time perft is run,
+		// but the node count will remain the same and that is what is important
+		std::stringstream out;
+		out << p.dress_move(*m) << ": " << cnt << "\n";
+		std::cout << out.str();
 
 	}
 
 }
 
 
-Value Search::Worker::qsearch(Position& p, int alpha, int beta, int ply) {
+Value Search::Worker::qsearch(Position& p, int alpha, int beta, [[maybe_unused]] int ply) {
 
 	
 	Value eval = p.to_play() == WHITE ? evaluate(p) : -evaluate(p);
@@ -61,7 +72,7 @@ Value Search::Worker::qsearch(Position& p, int alpha, int beta, int ply) {
 
 	if (eval > alpha)
 		alpha = eval;
-
+/*
 	MoveOrder<CAPTURES> mo(p);
 	
 	// this doesn't deal with stalemate, which is technically a problem,
@@ -90,6 +101,8 @@ Value Search::Worker::qsearch(Position& p, int alpha, int beta, int ply) {
 	}
 	
 	return best_val;
+	*/
+	return 0;
 }
 
 Value Search::Worker::search(Position& p, int alpha, int beta, int depth, int ply) {
@@ -102,7 +115,7 @@ Value Search::Worker::search(Position& p, int alpha, int beta, int depth, int pl
 
 	if (depth == 0) 
 		return qsearch(p, alpha, beta, ply);
-
+/*
 	MoveOrder<LEGAL> mo(p);
 
 	if (mo.size() == 0) 
@@ -134,6 +147,9 @@ Value Search::Worker::search(Position& p, int alpha, int beta, int depth, int pl
 	}
 	
 	return best_val;
+
+	*/
+	return 0;
 }
 
 void Search::Worker::iterative_deepening() {

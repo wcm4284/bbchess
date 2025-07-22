@@ -3,6 +3,7 @@
 
 #include "thread.h"
 #include "movegen.h"
+#include "moveorder.h"
 
 namespace Engine {
 
@@ -114,27 +115,12 @@ uint64_t ThreadPool::perft(std::string fen) {
 
 	Position        p;
 	p.set(fen);
-	MoveList<LEGAL> moves(p);
-
-	Search::PerftMoves rootMoves;
-
-	for (auto m : moves)
-		rootMoves.emplace_back(m);
-
-	std::vector<std::vector<int>> searchIndices;
-	searchIndices.resize(threads.size());
-
-	for (size_t i = 0; i < rootMoves.size(); ++i) 
-		searchIndices[i % threads.size()].push_back(i);
-
-	for (size_t i = 0; i < threads.size(); ++i) 
-		threads[i]->run_custom_job([&, i] { threads[i]->worker->perft(rootMoves, searchIndices[i]); });
+	MoveQueue<MoveList<LEGAL>> moves(p);
+	
+	for (auto& th : threads) 
+		th->run_custom_job([&] { th->worker->perft(moves); });
 
 	wait_for_all_threads();
-
-	for (auto m : rootMoves) {
-		std::cout << p.dress_move(m.move) << ": " << m.node_count << "\n";	
-	}
 
 	return accumulate(&Search::Worker::nodes);
 }
