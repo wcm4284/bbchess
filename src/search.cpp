@@ -30,7 +30,7 @@ uint64_t Search::Worker::perft(Position& p, Depth depth) {
 	return cnt;
 }
 
-void Search::Worker::perft(MoveQueue<MoveList<LEGAL>>& rootMoves) {
+void Search::Worker::perft(PerftMoves& rootMoves) {
 	
 	assert(limits.perft);
 
@@ -72,7 +72,7 @@ Value Search::Worker::qsearch(Position& p, int alpha, int beta, [[maybe_unused]]
 
 	if (eval > alpha)
 		alpha = eval;
-/*
+
 	MoveOrder<CAPTURES> mo(p);
 	
 	// this doesn't deal with stalemate, which is technically a problem,
@@ -82,7 +82,7 @@ Value Search::Worker::qsearch(Position& p, int alpha, int beta, [[maybe_unused]]
 
 	Value best_val = -VALUE_INF;
 	Move* m;
-	while ( (m = mo.next_move()) ) {
+	while ( (m = mo.next()) ) {
 
 		p.do_move(m);
 		Value val = -qsearch(p, -beta, -alpha, ply + 1);
@@ -101,11 +101,11 @@ Value Search::Worker::qsearch(Position& p, int alpha, int beta, [[maybe_unused]]
 	}
 	
 	return best_val;
-	*/
+	
 	return 0;
 }
 
-Value Search::Worker::search(Position& p, int alpha, int beta, int depth, int ply) {
+Value Search::Worker::search(Position& p, int alpha, int beta, Depth depth, int ply) {
 
 	alpha = std::max(mated_in(ply), alpha);
 	beta = std::min(mate_in(ply), beta);
@@ -115,7 +115,7 @@ Value Search::Worker::search(Position& p, int alpha, int beta, int depth, int pl
 
 	if (depth == 0) 
 		return qsearch(p, alpha, beta, ply);
-/*
+
 	MoveOrder<LEGAL> mo(p);
 
 	if (mo.size() == 0) 
@@ -123,7 +123,7 @@ Value Search::Worker::search(Position& p, int alpha, int beta, int depth, int pl
 
 	Value best_val = -VALUE_INF;	
 	Move* m;
-	while ( (m = mo.next_move()) ) {
+	while ( (m = mo.next()) ) {
 		p.do_move(m);
 		Value v = -search(p, -beta, -alpha, depth - 1, ply + 1);
 		p.undo_move(m);
@@ -148,19 +148,36 @@ Value Search::Worker::search(Position& p, int alpha, int beta, int depth, int pl
 	
 	return best_val;
 
-	*/
+	
 	return 0;
 }
 
 void Search::Worker::iterative_deepening() {
 
+	assert(limits.depth); 
+
 	std::cout << "iterative deepening\n";
+
+	int alpha = -VALUE_INF;
+	int beta  =  VALUE_INF;
+	Position     p;
+	p.set(rootPos.fen());
+
+	Value eval = search(p, alpha, beta, limits.depth, 0);
+
+	std::cout << "best eval: " << eval << std::endl;
+	std::cout << "1. " << p.dress_move(pv_table[0][0]) << std::endl;
+
+
 
 }
 
 void Search::Worker::start_searching() { 
 	
+	std::cout << "iterative deepening\n";
+	std::cout << rootPos << std::endl;
 	iterative_deepening(); 
+
 }
 
 } // namespace Engine

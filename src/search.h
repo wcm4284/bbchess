@@ -3,6 +3,7 @@
 #include "position.h"
 #include "types.h"
 #include "movegen.h"
+#include "moveorder.h"
 
 #include <string>
 #include <vector> 
@@ -35,7 +36,6 @@ struct PerftMove {
 
 };
 
-using PerftMoves = std::vector<PerftMove>;
 
 
 class Worker {
@@ -52,9 +52,9 @@ class Worker {
 	private:
 		
 		void iterative_deepening();
-		void perft(MoveQueue< MoveList<LEGAL> >&);
+		void perft(PerftMoves&);
 		uint64_t perft(Position&, Depth); 
-		Value search(Position&, int, int, int, int);
+		Value search(Position&, int, int, Depth, int);
 		Value qsearch(Position&, int, int, int);
 	
 

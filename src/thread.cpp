@@ -115,7 +115,7 @@ uint64_t ThreadPool::perft(std::string fen) {
 
 	Position        p;
 	p.set(fen);
-	MoveQueue<MoveList<LEGAL>> moves(p);
+	PerftMoves moves(p);
 	
 	for (auto& th : threads) 
 		th->run_custom_job([&] { th->worker->perft(moves); });
