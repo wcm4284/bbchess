@@ -70,7 +70,6 @@ void UCIEngine::go(std::istringstream& is) {
 
 	Search::SearchLimits limit = parse_limits(is);
 	
-	std::cout << "Running set\n";
 	engine.set(limit);
 
 	if (limit.perft)
