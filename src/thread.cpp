@@ -58,8 +58,6 @@ void Thread::idle() {
 
 ThreadPool::ThreadPool(size_t requested) {
 
-	std::cout << "requested " << requested << (requested == 1 ? " thread" : " threads") << "\n";
-
 	assert(requested > 0);
 	
 	while (threads.size() < requested) 
