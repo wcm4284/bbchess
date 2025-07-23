@@ -13,7 +13,7 @@ endif
 
 
 FILES := bitboard.cpp position.cpp movegen.cpp moveorder.cpp \
-		 evaluate.cpp search.cpp thread.cpp engine.cpp \
+		 evaluate.cpp tt.cpp search.cpp thread.cpp engine.cpp \
 		 uciengine.cpp main.cpp
 OBJECTS := $(patsubst %.cpp,$B/%.o,$(FILES))
 
