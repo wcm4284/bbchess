@@ -1,4 +1,3 @@
-#pragma once
 #ifndef POSITION_H_INCLUDED
 #define POSITION_H_INCLUDED
 
@@ -9,6 +8,9 @@
 #include <iostream>
 
 namespace Engine {
+
+// Refers to Zobrist Hash Key
+using Key = uint64_t;
 
 class Position {
 
@@ -21,9 +23,14 @@ class Position {
 			Square ep_sq; // at this position, what is the eq_sq
 			CastlingRights cr; // at this position, what was our castling rights?
 		};
+	
+		
+		// initializes the zobrist hashing keys
+		static void init();
 
 		void set(std::string_view); // maybe a string is fine
 		std::string fen() const;
+		Key hash() const;
 
 		std::string dress_move(Move) const;
 		char piece_str(Square) const;
@@ -75,9 +82,6 @@ class Position {
 
 		inline Square king_on(Color) const;
 
-		void init();
-
-
 	private:
 		void pos_is_ok() const;
 
@@ -87,11 +91,14 @@ class Position {
 		Color sideToMove;
 		int fiftyMoveCount;
 		int gamePly;
+		Key key;
 		Info history[MAX_PLY << 1], *st;
 
 };
 
 std::ostream& operator<<(std::ostream& os, const Position& pos);
+
+inline Key Position::hash() const { return key; }
 
 inline Bitboard Position::pieces(PieceType pt) const { return byType[pt]; }
 

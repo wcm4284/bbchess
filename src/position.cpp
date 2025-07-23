@@ -3,6 +3,8 @@
 #include <iostream>
 #include <string_view>
 #include <unordered_map>
+#include <random>
+
 
 namespace Engine {
 
@@ -21,7 +23,12 @@ namespace {
 		ANY_CASTLING, ANY_CASTLING, ANY_CASTLING, ANY_CASTLING, ANY_CASTLING, ANY_CASTLING, ANY_CASTLING, ANY_CASTLING,
 		~BLACK_OOO, ANY_CASTLING, ANY_CASTLING, ANY_CASTLING, ~BLACK_CASTLING, ANY_CASTLING, ANY_CASTLING, ~BLACK_OO
 	};
-}
+
+	uint64_t piece_zobrist[SQUARE_NB][PIECE_NB];
+	uint64_t ep_zobrist[SQUARE_NB + 1]; 
+	uint64_t castling_zobrist[CASTLE_RIGHT_NB];
+	uint64_t side_zobrist;
+} // namespace 
 	
 std::ostream& operator<<(std::ostream& os, const Position& pos) {
 
@@ -39,63 +46,38 @@ std::ostream& operator<<(std::ostream& os, const Position& pos) {
 	os << "  a   b   c   d   e   f   g   h\n\n";
 
 	os << "FEN String: " << pos.fen();
+	os << "Hash Key: " << pos.hash() << "\n";
 
 	return os << ((pos.to_play() == WHITE) ? "White" : "Black") << " to move\n";
 
 }
-	
+
+// this static function is called at the start of main()
+// it's purpose is to initialize the zobrist keys that
+// will be used to hash the position for the transposition
+// table
 void Position::init() {
 
-	st = history;
+	std::mt19937_64 rng(0xae7f5489032548fe);
+	
+	for (Square sq = SQ_A1; sq <= SQ_H8; ++sq) {
 
-	sideToMove = WHITE;
-	byType[PAWN]   = 0xFF00000000FF00;
-	byType[BISHOP] = 0x2400000000000024;
-	byType[KNIGHT] = 0x4200000000000042;
-	byType[ROOK]   = square_bb(SQ_A8) | square_bb(SQ_A1) | square_bb(SQ_H8) | square_bb(SQ_H1);
-	byType[QUEEN]  = square_bb(SQ_D1) | square_bb(SQ_D8);
-	byType[KING]   = square_bb(SQ_E1) | square_bb(SQ_E8);
+		for (Piece pc : {W_PAWN, W_KNIGHT, W_BISHOP, W_ROOK, W_QUEEN, W_KING,
+						 B_PAWN, B_KNIGHT, B_BISHOP, B_ROOK, B_QUEEN, B_KING}) {
+			
+			piece_zobrist[sq][pc] = rng();
 
-	byColor[WHITE] = 0xFFFF;
-	byColor[BLACK] = byColor[WHITE] << 48;
+		}
 
-	byType[ALL_PIECES] = byColor[WHITE] | byColor[BLACK];
-
-	board[SQ_H8] = board[SQ_A8] = B_ROOK;
-	board[SQ_G8] = board[SQ_B8] = B_KNIGHT;
-	board[SQ_F8] = board[SQ_C8] = B_BISHOP;
-	board[SQ_D8] = B_QUEEN;
-	board[SQ_E8] = B_KING;
-
-	board[SQ_A1] = board[SQ_H1] = W_ROOK;
-	board[SQ_B1] = board[SQ_G1] = W_KNIGHT;
-	board[SQ_C1] = board[SQ_F1] = W_BISHOP;
-	board[SQ_D1] = W_QUEEN;
-	board[SQ_E1] = W_KING;
-
-	for (File f = FILE_A; f <= FILE_H; ++f) 
-
-		board[make_square(f, RANK_2)] = W_PAWN;
-
-	for (File f = FILE_A; f <= FILE_H; ++f)
-		
-		board[make_square(f, RANK_7)] = B_PAWN;
-
-	for (File f = FILE_A; f <= FILE_H; ++f) {
-
-		for (Rank r = RANK_3; r <= RANK_6; ++r) 
-
-			board[make_square(f, r)] = NO_PIECE;
-
+		ep_zobrist[sq] = rng();
 	}
 
-	gamePly = 0;
-	st->ep_sq = SQ_NONE;
-	fiftyMoveCount = 0;
-	st->cr = ANY_CASTLING;
+	ep_zobrist[SQ_NONE] = rng();
 
-	pos_is_ok();
+	for (size_t i = 0; i < CASTLE_RIGHT_NB; ++i)
+		castling_zobrist[i] = rng();
 
+	side_zobrist = rng(); // random
 }
 
 void Position::set(std::string_view fen) {
@@ -125,16 +107,27 @@ void Position::set(std::string_view fen) {
 		char temp;
 		switch (temp = fen[idx++]) {
 			case 'p':
+				[[fallthrough]];
 			case 'P':
+				[[fallthrough]];
 			case 'n':
+				[[fallthrough]];
 			case 'N':
+				[[fallthrough]];
 			case 'b':
+				[[fallthrough]];
 			case 'B':
+				[[fallthrough]];
 			case 'r':
+				[[fallthrough]];
 			case 'R':
+				[[fallthrough]];
 			case 'q':
+				[[fallthrough]];
 			case 'Q':
+				[[fallthrough]];
 			case 'k':
+				[[fallthrough]];
 			case 'K':
 				board[sq++] = piece_conversion.at(temp);
 				break;
@@ -148,8 +141,24 @@ void Position::set(std::string_view fen) {
 				break;
 		}
 	}
+		
+	key = 0;	
+	for (Square sq = SQ_A1; sq <= SQ_H8; ++sq) {
+
+		Piece pc = piece_on(sq);
+
+		if (pc != NO_PIECE)
+			key ^= piece_zobrist[sq][pc];
+
+	}
+
 
 	sideToMove = fen[idx++] == 'w' ? WHITE : BLACK;	
+
+	if (sideToMove == BLACK)
+		key ^= side_zobrist;
+
+
 	++idx;
 
 	char t;
@@ -172,6 +181,8 @@ void Position::set(std::string_view fen) {
 				break;
 		}
 	}
+
+	key ^= castling_zobrist[st->cr];
 	
 	if ((t = fen[idx++]) != '-') {
 		char file = t;
@@ -179,6 +190,8 @@ void Position::set(std::string_view fen) {
 
 		st->ep_sq = Square(((rank - '1') * 8) + (file - 'a'));
 	} else { st->ep_sq = SQ_NONE; }
+
+	key ^= ep_zobrist[st->ep_sq];
 
 	++idx;
 
@@ -312,7 +325,7 @@ std::string Position::fen() const {
 		if (st->cr & BLACK_OOO)
 			s += "q";
 	}
-	s += " " + printSquare[st->ep_sq];
+	s += " " + std::string(printSquare[st->ep_sq]);
 	s += " " + std::to_string(fiftyMoveCount);
 	s += " " + std::to_string((gamePly / 2) + 1);
 
@@ -321,13 +334,13 @@ std::string Position::fen() const {
 
 std::string Position::dress_move(Move m) const {
 
-	return printSquare[m.from_sq()] + printSquare[m.to_sq()];
+	return std::string(printSquare[m.from_sq()]) + std::string(printSquare[m.to_sq()]);
 
 	std::string res;
 	if (type_of(piece_on(m.from_sq())) != PAWN)
 		res += PieceToChar[piece_on(m.from_sq())];
 
-	res += printSquare[m.to_sq()];
+	res += std::string(printSquare[m.to_sq()]);
 
 	return res;
 }
@@ -490,17 +503,13 @@ void Position::put_piece(Piece pc, Square s) {
 	byType[type_of(pc)] ^= s;
 	byType[ALL_PIECES] ^= s;
 
+	key ^= piece_zobrist[s][pc];
+
 	return;
 
 }
 
 void Position::move_piece(Square to, Square from) {
-
-	if (!empty(to)) {
-		std::cout << "assertion failed\n";
-		std::cout << *this;
-		std::cout << printSquare[from] << printSquare[to] << std::endl;
-	}
 
 	assert(empty(to));
 
@@ -514,6 +523,10 @@ void Position::move_piece(Square to, Square from) {
 	board[from] = NO_PIECE;
 	board[to] = pc;
 
+	// update zobrist key
+	key ^= piece_zobrist[from][pc];
+	key ^= piece_zobrist[to][pc];
+
 	return;
 }
 
@@ -526,6 +539,8 @@ Piece Position::remove_piece(Square s) {
 	byColor[color_of(pc)] ^= s;
 	byType[type_of(pc)] ^= s;
 	byType[ALL_PIECES] ^= s;
+
+	key ^= piece_zobrist[s][pc];
 	
 	return pc;
 }
@@ -541,18 +556,30 @@ void Position::do_move(Move *m) {
 	else 
 		st->capturedPiece = NO_PIECE;
 
+	// undo old ep zobrist
+	key ^= ep_zobrist[st->ep_sq];
+
 	++st;
 
 	st->cr = (st - 1)->cr;
+
+	// undo old castling zobrist
+	key ^= castling_zobrist[st->cr];
 
 	// update castling rights
 	st->cr &= right_update[to];
 	st->cr &= right_update[from];
 
+	// apply new castling zobrist
+	key ^= castling_zobrist[st->cr];
+
 	if (type_of(piece_on(from)) == PAWN && distance<Square>(to, from) == 2) 
 		st->ep_sq = to - push_dir(sideToMove);
 	else
 		st->ep_sq = SQ_NONE;
+
+	// apply new ep zobrist
+	key ^= ep_zobrist[st->ep_sq];
 
 
 	if (m->type() == PROMOTION) {
@@ -585,14 +612,25 @@ void Position::do_move(Move *m) {
 
 	++gamePly;
 	sideToMove = ~sideToMove;
+	key ^= side_zobrist;
 
 }
 
 void Position::undo_move(Move *m) {
+	
+	// undo ep & castling zobrist
+	key ^= ep_zobrist[st->ep_sq];
+	key ^= castling_zobrist[st->cr];
 
 	--st;
 	--gamePly;
 	sideToMove = ~sideToMove;
+
+	// apply new ep & castling zobrist
+	key ^= ep_zobrist[st->ep_sq];
+	key ^= castling_zobrist[st->cr];
+
+	key ^= side_zobrist;
 
 	// backwards bc we're undoing move 
 	Square from = m->to_sq();
