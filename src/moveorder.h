@@ -1,4 +1,6 @@
-#pragma once
+#ifndef MOVEORDER_H_INCLUDED
+#define MOVEORDER_H_INCLUDED
+
 
 #include <mutex>
 
@@ -51,4 +53,5 @@ using PerftMoves = MoveQueue<MoveList<LEGAL>>;
 using RootMoves = MoveQueue<MoveOrder<LEGAL>>;
 
 } // namespace Engine
-		
+	
+#endif

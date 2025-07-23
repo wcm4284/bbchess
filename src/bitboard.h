@@ -1,4 +1,3 @@
-#pragma once
 #ifndef BITBOARD_H_INCLUDED
 #define BITBOARD_H_INCLUDED
 

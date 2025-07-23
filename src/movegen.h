@@ -1,4 +1,3 @@
-#pragma once
 #ifndef MOVEGEN_H_INCLUDED
 #define MOVEGEN_H_INCLUDED
 

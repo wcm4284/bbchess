@@ -1,4 +1,6 @@
-#pragma once
+#ifndef SEARCH_H_INCLUDED
+#define SEARCH_H_INCLUDED
+
 
 #include "position.h"
 #include "types.h"
@@ -73,3 +75,5 @@ class Worker {
 } // namespace Search
 
 } // namespace Engine
+
+#endif

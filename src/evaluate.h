@@ -1,4 +1,6 @@
-#pragma once
+#ifndef EVALUATE_H_INCLUDED
+#define EVALUATE_H_INCLUDED
+
 
 #include "types.h"
 #include "position.h"
@@ -14,3 +16,5 @@ std::string pretty(const Position&);
 }
 
 } // namespace Engine
+
+#endif
