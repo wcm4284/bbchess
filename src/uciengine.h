@@ -1,4 +1,5 @@
-#pragma once
+#ifndef UCI_H_INCLUDED
+#define UCI_H_INCLUDED
 
 #include <sstream>
 
@@ -28,3 +29,5 @@ class UCIEngine {
 };
 
 } // namespace Engine
+
+#endif
