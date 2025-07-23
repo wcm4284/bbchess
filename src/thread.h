@@ -16,8 +16,9 @@ class Thread {
 
 	
 	public:
+	
 
-		Thread();
+		Thread(Search::SharedState&); 
 		~Thread();
 
 		void start_searching();
@@ -45,7 +46,7 @@ class ThreadPool {
 
 	public:
 
-		ThreadPool(size_t); 
+		ThreadPool(Search::SharedState, size_t); 
 	
 
 		void clear();

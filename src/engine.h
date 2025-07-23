@@ -1,7 +1,10 @@
-#pragma once
+#ifndef ENGINE_H_INCLUDED
+#define ENGINE_H_INCLUDED
+
 
 #include "thread.h"
 #include "position.h"
+#include "tt.h"
 
 namespace Engine {
 
@@ -22,7 +25,9 @@ class Engine {
 
 
 	private:
+	
 		
+		TranspositionTable tt;
 		ThreadPool threads;
 		Position pos;
 		
@@ -30,3 +35,5 @@ class Engine {
 };
 
 }
+
+#endif

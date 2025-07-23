@@ -1,8 +1,19 @@
 #include "engine.h"
 
+#include <string>
+
 namespace Engine {
 
-Engine::Engine(int nThreads) : threads(nThreads), pos() { pos.init(); }
+namespace {
+
+std::string_view startFEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+
+}
+
+Engine::Engine(int nThreads) : threads( {tt} , nThreads), pos() { 
+	pos.set(startFEN);
+	tt.resize(5); 
+}
 
 void Engine::go() { 
 	threads.start_searching();

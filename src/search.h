@@ -13,11 +13,21 @@
 namespace Engine {
 
 class ThreadPool;
+class TranspositionTable;
 
 template <typename T>
 class MoveQueue;
 
 namespace Search {
+
+
+struct SharedState {
+
+	SharedState(TranspositionTable& table) : tt(table) {}
+
+	TranspositionTable& tt;
+
+};
 
 struct SearchLimits {
 
@@ -46,6 +56,7 @@ class Worker {
 	public:
 
 		Worker() = default;
+		Worker(SharedState& ss) : tt(ss.tt) {}
 
 		void start_searching();
 
@@ -61,10 +72,13 @@ class Worker {
 	
 
 		uint64_t nodes;
+		
 
 		SearchLimits limits;
 		Position	 rootPos;
 		Move pv_table[MAX_PLY][MAX_PLY];
+
+		TranspositionTable& tt;
 
 
 	friend class Engine::ThreadPool;

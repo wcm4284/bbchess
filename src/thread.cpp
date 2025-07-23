@@ -7,9 +7,9 @@
 
 namespace Engine {
 
-Thread::Thread() : th(&Thread::idle, this) {
+Thread::Thread(Search::SharedState& ss) : th(&Thread::idle, this) {
 
-	this->worker = std::make_unique<Search::Worker>();
+	this->worker = std::make_unique<Search::Worker>(ss);
 }
 
 Thread::~Thread() {
@@ -56,12 +56,12 @@ void Thread::idle() {
 }
 
 
-ThreadPool::ThreadPool(size_t requested) {
+ThreadPool::ThreadPool(Search::SharedState ss, size_t requested) {
 
 	assert(requested > 0);
 	
 	while (threads.size() < requested) 
-		threads.emplace_back(std::make_unique<Thread>());
+		threads.emplace_back(std::make_unique<Thread>(ss));
 
 	assert(threads.size() == requested); 
 
