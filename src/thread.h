@@ -1,4 +1,6 @@
-#pragma once
+#ifndef THREAD_H_INCLUDED
+#define THREAD_H_INCLUDED
+
 
 #include <thread>
 #include <mutex>
@@ -72,3 +74,5 @@ class ThreadPool {
 };
 
 } // namespace Engine
+
+#endif
