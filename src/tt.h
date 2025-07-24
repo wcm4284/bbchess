@@ -35,6 +35,8 @@ class TTEntry {
 			return TTData(move, Depth(depth8), Value(value16), Value(eval16), Bound(0), true);
 		}
 
+        bool is_occupied() const { return bool(depth8); }
+
 //		void save(Key key, 
 
 	uint16_t key16;
@@ -43,9 +45,9 @@ class TTEntry {
 
 	uint8_t  depth8;
 	// gen8 is unique in that it holds 3 pieces of info:
-	// 1. occupied: (1 bit)
-	// 2. bound: EXACT, LOWER, UPPER (2 bits)
-	// 3. generation (5 bits)
+	// 1. generation (5 bits)
+	// 2. pv: (1 bit)
+	// 3. bound: EXACT, LOWER, UPPER (2 bits)
 	uint8_t  gen8; 
 	int16_t  eval16;
 	Move	 move;
