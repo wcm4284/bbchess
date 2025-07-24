@@ -13,7 +13,6 @@ namespace Engine {
 using Key = uint64_t;
 
 class Position {
-
 	public:
 		Position() = default;
 		Position(const Position&) = delete;
@@ -93,7 +92,6 @@ class Position {
 		int gamePly;
 		Key key;
 		Info history[MAX_PLY << 1], *st;
-
 };
 
 std::ostream& operator<<(std::ostream& os, const Position& pos);

@@ -11,8 +11,6 @@ namespace Engine {
 constexpr std::string_view PieceToChar(" PNBRQK  pnbrqk");
 
 namespace {
-
-
 	const CastlingRights right_update[64] = {
 		~WHITE_OOO, ANY_CASTLING, ANY_CASTLING, ANY_CASTLING, ~WHITE_CASTLING, ANY_CASTLING, ANY_CASTLING, ~WHITE_OO,
 		ANY_CASTLING, ANY_CASTLING, ANY_CASTLING, ANY_CASTLING, ANY_CASTLING, ANY_CASTLING, ANY_CASTLING, ANY_CASTLING,
@@ -31,7 +29,6 @@ namespace {
 } // namespace 
 	
 std::ostream& operator<<(std::ostream& os, const Position& pos) {
-
 	os << "+---+---+---+---+---+---+---+---+\n";
 
 	for (Rank r = RANK_8; r >= RANK_1; --r) {
@@ -40,7 +37,6 @@ std::ostream& operator<<(std::ostream& os, const Position& pos) {
 			os << "| " << PieceToChar[pos.piece_on(make_square(f, r))] << " ";
 
 		os << "| " << std::to_string(r + 1) << "\n+---+---+---+---+---+---+---+---+\n";
-
 	}
 
 	os << "  a   b   c   d   e   f   g   h\n\n";
@@ -49,7 +45,6 @@ std::ostream& operator<<(std::ostream& os, const Position& pos) {
 	os << "Hash Key: " << pos.hash() << "\n";
 
 	return os << ((pos.to_play() == WHITE) ? "White" : "Black") << " to move\n";
-
 }
 
 // this static function is called at the start of main()
@@ -57,18 +52,14 @@ std::ostream& operator<<(std::ostream& os, const Position& pos) {
 // will be used to hash the position for the transposition
 // table
 void Position::init() {
-
 	std::mt19937_64 rng(0xae7f5489032548fe);
 	
 	for (Square sq = SQ_A1; sq <= SQ_H8; ++sq) {
-
 		for (Piece pc : {W_PAWN, W_KNIGHT, W_BISHOP, W_ROOK, W_QUEEN, W_KING,
 						 B_PAWN, B_KNIGHT, B_BISHOP, B_ROOK, B_QUEEN, B_KING}) {
-			
+		
 			piece_zobrist[sq][pc] = rng();
-
 		}
-
 		ep_zobrist[sq] = rng();
 	}
 
@@ -77,11 +68,10 @@ void Position::init() {
 	for (size_t i = 0; i < CASTLE_RIGHT_NB; ++i)
 		castling_zobrist[i] = rng();
 
-	side_zobrist = rng(); // random
+	side_zobrist = rng();
 }
 
 void Position::set(std::string_view fen) {
-
 	st = history;
 	
 	const std::unordered_map<char, Piece> piece_conversion = {
@@ -102,8 +92,6 @@ void Position::set(std::string_view fen) {
 	int boardIdx = 56;
 	size_t fenIdx = 0;
 	while ( boardIdx >= 0 ) {
-		// there is probably a better way to do this,
-		// but this works so whatever
 		char temp;
 		switch (temp = fen[fenIdx++]) {
 			case 'p':
@@ -144,21 +132,14 @@ void Position::set(std::string_view fen) {
 		
 	key = 0;	
 	for (Square sq = SQ_A1; sq <= SQ_H8; ++sq) {
-
 		Piece pc = piece_on(sq);
-
 		if (pc != NO_PIECE)
 			key ^= piece_zobrist[sq][pc];
-
 	}
 
-
 	sideToMove = fen[fenIdx++] == 'w' ? WHITE : BLACK;	
-
 	if (sideToMove == BLACK)
 		key ^= side_zobrist;
-
-
 	++fenIdx;
 
 	char t;
@@ -187,19 +168,14 @@ void Position::set(std::string_view fen) {
 	if ((t = fen[fenIdx++]) != '-') {
 		char file = t;
 		char rank = fen[fenIdx++];
-
 		st->ep_sq = Square(((rank - '1') * 8) + (file - 'a'));
 	} else { st->ep_sq = SQ_NONE; }
-
-	key ^= ep_zobrist[st->ep_sq];
-
 	++fenIdx;
+	key ^= ep_zobrist[st->ep_sq];
 
 	size_t start = fenIdx;
 	while ((t = fen[fenIdx++]) != ' ') {}
 	fiftyMoveCount = std::stoi(std::string(fen.substr(start, fenIdx)));
-
-
 
 	std::string fm = std::string(fen.substr(fenIdx));
 	int fullMove = std::stoi(fm);
@@ -208,8 +184,6 @@ void Position::set(std::string_view fen) {
 	byColor[WHITE] = byColor[BLACK] = byType[PAWN] = byType[KNIGHT] = byType[BISHOP] =
 	byType[ROOK] = byType[QUEEN] = byType[KING] = byType[ALL_PIECES] = 0;
 
-
-	// gotta fix up byColor and byType now!!
 	for (Square sq = SQ_A1; sq <= SQ_H8; ++sq) {
 		Piece curr = board[sq];
 		switch (curr) {
@@ -264,7 +238,6 @@ void Position::set(std::string_view fen) {
 			default:
 				break;
 		}
-		
 	}
 	byType[ALL_PIECES] = byColor[WHITE] | byColor[BLACK];
 	pos_is_ok();
@@ -274,34 +247,22 @@ void Position::set(std::string_view fen) {
 }
 
 std::string Position::fen() const {
-
 	std::string s;
 
 	for (Rank r = RANK_8; r >= RANK_1; --r) {
-
 		int spaces = 0;
-
 		for (File f = FILE_A; f <= FILE_H; ++f) {
-
 			Piece p = piece_on(make_square(f, r));
 
 			if (p == NO_PIECE) {
-
 				++spaces;
-
 			} else {
-
 				if ( spaces ) {
-
 					s      += std::to_string(spaces);
 					spaces = 0;
-
 				}
-
 				s += PieceToChar[p];
-
 			}
-
 		}
 
 		if (spaces)
@@ -309,8 +270,8 @@ std::string Position::fen() const {
 		
 		if (r != RANK_1)
 			s += "/";
-
 	}
+
 	s += (sideToMove == WHITE) ? " w" : " b";
 	s += " ";
 	if (!st->cr) {
@@ -333,16 +294,7 @@ std::string Position::fen() const {
 }
 
 std::string Position::dress_move(Move m) const {
-
 	return std::string(printSquare[m.from_sq()]) + std::string(printSquare[m.to_sq()]);
-
-	std::string res;
-	if (type_of(piece_on(m.from_sq())) != PAWN)
-		res += PieceToChar[piece_on(m.from_sq())];
-
-	res += std::string(printSquare[m.to_sq()]);
-
-	return res;
 }
 
 char Position::piece_str(Square s) const {
@@ -353,7 +305,6 @@ Bitboard Position::attacked_squares(Color us) const {
 	Bitboard attacked(0);
 
 	Bitboard pawns = pieces(us, PAWN);
-
 	while (pawns) {
 		attacked |= attacks_bb<PAWN>(pop_lsb(pawns), us);}
 	
@@ -363,12 +314,10 @@ Bitboard Position::attacked_squares(Color us) const {
 		while (stuffs) {
 			attacked |= attacks_bb(pop_lsb(stuffs), occ, pt);}}
 
-
 	return attacked;
 }
 
 bool Position::can_castle(CastlingRights cr) const {
-
 	if (!(cr & st->cr)) 
 		return false;
 
@@ -396,47 +345,25 @@ bool Position::can_castle(CastlingRights cr) const {
 			assert(false);
 			return false;
 	}
-	
 }
 
 Bitboard Position::pinned(Color us, PieceType pinnedTo) const {
-
 	Bitboard pinned(0);
 	Color them          = ~us;
 	Bitboard pinnedToBB = pieces(us, pinnedTo);
 	
 	while (pinnedToBB) {
-
 		// I call this king because it is the important square here, 
 		// not necessarily because it is referring to the king, although
 		// it can refer to the king
 		Square king = pop_lsb(pinnedToBB);
-		
 		for (PieceType pt : { BISHOP, ROOK, QUEEN }) {
-			
 			Bitboard pinners = pieces(them, pt);
-
 			while (pinners) {
-				
-				// to figure out if a piece is pinned, we draw a line from where we are to the king
-				// if it hits the king, we need to find out if there are any pieces between us
-				// and the king. if so, add to pinned
-
-				// I thought about doing it without one of the two bitboards, but I decided that:
-				// 
-				// I need line, because PseudoAttacks could hit the king, and in the next step
-				// accidentally decide a piece is pinned. Maybe this could be fixed with a tweak
-				// to the next step but that is a brain exercise for another day
-				// TODO: read above
-
-				// I need PseudoAttacks because line could generate a hit, but be a false positive
-				// in the case that a rook is on the same diagonal as the king, or vice versa.
-				// can't use attack_bb because that would stop at the pinned piece
 				Square pinner      = pop_lsb(pinners);
 				Bitboard line      = line_bb(pinner, king);
 
 				if (line &= PseudoAttacks[pt][pinner]) {
-
 					if (!more_than_one(line &= pieces()) && line) {
 						pinned |= pop_lsb(line);}}
 			}
@@ -452,49 +379,35 @@ Bitboard Position::pinned(Color us, PieceType pinnedTo) const {
 // however, until I test and confirm, we will
 // act as though that is not the case
 Bitboard Position::checkers() const {
-	
 	Bitboard checkers(0);
 	Bitboard occ = pieces();
 
-
 	for (Color color : { WHITE, BLACK }) {
-		
 		Square ksq = king_on(color);
 		
-		if (!is_ok(ksq)) {
-			std::cout << *this << std::endl;}
 		assert(is_ok(ksq));
 		Color them = ~color;
 
 		for (PieceType pt : { BISHOP, ROOK, QUEEN }) {
-			
 			Bitboard attacks = attacks_bb(ksq, occ, pt);
-			
-			// I think this is okay, it shouldn't be possible
-			// for two rooks/bishops/queens to be checking
-			// the king at the same time. TODO: confirm
+			// TODO there's a bug here involving two queens checking the king at the same time
 			if (attacks &= pieces(them, pt)) {
 				checkers |= attacks;}
-
 		}
 
-		// knight
 		Bitboard knights = pieces(them, KNIGHT);
 		if (knights &= attacks_bb<KNIGHT>(ksq)) {
 			checkers |= knights;}
 
-		// pawn
 		Bitboard pawns = pieces(them, PAWN);
 		if (pawns &= attacks_bb<PAWN>(ksq, color)) {
 			checkers |= pawns;}
 	}
 	
 	return checkers;
-
 }
 
 void Position::put_piece(Piece pc, Square s) {
-
 	assert(empty(s));
 
 	board[s] = pc;
@@ -506,16 +419,14 @@ void Position::put_piece(Piece pc, Square s) {
 	key ^= piece_zobrist[s][pc];
 
 	return;
-
 }
 
 void Position::move_piece(Square to, Square from) {
-
 	assert(empty(to));
 
 	Piece pc = board[from];
 	Bitboard bb = square_bb(to, from);
-
+	
 	byColor[color_of(pc)] ^= bb;
 	byType[type_of(pc)] ^= bb;
 	byType[ALL_PIECES] ^= bb;
@@ -523,7 +434,6 @@ void Position::move_piece(Square to, Square from) {
 	board[from] = NO_PIECE;
 	board[to] = pc;
 
-	// update zobrist key
 	key ^= piece_zobrist[from][pc];
 	key ^= piece_zobrist[to][pc];
 
@@ -556,21 +466,14 @@ void Position::do_move(Move *m) {
 	else 
 		st->capturedPiece = NO_PIECE;
 
-	// undo old ep zobrist
 	key ^= ep_zobrist[st->ep_sq];
 
 	++st;
-
 	st->cr = (st - 1)->cr;
 
-	// undo old castling zobrist
 	key ^= castling_zobrist[st->cr];
-
-	// update castling rights
 	st->cr &= right_update[to];
 	st->cr &= right_update[from];
-
-	// apply new castling zobrist
 	key ^= castling_zobrist[st->cr];
 
 	if (type_of(piece_on(from)) == PAWN && distance<Square>(to, from) == 2) 
@@ -578,9 +481,7 @@ void Position::do_move(Move *m) {
 	else
 		st->ep_sq = SQ_NONE;
 
-	// apply new ep zobrist
 	key ^= ep_zobrist[st->ep_sq];
-
 
 	if (m->type() == PROMOTION) {
 		remove_piece(from);
@@ -589,36 +490,26 @@ void Position::do_move(Move *m) {
 		move_piece(to, from);
 
 	if (m->type() == CASTLING) {
-	
 		if (to == SQ_C1) 
 			move_piece(SQ_D1, SQ_A1);	
-		
 		else if (to == SQ_G1)
 			move_piece(SQ_F1, SQ_H1);
-
 		else if (to == SQ_C8)
 			move_piece(SQ_D8, SQ_A8);
-
 		else
 			move_piece(SQ_F8, SQ_H8);
-
 	} else if (m->type() == ENPASSANT) {
-
 		Square capsq = to - push_dir(sideToMove);
 		assert(type_of(piece_on(capsq)) == PAWN);
 		remove_piece(capsq);
-
 	}
 
 	++gamePly;
 	sideToMove = ~sideToMove;
 	key ^= side_zobrist;
-
 }
 
 void Position::undo_move(Move *m) {
-	
-	// undo ep & castling zobrist
 	key ^= ep_zobrist[st->ep_sq];
 	key ^= castling_zobrist[st->cr];
 
@@ -626,16 +517,13 @@ void Position::undo_move(Move *m) {
 	--gamePly;
 	sideToMove = ~sideToMove;
 
-	// apply new ep & castling zobrist
 	key ^= ep_zobrist[st->ep_sq];
 	key ^= castling_zobrist[st->cr];
-
 	key ^= side_zobrist;
 
 	// backwards bc we're undoing move 
 	Square from = m->to_sq();
 	Square to = m->from_sq();
-
 
 	if (m->type() == PROMOTION) {
 		remove_piece(from);
@@ -644,52 +532,35 @@ void Position::undo_move(Move *m) {
 		move_piece(to, from);
 	
 	Piece cap;
-		
 	if (m->type() == ENPASSANT) {
 		put_piece(make_piece(PAWN, ~sideToMove), from - push_dir(sideToMove));} 
 	else if ((cap = st->capturedPiece) != NO_PIECE) 
 		put_piece(cap, from);
 
-
-
-	else if (m->type() == CASTLING) {
-		
+	if (m->type() == CASTLING) {
 		if (from == SQ_G1) 
 			move_piece(SQ_H1, SQ_F1);
-
 		else if ( from == SQ_C1 ) 
 			move_piece(SQ_A1, SQ_D1);
-
 		else if ( from == SQ_G8 ) 
 			move_piece(SQ_H8, SQ_F8);
-
 		else
 			move_piece(SQ_A8, SQ_D8);
-		
 	}
-
-
 }
 
 bool Position::legal_move(Move* m) const {
-
-	// what we need to check:
-	// en passant moves
-	// pinned moves
 	Color us = sideToMove;
 	Square from = m->from_sq();
 	Square to = m->to_sq();
 	Square ksq = king_on(us);
 
-	
 	if (from == ksq) 
 		return !(to & attacked_squares(~us));
 
 	// start with en pass
 	if (m->type() == ENPASSANT) {
-	
 		Square capsq = to - push_dir(us);
-
 		Bitboard occ = (pieces() ^ from ^ capsq) | to;
 
 		return (!(attacks_bb<ROOK>(ksq, occ) & pieces(~us, ROOK, QUEEN)) && 
@@ -697,23 +568,19 @@ bool Position::legal_move(Move* m) const {
 	}
 
 	Bitboard pin = pinned(us);
-
 	assert(pin & from);
 
 	return !(pin & from) || (line_bb(to, ksq) & from) || (line_bb(from, ksq) & to); 
 }
 
 void Position::pos_is_ok() const {
-
 	for (Square sq = SQ_A1; sq <= SQ_H8; ++sq) {
-
 		Piece p = piece_on(sq);
 		if (p == NO_PIECE)
 			continue;
 
 		PieceType pt = type_of(p);
 		Color c = color_of(p);
-
 		Bitboard sqbb = square_bb(sq);
 
 		if (!(sqbb & pieces(c)))
