@@ -5,10 +5,11 @@ COMPILER := g++
 
 DEBUG ?= 0
 
-ifeq ($(DEBUG), 1)
-FLAGS := -O0 -g -Wall -Wextra -Wpedantic -std=c++20 -mbmi2
-else
-FLAGS := -O2 -g -Wall -Wextra -Wpedantic -std=c++20 -mbmi2
+CXXFLAGS := -g -Wall -Wcast-qual -Wextra -pedantic -Wnull-dereference -Wshadow \
+			-Wmissing-declarations -std=c++20 -mbmi2
+
+ifeq ($(DEBUG),0)
+	CXXFLAGS += -O2
 endif
 
 
@@ -19,7 +20,7 @@ OBJECTS := $(patsubst %.cpp,$B/%.o,$(FILES))
 
 $B/main_engine: $(OBJECTS)
 	@echo "Linking $@"
-	@$(COMPILER) -o $@ $(OBJECTS) $(FLAGS)
+	@$(COMPILER) -o $@ $(OBJECTS) $(CXXFLAGS)
 	@ln -sf $@ engine
 
 
@@ -27,7 +28,7 @@ $B/main_engine: $(OBJECTS)
 $B/%.o : %.cpp Makefile
 	@echo "compiling $<"
 	@mkdir -p $(B)
-	$(COMPILER) -I. -c -MD -MF $B/$*.d -o $B/$*.o $< $(FLAGS) -DUSE_PEXT
+	$(COMPILER) -I. -c -MD -MF $B/$*.d -o $B/$*.o $< $(CXXFLAGS) -DUSE_PEXT
 
 all: $B/main_engine
 

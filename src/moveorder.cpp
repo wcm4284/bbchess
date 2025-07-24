@@ -6,6 +6,7 @@
 
 namespace Engine {
 
+namespace {
 void rate_moves(const Position& p, ExtMove *f, ExtMove *l) {
 
 	while ( f != l ) {
@@ -15,6 +16,7 @@ void rate_moves(const Position& p, ExtMove *f, ExtMove *l) {
 
 	return;
 }
+} // namespace
 	
 void sort(const Position& p, ExtMove *f, ExtMove *l) {
 	rate_moves(p, f, l);
@@ -22,4 +24,4 @@ void sort(const Position& p, ExtMove *f, ExtMove *l) {
 
 	return;
 }
-} // namespace
+} // namespace Engine

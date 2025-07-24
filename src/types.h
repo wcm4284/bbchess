@@ -278,7 +278,7 @@ class Move {
 
 	public:
 		constexpr Move() : data(0) {}
-		constexpr explicit Move(uint16_t data) : data(data) {}
+		constexpr explicit Move(uint16_t raw) : data(raw) {}
 
 		constexpr Move(Square to, Square from) : data(from | (to << 6)) {}
 

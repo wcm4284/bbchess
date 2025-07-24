@@ -5,6 +5,20 @@
 
 namespace Engine {
 
+namespace {
+
+ExtMove* generate_promotions(Square to, Square from, ExtMove* list) {
+
+	
+	for (PieceType pt : { KNIGHT, BISHOP, ROOK, QUEEN }) 
+		*list++ = Move::make<PROMOTION>(to, from, pt);
+
+	return list;
+}
+
+} // namespace
+
+
 template <Color us, PieceType pt>
 ExtMove* generate_moves(Bitboard target, const Position& pos, ExtMove* list) {
 
@@ -31,14 +45,6 @@ ExtMove* generate_moves(Bitboard target, const Position& pos, ExtMove* list) {
 	return list;
 }
 
-ExtMove* generate_promotions(Square to, Square from, ExtMove* list) {
-
-	
-	for (PieceType pt : { KNIGHT, BISHOP, ROOK, QUEEN }) 
-		*list++ = Move::make<PROMOTION>(to, from, pt);
-
-	return list;
-}
 
 template <Color us, GenType type>
 ExtMove* generate_pawn_moves(Bitboard target, const Position& pos, ExtMove* list) {

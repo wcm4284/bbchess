@@ -99,13 +99,13 @@ void Position::set(std::string_view fen) {
 		{'K', W_KING}
 	};
 	
-	int sq = 56;
-	int idx = 0;
-	while ( sq >= 0 ) {
+	int boardIdx = 56;
+	size_t fenIdx = 0;
+	while ( boardIdx >= 0 ) {
 		// there is probably a better way to do this,
 		// but this works so whatever
 		char temp;
-		switch (temp = fen[idx++]) {
+		switch (temp = fen[fenIdx++]) {
 			case 'p':
 				[[fallthrough]];
 			case 'P':
@@ -129,15 +129,15 @@ void Position::set(std::string_view fen) {
 			case 'k':
 				[[fallthrough]];
 			case 'K':
-				board[sq++] = piece_conversion.at(temp);
+				board[boardIdx++] = piece_conversion.at(temp);
 				break;
 			case ' ':
 			case '/':
-				sq -= 16;
+				boardIdx -= 16;
 				break;
 			default:
 				for (int i = 0; i < temp - '0'; ++i) {
-					board[sq++] = NO_PIECE;}
+					board[boardIdx++] = NO_PIECE;}
 				break;
 		}
 	}
@@ -153,17 +153,17 @@ void Position::set(std::string_view fen) {
 	}
 
 
-	sideToMove = fen[idx++] == 'w' ? WHITE : BLACK;	
+	sideToMove = fen[fenIdx++] == 'w' ? WHITE : BLACK;	
 
 	if (sideToMove == BLACK)
 		key ^= side_zobrist;
 
 
-	++idx;
+	++fenIdx;
 
 	char t;
 	st->cr = CastlingRights(0);
-	while ((t = fen[idx++]) != ' ') {
+	while ((t = fen[fenIdx++]) != ' ') {
 		switch ( t ) {
 			case 'K':
 				st->cr |= WHITE_OO;
@@ -184,24 +184,24 @@ void Position::set(std::string_view fen) {
 
 	key ^= castling_zobrist[st->cr];
 	
-	if ((t = fen[idx++]) != '-') {
+	if ((t = fen[fenIdx++]) != '-') {
 		char file = t;
-		char rank = fen[idx++];
+		char rank = fen[fenIdx++];
 
 		st->ep_sq = Square(((rank - '1') * 8) + (file - 'a'));
 	} else { st->ep_sq = SQ_NONE; }
 
 	key ^= ep_zobrist[st->ep_sq];
 
-	++idx;
+	++fenIdx;
 
-	int start = idx;
-	while ((t = fen[idx++]) != ' ') {}
-	fiftyMoveCount = std::stoi(std::string(fen.substr(start, idx)));
+	size_t start = fenIdx;
+	while ((t = fen[fenIdx++]) != ' ') {}
+	fiftyMoveCount = std::stoi(std::string(fen.substr(start, fenIdx)));
 
 
 
-	std::string fm = std::string(fen.substr(idx));
+	std::string fm = std::string(fen.substr(fenIdx));
 	int fullMove = std::stoi(fm);
 	gamePly = (fullMove - 1) * 2 + (sideToMove == BLACK ? 1 : 0);
 
