@@ -31,13 +31,17 @@ struct TTData {
 class TTEntry {
 
 	public:
-		TTData read() { // TODO: fix bound and pv
-			return TTData(move, Depth(depth8), Value(value16), Value(eval16), Bound(0), true);
+		TTData read() {
+			return TTData(
+                         move, 
+                         Depth(depth8), 
+                         Value(value16), 
+                         Value(eval16), 
+                         Bound(gen8 & 0b11),
+                         bool(gen8 & 0b100) );
 		}
-
-        bool is_occupied() const { return bool(depth8); }
-
-//		void save(Key key, 
+        void save(Key key, Depth depth, Value ev, Move m, Value v, Bound b, uint8_t gen); 
+        bool occupied() const { return bool(depth8); }
 
 	uint16_t key16;
 	
@@ -59,29 +63,34 @@ struct TTWriter {
 	TTWriter(TTEntry* e) : entry(e) {}
 	
 	// i'm unsure about gen TODO
-	void write(Key key, Depth depth, uint8_t gen, Value ev, Move m, Value v);  
+	void write(Key key, Depth depth, Value ev, Move m, Value v, Bound b);  
 	
 	TTEntry* entry;
 };
 
 class TranspositionTable {
-	public:
+   public:
 
 	TranspositionTable() = default;
 	~TranspositionTable();
 
 	void resize(size_t MB);
 	void clear();
+    uint8_t generation() const;
+	TTEntry* find_entry(const Key) const; 
 	std::tuple<bool, TTData, TTWriter> probe(const Key key) const;
 
-	private:
+   private:
 
-	TTEntry* find_entry(const Key) const; 
+    friend struct TTEntry;
 
 	size_t numClusters;
 	Cluster *table = nullptr;
+    uint8_t generation8; 
 
 };
+
+inline uint8_t TranspositionTable::generation() const { return generation8; }
 
 } // namespace Engine
 

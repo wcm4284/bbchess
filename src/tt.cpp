@@ -10,6 +10,20 @@ struct Cluster {
 	TTEntry entries[clusterSize];
 };
 
+void TTEntry::save(Key key, Depth depth, Value ev, Move m, Value v,Bound b, uint8_t generation8) {
+    key16 = uint16_t(key >> 48);
+    depth8 = uint8_t(depth);
+    gen8 = generation8 | b;
+    eval16 = int16_t(ev);
+    value16 = int16_t(v);
+    move = m; 
+
+}
+
+void TTWriter::write(Key key, Depth depth, Value ev, Move m, Value v, Bound b) {
+    entry->save(key, depth, ev, m, v, b, 0); 
+}
+
 TranspositionTable::~TranspositionTable() {
 	delete[] table;
 }
@@ -55,9 +69,9 @@ TranspositionTable::probe(const Key key) const {
 		// we use the most significant bits because the table index uses
 		// the least significant bits, so any entries in the same cluster
 		// likely have the same least significant bits, which would lead to
-		// a lot of collisions
+		// a lot of false positives
 		if (tte[i].key16 == (key >> 48)) {
-			return {true, tte[i].read(), TTWriter(&tte[i])};
+			return {tte[i].occupied(), tte[i].read(), TTWriter(&tte[i])};
 		}
 	}
 
