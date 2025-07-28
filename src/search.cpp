@@ -12,6 +12,17 @@ uint64_t Search::Worker::perft(Position& pos, Depth depth) {
 
 	assert(depth != 1);
 
+    Key posKey = pos.hash();
+    auto [ttHit, ttData, writer] = tt.probe(posKey);
+    PerftWriter ttWriter = std::get<PerftWriter>(writer);
+
+    if (ttHit) {
+        if (ttData.depth == depth) {
+            uint64_t n = (uint64_t(ttData.value) << 32) | ttData.eval;
+            return n;
+        }
+    }
+
 	if (depth == 0)
 		return 1;
 
@@ -27,7 +38,8 @@ uint64_t Search::Worker::perft(Position& pos, Depth depth) {
 		pos.undo_move(&m);
 
 	}
-
+    
+    ttWriter.write(posKey, depth, cnt);
 	return cnt;
 }
 
@@ -111,11 +123,13 @@ Value Search::Worker::search(Position& pos, int alpha, int beta, Depth depth, in
     Value ev = evaluate(pos);
     Key posKey = pos.hash();
 
-    auto [ttHit, ttData, ttWriter] = tt.probe(posKey);
+    auto [ttHit, ttData, writer] = tt.probe(posKey);
+    SearchWriter ttWriter = std::get<SearchWriter>(writer);
+
     if (ttHit) {
         std::cout << "got a hit!" << std::endl;
     } else {
-        ttWriter.write(posKey, depth, ev, Move(), Value(0), BOUND_EXACT);
+        ttWriter.write(posKey, depth, Move(), Value(0), ev, BOUND_EXACT, tt.generation());
     }
     
 	alpha = std::max(mated_in(ply), alpha);

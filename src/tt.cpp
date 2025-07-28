@@ -5,27 +5,42 @@
 
 namespace Engine {
 
-static constexpr size_t clusterSize = 3;
-struct Cluster {
+static constexpr size_t searchClusterSize = 3;
+static constexpr size_t perftClusterSize = 2;
 
-	TTEntry entries[clusterSize];
-    char padding[2];
+union Cluster {
+    
+    PerftEntry prft[perftClusterSize];
+	SearchEntry srch[searchClusterSize];
 };
 
 static_assert(sizeof(Cluster) == 32, "Cluster should be aligned to 64 bytes");
 
-void TTEntry::save(Key key, Depth depth, Value ev, Move m, Value v,Bound b, uint8_t generation8) {
+void PerftEntry::save(Key key, Depth depth, uint64_t cnt) {
+    key48 = key >> 16;
+    depth16 = uint16_t(depth);
+    nodes = cnt;
+}
+
+void PerftWriter::write(Key key, Depth depth, uint64_t cnt) {
+    entry->save(key, depth, cnt);
+}
+
+void SearchEntry::save(Key key, Depth depth, uint16_t raw, Value v, Value ev, Bound b, uint8_t generation8) {
     key16 = uint16_t(key >> 48);
     depth8 = uint8_t(depth);
     gen8 = generation8 | b;
     eval16 = int16_t(ev);
     value16 = int16_t(v);
-    move = m; 
-
+    raw16 = raw; 
 }
 
-void TTWriter::write(Key key, Depth depth, Value ev, Move m, Value v, Bound b) {
-    entry->save(key, depth, ev, m, v, b, 0); 
+void SearchWriter::write(Key key, Depth depth, Move m, Value v, Value ev, Bound b, uint8_t gen) {
+    entry->save(key, depth, m.raw(), v, ev, b, gen); 
+}
+
+TTData TTData::null() {
+    return TTData(Move(0), Depth(0), VALUE_ZERO, VALUE_ZERO, BOUND_NONE, false);
 }
 
 TranspositionTable::~TranspositionTable() {
@@ -65,33 +80,86 @@ void TranspositionTable::clear() {
 	}
 }
 
-TTEntry* TranspositionTable::find_entry(const Key key) const {
-	// Ideally this is the same as key % numClusters.
-	size_t clusterIdx = key & (numClusters - 1);
-	return &table[clusterIdx].entries[0];
+void TranspositionTable::set_probe(ProbeType pb) {
+    
+    if (pb != probeMode) {
+        clear();
+    }
+
+    probeMode = pb;
 }
 
-std::tuple<bool, TTData, TTWriter> 
+SearchEntry* TranspositionTable::find_s_entry(const Key key) const {
+	// Ideally this is the same as key % numClusters.
+    assert(popcnt(numClusters) == 1);
+	size_t clusterIdx = key & (numClusters - 1);
+	return &table[clusterIdx].srch[0];
+}
+
+PerftEntry* TranspositionTable::find_p_entry(const Key key) const {
+    size_t clusterIdx = key & (numClusters - 1);
+    return &table[clusterIdx].prft[0];
+}
+
+std::tuple<bool, TTData, PerftWriter> 
+TranspositionTable::probe_perft(const Key key) const {
+
+    PerftEntry *pe = find_p_entry(key);
+    for (size_t i = 0; i < perftClusterSize; ++i) {
+        if (pe[i].key48 == (key >> 16)) {
+            return {pe[i].occupied(), pe[i].read(), PerftWriter(&pe[i])};
+        }
+    }
+
+    PerftEntry *replace = pe;
+    for (size_t i = 1; i < perftClusterSize; ++i) {
+        if (!pe[i].occupied()) {
+            replace = &pe[i];
+            break;
+        }
+
+        if (replace->depth16 < pe[i].depth16) {
+            replace = &pe[i];
+        }
+    }
+
+    return {false, TTData::null(), PerftWriter(replace)};
+}
+
+std::tuple<bool, TTData, SearchWriter> 
+TranspositionTable::probe_search(const Key key) const {
+
+    SearchEntry *se = find_s_entry(key);
+    for (size_t i = 0; i < searchClusterSize; ++i) {
+        // we use the most significant bits because the table index uses
+        // the least significant bits, so any entries in the same cluster
+        // likely have the same least significant bits, which would lead to
+        // a lot of false positives
+        if (se[i].key16 == (key >> 48)) {
+            return {se[i].occupied(), se[i].read(), SearchWriter(&se[i])};
+        }
+    }
+
+    SearchEntry *replace = se;
+    for (size_t i = 1; i < searchClusterSize; ++i) {
+        if (!se[i].occupied()) {
+            replace = &se[i];
+            break;
+        }
+        // TODO regular replacement policy
+        
+    }
+
+    return {false, TTData::null(), SearchWriter(replace)};
+}
+
+std::tuple<bool, TTData, std::variant<SearchWriter, PerftWriter>> 
 TranspositionTable::probe(const Key key) const {
-	TTEntry* tte = find_entry(key);
+    if (probeMode == SEARCH)
+        return probe_search(key);
 
-	for (size_t i = 0; i < clusterSize; ++i) {
-		// we use the most significant bits because the table index uses
-		// the least significant bits, so any entries in the same cluster
-		// likely have the same least significant bits, which would lead to
-		// a lot of false positives
-		if (tte[i].key16 == (key >> 48)) {
-			return {tte[i].occupied(), tte[i].read(), TTWriter(&tte[i])};
-		}
-	}
-
-	TTEntry* replace = tte;
-	for (size_t i = 1; i < clusterSize; ++i) {
-		// TODO find replacement
-
-	}
-
-	return {false, TTEntry().read(), TTWriter(replace)};
+    assert(probeMode == PERFT);
+    return probe_perft(key);
 }
 
 } // namespace Engine
