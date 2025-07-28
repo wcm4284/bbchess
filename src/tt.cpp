@@ -1,14 +1,18 @@
 #include "tt.h"
 
+#include <bit> 
 #include <cstring>
 
 namespace Engine {
 
-static constexpr size_t clusterSize = 4;
+static constexpr size_t clusterSize = 3;
 struct Cluster {
 
 	TTEntry entries[clusterSize];
+    char padding[2];
 };
+
+static_assert(sizeof(Cluster) == 32, "Cluster should be aligned to 64 bytes");
 
 void TTEntry::save(Key key, Depth depth, Value ev, Move m, Value v,Bound b, uint8_t generation8) {
     key16 = uint16_t(key >> 48);
@@ -28,11 +32,17 @@ TranspositionTable::~TranspositionTable() {
 	delete[] table;
 }
 
+// Sets the size of the transposition table to the requested size (MBs)
+// Makes sure that the number of clusters is a power of 2 so that we can
+// index into the table efficiently with key & (numClusers - 1) instead of %
 void TranspositionTable::resize(size_t MB) {
 
 	delete[] table;
 
 	numClusters = (MB << 20) / sizeof(Cluster); 
+    numClusters = 1ULL << (std::bit_width(numClusters) - 1);
+
+    std::cout << numClusters << std::endl;
 	
 	table = new Cluster[numClusters];
 	clear(); 
