@@ -19,11 +19,11 @@ Welcome to the codebase. Here's what each file does:
 * contains move generation logic
 * contains templated MoveList class
 * supports generation of multiple types of moves
-	* LEGAL
-	* CAPTURES
-	* EVASIONS
-	* NON EVASIONS
-	* QUIET
+    * LEGAL
+    * CAPTURES
+    * EVASIONS
+    * NON EVASIONS
+    * QUIET
 
 ## moveorder.cpp/h 
 
@@ -35,7 +35,7 @@ Welcome to the codebase. Here's what each file does:
 
 * contains TranspositionTable class as well as related structures
 * used to access transpositions in order to speed up search
-	* a transposition is when the same position is reached from different move orders
+    * a transposition is when the same position is reached from different move orders
 
 ## search
 

@@ -13,12 +13,12 @@ using namespace Engine;
 
 int main(int argc, char** argv ) {
 
-	Bitboards::init();
-	Position::init();
+    Bitboards::init();
+    Position::init();
 
-	UCIEngine uci {argc - 1, argv + 1};
-	uci.loop();
-	
-	return 0;
+    UCIEngine uci {argc - 1, argv + 1};
+    uci.loop();
+    
+    return 0;
 
 }

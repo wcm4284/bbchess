@@ -17,11 +17,11 @@ void sort(const Position&, ExtMove*, ExtMove*);
 template <GenType T>
 class MoveOrder : public MoveList<T> {
 
-	public:
-		MoveOrder(const Position& pos) : 
-			MoveList<T>(pos) 
-			
-			{ sort(pos, this->list, this->last); }
+    public:
+        MoveOrder(const Position& pos) : 
+            MoveList<T>(pos) 
+            
+            { sort(pos, this->list, this->last); }
 
 };
 
@@ -31,20 +31,20 @@ class MoveOrder : public MoveList<T> {
 template <typename T>
 class MoveQueue {
 
-	public:
-		MoveQueue(const Position& pos) : moves(pos) {}
-		inline Move* next() {
-			std::lock_guard<std::mutex> lock(mutex);
-			return moves.next();
-		}
+    public:
+        MoveQueue(const Position& pos) : moves(pos) {}
+        inline Move* next() {
+            std::lock_guard<std::mutex> lock(mutex);
+            return moves.next();
+        }
 
-		size_t size() const { return moves.size(); }
+        size_t size() const { return moves.size(); }
 
 
-	private:
-		
-		T moves;
-		std::mutex mutex;
+    private:
+        
+        T moves;
+        std::mutex mutex;
 
 };
 
@@ -53,5 +53,5 @@ using PerftMoves = MoveQueue<MoveList<LEGAL>>;
 using RootMoves = MoveQueue<MoveOrder<LEGAL>>;
 
 } // namespace Engine
-	
+    
 #endif

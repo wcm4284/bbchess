@@ -11,7 +11,7 @@ static constexpr size_t perftClusterSize = 2;
 union Cluster {
     
     PerftEntry prft[perftClusterSize];
-	SearchEntry srch[searchClusterSize];
+    SearchEntry srch[searchClusterSize];
 };
 
 static_assert(sizeof(Cluster) == 32, "Cluster should be aligned to 64 bytes");
@@ -44,7 +44,7 @@ TTData TTData::null() {
 }
 
 TranspositionTable::~TranspositionTable() {
-	delete[] table;
+    delete[] table;
 }
 
 // Sets the size of the transposition table to the requested size (MBs)
@@ -52,32 +52,32 @@ TranspositionTable::~TranspositionTable() {
 // index into the table efficiently with key & (numClusers - 1) instead of %
 void TranspositionTable::resize(size_t MB) {
 
-	delete[] table;
+    delete[] table;
 
-	numClusters = (MB << 20) / sizeof(Cluster); 
+    numClusters = (MB << 20) / sizeof(Cluster); 
     numClusters = 1ULL << (std::bit_width(numClusters) - 1);
 
     std::cout << numClusters << std::endl;
-	
-	table = new Cluster[numClusters];
-	clear(); 
+    
+    table = new Cluster[numClusters];
+    clear(); 
 }
 
 // @prereq - table & numClusters need to be set, otherwise we're doing nothing 
 // This could be multi-threaded, but it doesn't take long enough to clear for me
 // to care
 void TranspositionTable::clear() {
-	assert(table);
+    assert(table);
 
-	for (size_t i = 0; i < numClusters; ++i) {
-		// because a TTEntry object isn't trivially constructable, and by extension
-		// a Cluster object, the compiler throws as a -Wclass-memaccess warning
-		// to make this go away, we tell it to not worry about us for a second
+    for (size_t i = 0; i < numClusters; ++i) {
+        // because a TTEntry object isn't trivially constructable, and by extension
+        // a Cluster object, the compiler throws as a -Wclass-memaccess warning
+        // to make this go away, we tell it to not worry about us for a second
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wclass-memaccess"
-		memset(&table[i], 0, sizeof(Cluster)); 
+        memset(&table[i], 0, sizeof(Cluster)); 
 #pragma GCC diagnostic pop
-	}
+    }
 }
 
 void TranspositionTable::set_probe(ProbeType pb) {
@@ -90,10 +90,10 @@ void TranspositionTable::set_probe(ProbeType pb) {
 }
 
 SearchEntry* TranspositionTable::find_s_entry(const Key key) const {
-	// Ideally this is the same as key % numClusters.
+    // Ideally this is the same as key % numClusters.
     assert(popcnt(numClusters) == 1);
-	size_t clusterIdx = key & (numClusters - 1);
-	return &table[clusterIdx].srch[0];
+    size_t clusterIdx = key & (numClusters - 1);
+    return &table[clusterIdx].srch[0];
 }
 
 PerftEntry* TranspositionTable::find_p_entry(const Key key) const {

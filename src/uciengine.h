@@ -10,21 +10,21 @@ namespace Engine {
 
 class UCIEngine {
 
-	public:
-		UCIEngine() = default;
-		UCIEngine(int, char**); 
+    public:
+        UCIEngine() = default;
+        UCIEngine(int, char**); 
 
-		void loop();
+        void loop();
 
 
-	private:
-		void position(std::istringstream&);
-		void go(std::istringstream&);
-		Search::SearchLimits parse_limits(std::istringstream&);
-		void perft();
-		void start_searching();
-		
-		Engine engine;
+    private:
+        void position(std::istringstream&);
+        void go(std::istringstream&);
+        Search::SearchLimits parse_limits(std::istringstream&);
+        void perft();
+        void start_searching();
+        
+        Engine engine;
 
 };
 

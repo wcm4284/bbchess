@@ -23,28 +23,28 @@ namespace Search {
 
 struct SharedState {
 
-	SharedState(TranspositionTable& table) : tt(table) {}
+    SharedState(TranspositionTable& table) : tt(table) {}
 
-	TranspositionTable& tt;
+    TranspositionTable& tt;
 
 };
 
 struct SearchLimits {
 
-	SearchLimits() : perft(0), depth(0) {}
+    SearchLimits() : perft(0), depth(0) {}
 
-	// depth for perft search
-	Depth perft;
-	// depth for regular search
-	Depth depth;
+    // depth for perft search
+    Depth perft;
+    // depth for regular search
+    Depth depth;
 };
 
 struct PerftMove {
 
-	PerftMove(Move m) : move(m), node_count(0) {}
-	
-	Move move; 
-	uint64_t node_count;
+    PerftMove(Move m) : move(m), node_count(0) {}
+    
+    Move move; 
+    uint64_t node_count;
 
 };
 
@@ -53,39 +53,39 @@ struct PerftMove {
 class Worker {
 
 
-	public:
+    public:
 
-		Worker() = default;
-		Worker(SharedState& ss) : tt(ss.tt) {}
+        Worker() = default;
+        Worker(SharedState& ss) : tt(ss.tt) {}
 
-		void start_searching();
-
-
-
-	private:
-		
-		void iterative_deepening();
-		void perft(PerftMoves&);
-		uint64_t perft(Position&, Depth); 
-		Value search(Position&, int, int, Depth, int);
-		Value qsearch(Position&, int, int, int);
-	
-
-		uint64_t nodes;
-		
-
-		SearchLimits limits;
-		Position	 rootPos;
-		Move pv_table[MAX_PLY][MAX_PLY];
-
-		TranspositionTable& tt;
+        void start_searching();
 
 
-	friend class Engine::ThreadPool;
+
+    private:
+        
+        void iterative_deepening();
+        void perft(PerftMoves&);
+        uint64_t perft(Position&, Depth); 
+        Value search(Position&, int, int, Depth, int);
+        Value qsearch(Position&, int, int, int);
+    
+
+        uint64_t nodes;
+        
+
+        SearchLimits limits;
+        Position     rootPos;
+        Move pv_table[MAX_PLY][MAX_PLY];
+
+        TranspositionTable& tt;
+
+
+    friend class Engine::ThreadPool;
 
 };
-	
-	
+    
+    
 } // namespace Search
 
 } // namespace Engine

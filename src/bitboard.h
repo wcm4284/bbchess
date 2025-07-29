@@ -46,48 +46,48 @@ extern Bitboard PseudoAttacks[PIECE_TYPE_NB][SQUARE_NB];
 // attempting the "Fancy" approach
 struct Magic {
 
-	Bitboard mask;
-	Bitboard* attacks;
+    Bitboard mask;
+    Bitboard* attacks;
 
 #ifndef USE_PEXT
 
-	Bitboard magic;
-	int shift;
+    Bitboard magic;
+    int shift;
 
 #endif
 
-	unsigned index(Bitboard occ) const {
+    unsigned index(Bitboard occ) const {
 
-		#ifdef USE_PEXT
+        #ifdef USE_PEXT
 
-		return unsigned(pext(occ, mask));
+        return unsigned(pext(occ, mask));
 
-		#else
-		
-		// TODO logic for not using pext
-		assert(false);
+        #else
+        
+        // TODO logic for not using pext
+        assert(false);
 
-		#endif
-	}
+        #endif
+    }
 
-	Bitboard attacks_bb(Bitboard occ) const { return attacks[index(occ)]; }
+    Bitboard attacks_bb(Bitboard occ) const { return attacks[index(occ)]; }
 };
 
 extern Magic Magics[SQUARE_NB][2];
 
 
 constexpr Bitboard square_bb(Square s) {
-	if (!is_ok(s)) {
-		std::cout << "Failed assertion is_ok(s) with value " << s << std::endl;}
-	assert(is_ok(s));
-	return (1ULL << s);
+    if (!is_ok(s)) {
+        std::cout << "Failed assertion is_ok(s) with value " << s << std::endl;}
+    assert(is_ok(s));
+    return (1ULL << s);
 }
 
 template <typename... Squares>
 inline Bitboard square_bb(Square s, Squares... sqs) { return square_bb(sqs...) | s; }
 
 inline Bitboard move_bb(const Move& m) {
-	return square_bb(m.to_sq(), m.from_sq());}
+    return square_bb(m.to_sq(), m.from_sq());}
 
 inline Bitboard operator&(Bitboard b, Square s) { return b & square_bb(s); }
 inline Bitboard operator|(Bitboard b, Square s) { return b | square_bb(s); }
@@ -104,61 +104,61 @@ constexpr bool more_than_one(Bitboard b) { return b & (b - 1); }
 
 inline Square lsb(Bitboard b) {
 
-	#ifdef __GNUC__
-		return Square(__builtin_ctzll(b));
-	#else
-		assert(false);
-	#endif
+    #ifdef __GNUC__
+        return Square(__builtin_ctzll(b));
+    #else
+        assert(false);
+    #endif
 
 }
 
 inline Square pop_lsb(Bitboard& b) {
-	assert(b != 0);
-	Square s = lsb(b);
-	b ^= s;
-	return s;
+    assert(b != 0);
+    Square s = lsb(b);
+    b ^= s;
+    return s;
 }
 
 inline Bitboard line_bb(Square s1, Square s2) { return Line[s1][s2]; }
 inline Bitboard line_bb(Square s1, Bitboard b) {
-	Bitboard line(0);
-	while (b) 
-		line |= line_bb(s1, pop_lsb(b));
+    Bitboard line(0);
+    while (b) 
+        line |= line_bb(s1, pop_lsb(b));
 
-	return line;
+    return line;
 }
 
 inline Bitboard between_bb(Square s1, Square s2) { return Between[s1][s2]; }
 inline Bitboard between_bb(Square s1, Bitboard b) {
-	Bitboard between(0);
-	while (b)
-		between |= between_bb(s1, pop_lsb(b));
-	return between;
+    Bitboard between(0);
+    while (b)
+        between |= between_bb(s1, pop_lsb(b));
+    return between;
 }
 
 
 template <Direction d>
 constexpr Bitboard shift(Bitboard b) {
 
-	return   d == NORTH			? b << 8
-		   : d == SOUTH			? b >> 8
-		   : d == NORTH + NORTH ? b << 16
-		   : d == SOUTH + SOUTH ? b >> 16
-		   : d == EAST			? (b & ~FileH) << 1
-		   : d == WEST			? (b & ~FileA) >> 1
-		   : d == NORTH_EAST    ? (b & ~FileH) << 9
-		   : d == NORTH_WEST    ? (b & ~FileA) << 7
-		   : d == SOUTH_EAST    ? (b & ~FileH) >> 7
-		   : d == SOUTH_WEST	? (b & ~FileA) >> 9
-								: 0;
-	
+    return   d == NORTH         ? b << 8
+           : d == SOUTH         ? b >> 8
+           : d == NORTH + NORTH ? b << 16
+           : d == SOUTH + SOUTH ? b >> 16
+           : d == EAST          ? (b & ~FileH) << 1
+           : d == WEST          ? (b & ~FileA) >> 1
+           : d == NORTH_EAST    ? (b & ~FileH) << 9
+           : d == NORTH_WEST    ? (b & ~FileA) << 7
+           : d == SOUTH_EAST    ? (b & ~FileH) >> 7
+           : d == SOUTH_WEST    ? (b & ~FileA) >> 9
+                                : 0;
+    
 }
 
 // used to fill pawnattack array in bitboard.cpp
 template <Color c>
 constexpr Bitboard generate_pawn_attack(Bitboard b) {
-	return c == WHITE ? shift<NORTH_EAST>(b) | shift<NORTH_WEST>(b)
-					  : shift<SOUTH_EAST>(b) | shift<SOUTH_WEST>(b);
+    return c == WHITE ? shift<NORTH_EAST>(b) | shift<NORTH_WEST>(b)
+                      : shift<SOUTH_EAST>(b) | shift<SOUTH_WEST>(b);
 }
 
 template<typename T = Square>
@@ -175,46 +175,46 @@ inline int distance<Square>(Square s1, Square s2) { return std::max(distance<Fil
 
 template <PieceType pt>
 constexpr Bitboard attacks_bb(Square s, Color c = COLOR_NB) {
-	assert((pt != PAWN) || (c < COLOR_NB));
-	return pt == PAWN ? PseudoAttacks[c][s] : PseudoAttacks[pt][s];
+    assert((pt != PAWN) || (c < COLOR_NB));
+    return pt == PAWN ? PseudoAttacks[c][s] : PseudoAttacks[pt][s];
 }
 
 template <PieceType pt>
 constexpr Bitboard attacks_bb(Square s, Bitboard occupancy) {
 
-	assert(pt != PAWN);
-	assert(is_ok(s));
+    assert(pt != PAWN);
+    assert(is_ok(s));
 
-	switch (pt) {
+    switch (pt) {
 
-		case BISHOP:
-		case ROOK:
-			return Magics[s][pt - BISHOP].attacks_bb(occupancy);
-		case QUEEN:
-			return Magics[s][0].attacks_bb(occupancy) | Magics[s][1].attacks_bb(occupancy);
-		default:
-			return PseudoAttacks[pt][s];
-	}
+        case BISHOP:
+        case ROOK:
+            return Magics[s][pt - BISHOP].attacks_bb(occupancy);
+        case QUEEN:
+            return Magics[s][0].attacks_bb(occupancy) | Magics[s][1].attacks_bb(occupancy);
+        default:
+            return PseudoAttacks[pt][s];
+    }
 
-	return 0;
+    return 0;
 
 }
 
 inline Bitboard attacks_bb(Square s, Bitboard occupancy, PieceType pt) {
-	assert(pt != PAWN);
-	assert(is_ok(s));
+    assert(pt != PAWN);
+    assert(is_ok(s));
 
-	switch (pt) {
-		case BISHOP:
-		case ROOK:
-			return Magics[s][pt - BISHOP].attacks_bb(occupancy);
-		case QUEEN:
-			return Magics[s][0].attacks_bb(occupancy) | Magics[s][1].attacks_bb(occupancy);
-		default:
-			return PseudoAttacks[pt][s];
-	}
+    switch (pt) {
+        case BISHOP:
+        case ROOK:
+            return Magics[s][pt - BISHOP].attacks_bb(occupancy);
+        case QUEEN:
+            return Magics[s][0].attacks_bb(occupancy) | Magics[s][1].attacks_bb(occupancy);
+        default:
+            return PseudoAttacks[pt][s];
+    }
 
-	return 0;
+    return 0;
 }
 } // namespace Engine
 
