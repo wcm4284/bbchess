@@ -48,7 +48,6 @@ class MoveQueue {
 
 };
 
-
 using PerftMoves = MoveQueue<MoveList<LEGAL>>;
 using RootMoves = MoveQueue<MoveOrder<LEGAL>>;
 

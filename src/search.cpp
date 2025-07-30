@@ -122,12 +122,6 @@ Value Search::Worker::search(Position& pos, int alpha, int beta, Depth depth, in
     auto [ttHit, ttData, writer] = tt.probe(posKey);
     SearchWriter ttWriter = std::get<SearchWriter>(writer);
 
-    if (ttHit) {
-        std::cout << "got a hit!" << std::endl;
-    } else {
-        ttWriter.write(posKey, depth, Move(), Value(0), ev, BOUND_EXACT, tt.generation());
-    }
-    
     alpha = std::max(mated_in(ply), alpha);
     beta = std::min(mate_in(ply), beta);
 
@@ -182,10 +176,9 @@ void Search::Worker::iterative_deepening() {
     Value eval = search(p, alpha, beta, limits.depth, 0);
 
     std::cout << "best eval: " << eval << std::endl;
-    std::cout << "1. " << p.dress_move(pv_table[0][0]) << std::endl;
-
-
-
+    for (int i = 0; i < limits.depth; ++i) {
+        std::cout << i + 1 << ". " << p.dress_move(pv_table[0][i]) << std::endl;
+    }
 }
 
 void Search::Worker::start_searching() { 

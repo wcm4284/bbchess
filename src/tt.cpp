@@ -57,8 +57,8 @@ void TranspositionTable::resize(size_t MB) {
     numClusters = (MB << 20) / sizeof(Cluster); 
     numClusters = 1ULL << (std::bit_width(numClusters) - 1);
 
-    std::cout << numClusters << std::endl;
-    
+    assert(popcnt(numClusters) == 1);
+
     table = new Cluster[numClusters];
     clear(); 
 }
