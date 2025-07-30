@@ -2,9 +2,6 @@
 #define SEARCH_H_INCLUDED
 
 
-#include "position.h"
-#include "types.h"
-#include "movegen.h"
 #include "moveorder.h"
 
 #include <string>

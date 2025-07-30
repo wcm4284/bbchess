@@ -3,7 +3,6 @@
 
 
 #include "thread.h"
-#include "position.h"
 #include "tt.h"
 
 namespace Engine {

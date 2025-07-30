@@ -1,8 +1,16 @@
+/**
+ * @file bitboard.h
+ * @brief Contains useful bitboard functions and constants
+ *
+ * Most constants and functions included in this file are
+ * related to and used for move generation or evaluation.
+ * Bitboards are how we store the position, and therefore
+ * how we analyze and manipulate it.
+*/
+
+
 #ifndef BITBOARD_H_INCLUDED
 #define BITBOARD_H_INCLUDED
-
-#include <cassert>
-#include <string>
 
 #include "types.h"
 
@@ -10,11 +18,26 @@ namespace Engine {
 
 namespace Bitboards {
 
+/**
+ * @brief Initializes and precomputes move tables.
+ * @details This function should be called once on startup.
+*/
 void init();
+
+/**
+ * @brief Creates a human readable string for debugging
+ * @note Useful for debugging.
+ * @param b Bitboard to turn into string
+ * @return Human readable string to be output to console
+ */
 std::string pretty(Bitboard b);
 
 } // namespace Engine::Bitboards
 
+
+/// @defgroup FileBitboards Bitboard File Constants
+/// @brief Bitboard masks for the files (columns) of the board
+/// @{
 constexpr Bitboard FileA = 0x0101010101010101ULL;
 constexpr Bitboard FileB = FileA << 1;
 constexpr Bitboard FileC = FileA << 2;
@@ -23,7 +46,11 @@ constexpr Bitboard FileE = FileA << 4;
 constexpr Bitboard FileF = FileA << 5;
 constexpr Bitboard FileG = FileA << 6;
 constexpr Bitboard FileH = FileA << 7;
+/// @}
 
+/// @defgroup RankBitboards Bitboard Rank Constants
+/// @brief Bitboard masks for the ranks (rows) of the board
+/// @{
 constexpr Bitboard Rank1 = 0xFFULL;
 constexpr Bitboard Rank2 = Rank1 << (8 * 1);
 constexpr Bitboard Rank3 = Rank1 << (8 * 2);
@@ -32,15 +59,21 @@ constexpr Bitboard Rank5 = Rank1 << (8 * 4);
 constexpr Bitboard Rank6 = Rank1 << (8 * 5);
 constexpr Bitboard Rank7 = Rank1 << (8 * 6);
 constexpr Bitboard Rank8 = Rank1 << (8 * 7);
+/// @}
 
+/// @defgroup Bitboardhelpers Rank/File Bitboard Accessors
+/// @brief Helper functions to retrieve the file/rank bitboard
+///     of a certain file, rank, or square
+/// @{
 constexpr Bitboard file_bb(File f) { return FileA << f; }
 constexpr Bitboard file_bb(Square s) { return FileA << (file_of(s)); }
 constexpr Bitboard rank_bb(Rank r) { return Rank1 << (8 * r); }
 constexpr Bitboard rank_bb(Square s) { return Rank1 << (8 * rank_of(s)); }
+/// @}
 
-extern Bitboard Line[SQUARE_NB][SQUARE_NB];
-extern Bitboard Between[SQUARE_NB][SQUARE_NB];
-extern Bitboard PseudoAttacks[PIECE_TYPE_NB][SQUARE_NB];
+extern Bitboard Line[SQUARE_NB][SQUARE_NB]; ///< Precomputed array of lines between squares (excluding)
+extern Bitboard Between[SQUARE_NB][SQUARE_NB]; ///< Precomputed array of lines between squares (including)
+extern Bitboard PseudoAttacks[PIECE_TYPE_NB][SQUARE_NB]; ///< Precomputed array of possible moves from any square
 
 // courtesy of chessprogramming.org/Magic_Bitboards
 // attempting the "Fancy" approach
@@ -77,8 +110,6 @@ extern Magic Magics[SQUARE_NB][2];
 
 
 constexpr Bitboard square_bb(Square s) {
-    if (!is_ok(s)) {
-        std::cout << "Failed assertion is_ok(s) with value " << s << std::endl;}
     assert(is_ok(s));
     return (1ULL << s);
 }
