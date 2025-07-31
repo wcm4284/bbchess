@@ -16,6 +16,13 @@
 
 namespace Engine {
 
+
+/// @defgroup Bitboards Bitboard Utilities
+/// @brief Functions, constants, and helpers used for bitboard manipulation
+///
+/// This group contains grouped constants for files/ranks,
+/// helper accessors, and attack bitboards used for move generation
+
 namespace Bitboards {
 
 /**
@@ -36,6 +43,7 @@ std::string pretty(Bitboard b);
 
 
 /// @defgroup FileBitboards Bitboard File Constants
+/// @ingroup Bitboards
 /// @brief Bitboard masks for the files (columns) of the board
 /// @{
 constexpr Bitboard FileA = 0x0101010101010101ULL;
@@ -49,6 +57,7 @@ constexpr Bitboard FileH = FileA << 7;
 /// @}
 
 /// @defgroup RankBitboards Bitboard Rank Constants
+/// @ingroup Bitboards
 /// @brief Bitboard masks for the ranks (rows) of the board
 /// @{
 constexpr Bitboard Rank1 = 0xFFULL;
@@ -62,6 +71,7 @@ constexpr Bitboard Rank8 = Rank1 << (8 * 7);
 /// @}
 
 /// @defgroup Bitboardhelpers Rank/File Bitboard Accessors
+/// @ingroup Bitboards
 /// @brief Helper functions to retrieve the file/rank bitboard
 ///     of a certain file, rank, or square
 /// @{
@@ -204,6 +214,10 @@ inline int distance<Rank>(Square s1, Square s2) { return abs(rank_of(s1) - rank_
 template<>
 inline int distance<Square>(Square s1, Square s2) { return std::max(distance<File>(s1, s2), distance<Rank>(s1, s2)); }
 
+/// @defgroup AttackBitboards Attack Bitboard Accessor Functions
+/// @ingroup Bitboards
+/// @brief Provides an interface to access psuedo legal moves at a given square
+/// @{
 template <PieceType pt>
 constexpr Bitboard attacks_bb(Square s, Color c = COLOR_NB) {
     assert((pt != PAWN) || (c < COLOR_NB));
@@ -247,6 +261,8 @@ inline Bitboard attacks_bb(Square s, Bitboard occupancy, PieceType pt) {
 
     return 0;
 }
+
+/// @}
 } // namespace Engine
 
 #endif
