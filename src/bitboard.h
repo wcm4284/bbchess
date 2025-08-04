@@ -70,9 +70,9 @@ constexpr Bitboard Rank7 = Rank1 << (8 * 6);
 constexpr Bitboard Rank8 = Rank1 << (8 * 7);
 /// @}
 
-/// @defgroup Bitboardhelpers Rank/File Bitboard Accessors
+/// @defgroup BitboardHelpers Bitboard Getters
 /// @ingroup Bitboards
-/// @brief Helper functions to retrieve the file/rank bitboard
+/// @brief Helper functions to create or retrieve the bitboard
 ///     of a certain file, rank, or square
 /// @{
 constexpr Bitboard file_bb(File f) { return FileA << f; }
@@ -85,8 +85,9 @@ extern Bitboard Line[SQUARE_NB][SQUARE_NB]; ///< Precomputed array of lines betw
 extern Bitboard Between[SQUARE_NB][SQUARE_NB]; ///< Precomputed array of lines between squares (including)
 extern Bitboard PseudoAttacks[PIECE_TYPE_NB][SQUARE_NB]; ///< Precomputed array of possible moves from any square
 
-// courtesy of chessprogramming.org/Magic_Bitboards
-// attempting the "Fancy" approach
+
+/// @struct Magic
+/// @brief Helper struct for populating sliding piece moves
 struct Magic {
 
     Bitboard mask;
@@ -118,7 +119,8 @@ struct Magic {
 
 extern Magic Magics[SQUARE_NB][2];
 
-
+/// @ingroup BitboardHelpers 
+/// @{
 constexpr Bitboard square_bb(Square s) {
     assert(is_ok(s));
     return (1ULL << s);
@@ -127,9 +129,14 @@ constexpr Bitboard square_bb(Square s) {
 template <typename... Squares>
 inline Bitboard square_bb(Square s, Squares... sqs) { return square_bb(sqs...) | s; }
 
-inline Bitboard move_bb(const Move& m) {
-    return square_bb(m.to_sq(), m.from_sq());}
+inline Bitboard move_bb(const Move& m) { return square_bb(m.to_sq(), m.from_sq()); }
+/// @}
 
+
+/// @defgroup BitboardOperators Bitboard Operator Overloads
+/// @ingroup Bitboards
+/// @brief Operator overloads for manipulating bitboards with individual squares
+/// @{
 inline Bitboard operator&(Bitboard b, Square s) { return b & square_bb(s); }
 inline Bitboard operator|(Bitboard b, Square s) { return b | square_bb(s); }
 inline Bitboard operator^(Bitboard b, Square s) { return b ^ square_bb(s); }
@@ -140,9 +147,18 @@ inline Bitboard& operator^=(Bitboard& b, Square s) { return b ^= square_bb(s); }
 inline Bitboard operator&(Square s, Bitboard b) { return b & s; }
 inline Bitboard operator|(Square s, Bitboard b) { return b | s; }
 inline Bitboard operator^(Square s, Bitboard b) { return b ^ s; }
+/// @}
 
+/// @ingroup Bitboards
+/// @brief checks if bitboard has multiple bits high -- this is equivalent to { popcnt(b) > 1 }
+/// @param b Bitboard to check
+/// @return true if more than bit is 1
 constexpr bool more_than_one(Bitboard b) { return b & (b - 1); }
 
+/// @ingroup Bitboards
+/// @brief returns the index of the least significant bit
+/// @param b Biboard to check
+/// @return index of lsb as a Square
 inline Square lsb(Bitboard b) {
 
     #ifdef __GNUC__
@@ -153,6 +169,11 @@ inline Square lsb(Bitboard b) {
 
 }
 
+/// @ingroup Bitboards
+/// @brief returns the index of the least significant bit while also removing it from the bitboard
+/// @param b Bitboard to manipulate
+/// @return index of lsb as a Square
+/// @note This function changes the bitboard passed into it
 inline Square pop_lsb(Bitboard& b) {
     assert(b != 0);
     Square s = lsb(b);
@@ -160,6 +181,8 @@ inline Square pop_lsb(Bitboard& b) {
     return s;
 }
 
+/// @ingroup BitboardHelpers
+/// @{
 inline Bitboard line_bb(Square s1, Square s2) { return Line[s1][s2]; }
 inline Bitboard line_bb(Square s1, Bitboard b) {
     Bitboard line(0);
@@ -176,6 +199,7 @@ inline Bitboard between_bb(Square s1, Bitboard b) {
         between |= between_bb(s1, pop_lsb(b));
     return between;
 }
+/// @}
 
 
 template <Direction d>
@@ -217,6 +241,8 @@ inline int distance<Square>(Square s1, Square s2) { return std::max(distance<Fil
 /// @defgroup AttackBitboards Attack Bitboard Accessor Functions
 /// @ingroup Bitboards
 /// @brief Provides an interface to access psuedo legal moves at a given square
+///
+/// Wraps the Magic struct to return the pseudo legal moves
 /// @{
 template <PieceType pt>
 constexpr Bitboard attacks_bb(Square s, Color c = COLOR_NB) {
@@ -260,9 +286,8 @@ inline Bitboard attacks_bb(Square s, Bitboard occupancy, PieceType pt) {
     }
 
     return 0;
-}
+} /// @}
 
-/// @}
 } // namespace Engine
 
 #endif
