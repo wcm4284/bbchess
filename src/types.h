@@ -1,3 +1,10 @@
+/**
+ * @file types.h
+ * @brief Contains useful typedefs, enum declarations, and the Move class
+ *
+*/
+
+
 #ifndef TYPES_H_INCLUDED
 #define TYPES_H_INCLUDED
 
@@ -7,9 +14,6 @@
 #include <unordered_map>
 #include <string>
 #include <iostream>
-
-// look at stockfish for compiler stuff?
-// not sure what they're doing yet, but they define popcnt and that's important
 
 #ifdef USE_PEXT
     #include <immintrin.h>
@@ -28,18 +32,22 @@ using Depth = int;
 constexpr int MAX_MOVES = 256;
 constexpr int MAX_PLY = 246;
 
+/// @enum Color
+/// @brief Represents the two players
 enum Color {
     WHITE,
     BLACK,
     COLOR_NB = 2
 };
 
+/// @enum CastlingRights
+/// @brief Castling rights available in a position
 enum CastlingRights {
 
-    WHITE_OO  = 1,
-    WHITE_OOO = WHITE_OO << 1,
-    BLACK_OO  = WHITE_OO << 2,
-    BLACK_OOO = WHITE_OO << 3,
+    WHITE_OO  = 1, ///< White Kingside
+    WHITE_OOO = WHITE_OO << 1, ///< White Queenside
+    BLACK_OO  = WHITE_OO << 2, ///< Black Kingside
+    BLACK_OOO = WHITE_OO << 3, ///< Black Queenside
 
     KING_SIDE      = WHITE_OO | BLACK_OO,
     QUEEN_SIDE     = WHITE_OOO | BLACK_OOO,
@@ -51,14 +59,14 @@ enum CastlingRights {
     
 };
 
+/// @enum Bound
+/// @brief Represents the bound of a score stored in the Transposition Table
 enum Bound {
-    BOUND_NONE,
-    BOUND_UPPER,
-    BOUND_LOWER,
-    BOUND_EXACT = BOUND_UPPER | BOUND_LOWER,
+    BOUND_NONE, ///< Used for empty table items
+    BOUND_UPPER, ///< Used when our search never raised alpha (fail-low)
+    BOUND_LOWER, ///< Used when our search reached beta cutoff (fail-high)
+    BOUND_EXACT = BOUND_UPPER | BOUND_LOWER, ///< Used when no cutoff occurs while searching
 };
-
-
 
 // Value is used as an alias for int in cases where
 // the value refers to a position evaluation. The values
@@ -66,6 +74,9 @@ enum Bound {
 // (-VALUE_NONE, VALUE_NONE]
 using Value = int;
 
+/// @defgroup SearchValues Common Search Values
+/// @brief Values commonly used during a search to represent certain outcomes
+/// @{
 constexpr Value VALUE_ZERO     = 0;
 constexpr Value VALUE_DRAW     = 0;
 constexpr Value VALUE_NONE     = 32002;
@@ -78,13 +89,20 @@ constexpr Value VALUE_MATED_IN_MAX_PLY = -VALUE_MATE_IN_MAX_PLY;
 constexpr Value VALUE_TB                 = VALUE_MATE_IN_MAX_PLY - 1;
 constexpr Value VALUE_TB_WIN_IN_MAX_PLY  = VALUE_TB - MAX_PLY;
 constexpr Value VALUE_TB_LOSS_IN_MAX_PLY = -VALUE_TB_WIN_IN_MAX_PLY;
+/// @}
 
+/// @defgroup EvaluationValues Piece Evaluation Values
+/// @brief Piece values used for static evaluation of a position
+/// @{
 constexpr Value PawnValue   = 100;
 constexpr Value KnightValue = 300;
 constexpr Value BishopValue = 315;
 constexpr Value RookValue   = 500;
 constexpr Value QueenValue  = 900;
+/// @}
 
+/// @enum PieceType
+/// @brief Represents the different types of pieces
 enum PieceType {
 
     NO_PIECE_TYPE, PAWN, KNIGHT, BISHOP, ROOK, QUEEN, KING,
@@ -92,6 +110,8 @@ enum PieceType {
     PIECE_TYPE_NB = 8
 };
 
+/// @enum Piece
+/// @brief Represents all pieces, split per side
 enum Piece {
     NO_PIECE,
 
@@ -103,10 +123,11 @@ enum Piece {
 };
 
 constexpr Value PieceValues[PIECE_TYPE_NB] = {
-    VALUE_ZERO, PawnValue, KnightValue, BishopValue, RookValue, QueenValue, VALUE_ZERO//, VALUE_ZERO
-    //VALUE_ZERO, -PawnValue, -KnightValue, -BishopValue, -RookValue, -QueenValue, VALUE_ZERO, VALUE_ZERO
+    VALUE_ZERO, PawnValue, KnightValue, BishopValue, RookValue, QueenValue, VALUE_ZERO
 };
 
+/// @enum Square
+/// @brief Represents the available squares on a chess board
 enum Square : int {
     
     SQ_A1, SQ_B1, SQ_C1, SQ_D1, SQ_E1, SQ_F1, SQ_G1, SQ_H1,
@@ -133,8 +154,12 @@ const std::array<std::string, 65> printSquare = {
     "a7", "b7", "c7", "d7", "e7", "f7", "g7", "h7",
     "a8", "b8", "c8", "d8", "e8", "f8", "g8", "h8",
     "-"
-};
+}; ///< Used to print a square to stdout
 
+/// @enum Direction
+/// @brief Represents the directions on a chess board as cardinal directions.
+///
+/// The cardinal directions are viewed from the perspective of white
 enum Direction {
 
     NORTH = 8,
@@ -149,7 +174,8 @@ enum Direction {
 
 };
 
-// Ranks are the rows
+/// @enum Rank
+/// @brief Represents the rows on a chess board, with RANK_1 being nearest to white
 enum Rank : int {
     
     RANK_1,
@@ -164,7 +190,8 @@ enum Rank : int {
     RANK_NB = 8
 };
 
-// Files are the columns
+/// @enum File
+/// @brief Represents the columns on a chess board, with FILE_A being leftmost from white's perspective
 enum File : int {
 
     FILE_A,
@@ -179,7 +206,10 @@ enum File : int {
     FILE_NB = 8
 };
 
-// enum MoveType
+/// @enum MoveType
+/// @brief Represents possible moves
+///
+/// @note NORMAL represents both quiet and capture moves
 enum MoveType {
     NORMAL,
     PROMOTION = 1 << 14,
@@ -189,13 +219,15 @@ enum MoveType {
 
 namespace {
 
+    /// \internal Converts MoveType to string
     std::unordered_map<MoveType, std::string> mt_conv = {
         {NORMAL, "normal"},
         {PROMOTION, "promotion"},
         {CASTLING, "castle"},
         {ENPASSANT, "en passant"}
     };
-
+    
+    /// \internal Converts PieceType to string
     std::unordered_map<PieceType, std::string> pt_conv = {
         {KNIGHT, "knight"},
         {BISHOP, "bishop"},
@@ -205,6 +237,9 @@ namespace {
 
 }
 
+/// @defgroup BoardOperators Board Operator Overloads
+/// @brief Operator overloads to allow looping and easy manipulation of board dimensions
+/// @{
 #define ENABLE_INC_OPERATOR_ON(T) \
         inline T& operator++(T& t) { return t = T(int(t) + 1); } \
         inline T& operator--(T& t) { return t = T(int(t) - 1); }
@@ -223,9 +258,9 @@ inline Square operator+(Square s, Direction d) { return Square(int(s) + int(d));
 inline Square operator-(Square s, Direction d) { return Square(int(s) - int(d)); }
 inline Square& operator+=(Square& s, Direction d) { return s = s + d; }
 inline Square& operator-=(Square& s, Direction d) { return s = s - d; }
+/// @}
 
-
-// toggle color
+/// @brief Toggle color
 constexpr Color operator~(Color c) { return Color(c ^ BLACK); }
 
 constexpr CastlingRights operator~(CastlingRights cr) { return CastlingRights(~int(cr) & 0x1f); }
@@ -234,14 +269,16 @@ inline CastlingRights& operator&=(CastlingRights& c, CastlingRights cr) { return
 
 constexpr Piece make_piece(PieceType p, Color c) { return Piece(int(p) + (int(c) * 8)); }
 
-// flip rank A1 -> A8
+/// @brief Flip rank A1 -> A8
 constexpr Square flip_rank(Square s) { return Square(s ^ SQ_A8); }
 
-// flip file A1 -> H1
+/// @brief Flip file A1 -> H1
 constexpr Square flip_file(Square s) { return Square(s ^ SQ_H1); }
 
+/// @brief Flip square A1 -> H8
 constexpr Square flip_square(Square s) { return flip_rank(flip_file(s)); }
 
+/// @brief Checks if a square is on the board
 constexpr bool is_ok(Square s) { return s >= SQ_A1 && s <= SQ_H8; }
 
 constexpr Direction push_dir(Color c) { return c == WHITE ? NORTH : SOUTH; }
@@ -261,8 +298,13 @@ constexpr PieceType type_of(Piece pc) { return PieceType(pc >= B_PAWN ? pc - 8 :
 constexpr Value mated_in(int ply) { return -VALUE_MATE + ply; }
 constexpr Value mate_in(int ply)  { return  VALUE_MATE - ply; }
 
-class Move {
 
+/// @class Move
+/// @brief Encapsulates a move to be played on the board
+class Move {
+    
+    /// @brief Prints move to stdout
+    /// @note Useful for debugging
     friend std::ostream& operator<<(std::ostream& os, const Move& mv) {
         os << printSquare[mv.from_sq()] << " to " << printSquare[mv.to_sq()] << 
         "; mt: " << mt_conv[mv.type()];
@@ -280,23 +322,35 @@ class Move {
 
         constexpr Move(Square to, Square from) : data(from | (to << 6)) {}
 
-
+        /// @return Square to move from 
         inline Square from_sq() const { return Square(data & 0x3f); }
+        /// @return Square to move to 
         inline Square to_sq() const { return Square((data & 0xfc0) >> 6); }
+        /// @return PieceType of promoted piece
+        /// @note Only viable if MoveType == PROMOTION
         inline PieceType promote_to() const { return PieceType(((data & 0x3000) >> 12) + 2); }
+        /// @return Type of move (e.g. NORMAL, CASTLING, ...)
         inline MoveType type() const { return MoveType(data & 0xc000); }
+        /// @brief Checks both move for being in bounds
         inline bool is_ok() const { return from_sq() >= SQ_A1 && from_sq() <= SQ_H8 &&
                                     to_sq() >= SQ_A1 && to_sq() <= SQ_H8 && from_sq() != to_sq(); }
-
+        
+        /// @brief Creates a Move object with the given parameters
+        /// @param to Square to move to
+        /// @param from Square to move from
+        /// @param pt Piece to promote to (only relevant if T == PROMOTION)
+        /// @tparam T MoveType for move
+        /// @return Move object created with given parameters
         template <MoveType T>
         constexpr static Move make(Square to, Square from, PieceType pt = KNIGHT) {
             return Move(T + ((pt - KNIGHT) << 12) + (to << 6) + from);
         }
-
+        
+        /// @brief Access raw move data
         constexpr uint16_t raw() const { return data; }
 
     protected:
-        uint16_t data;
+        uint16_t data; ///< raw move data
 
 };
 
