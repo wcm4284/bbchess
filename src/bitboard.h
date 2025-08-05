@@ -90,8 +90,8 @@ extern Bitboard PseudoAttacks[PIECE_TYPE_NB][SQUARE_NB]; ///< Precomputed array 
 /// @brief Helper struct for populating sliding piece moves
 struct Magic {
 
-    Bitboard mask;
-    Bitboard* attacks;
+    Bitboard mask; ///< Relevant occupancy mask
+    Bitboard* attacks; ///< Pointer to precomputed attacks
 
 #ifndef USE_PEXT
 
@@ -117,7 +117,7 @@ struct Magic {
     Bitboard attacks_bb(Bitboard occ) const { return attacks[index(occ)]; }
 };
 
-extern Magic Magics[SQUARE_NB][2];
+extern Magic Magics[SQUARE_NB][2]; ///< Array of magics used to precompute sliding attacks
 
 /// @ingroup BitboardHelpers 
 /// @{
@@ -188,7 +188,6 @@ inline Bitboard line_bb(Square s1, Bitboard b) {
     Bitboard line(0);
     while (b) 
         line |= line_bb(s1, pop_lsb(b));
-
     return line;
 }
 
@@ -201,7 +200,10 @@ inline Bitboard between_bb(Square s1, Bitboard b) {
 }
 /// @}
 
-
+/// @brief Non-modifying bit shift of a bitboard
+/// @tparam d Direction to shift b
+/// @param b Bitboard to shift
+/// @return Shifted bitboard
 template <Direction d>
 constexpr Bitboard shift(Bitboard b) {
 
@@ -219,13 +221,21 @@ constexpr Bitboard shift(Bitboard b) {
     
 }
 
-// used to fill pawnattack array in bitboard.cpp
+/// @brief Generates pawn attacks by shifting the bitboard
+/// @tparam c Color to generate pawn attacks for (useful for direction)
+/// @param b Bitboard to shift
+/// @return Possible pawn attacks from all squares on b
 template <Color c>
 constexpr Bitboard generate_pawn_attack(Bitboard b) {
     return c == WHITE ? shift<NORTH_EAST>(b) | shift<NORTH_WEST>(b)
                       : shift<SOUTH_EAST>(b) | shift<SOUTH_WEST>(b);
 }
 
+/// @defgroup Distance Distance Helpers
+/// @ingroup Bitboards
+/// @brief Finds distance between two squares in units of T
+/// @tparam T Unit of distance to find, e.g. Square, File, Rank
+/// @return distance between s1 and s2 in T units
 template<typename T = Square>
 inline int distance(Square, Square);
 
