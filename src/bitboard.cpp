@@ -106,7 +106,7 @@ void init_magics(PieceType pt, Bitboard table[], Magic Magics[][2]) {
         Bitboard b = 0;
         do {
             m.attacks[pext(b, m.mask)] = sliding_attacks(pt, s, b);
-            b                                   = (b - m.mask) & m.mask;
+            b                          = (b - m.mask) & m.mask;
             ++size;
         } while (b);
     }

@@ -1,20 +1,51 @@
+/**
+ * @file bitboard.h
+ * @brief Contains useful bitboard functions and constants
+ *
+ * Most constants and functions included in this file are
+ * related to and used for move generation or evaluation.
+ * Bitboards are how we store the position, and therefore
+ * how we analyze and manipulate it.
+*/
+
+
 #ifndef BITBOARD_H_INCLUDED
 #define BITBOARD_H_INCLUDED
-
-#include <cassert>
-#include <string>
 
 #include "types.h"
 
 namespace Engine {
 
+
+/// @defgroup Bitboards Bitboard Utilities
+/// @brief Functions, constants, and helpers used for bitboard manipulation
+///
+/// This group contains grouped constants for files/ranks,
+/// helper accessors, and attack bitboards used for move generation
+
 namespace Bitboards {
 
+/**
+ * @brief Initializes and precomputes move tables.
+ * @details This function should be called once on startup.
+*/
 void init();
+
+/**
+ * @brief Creates a human readable string for debugging
+ * @note Useful for debugging.
+ * @param b Bitboard to turn into string
+ * @return Human readable string to be output to console
+ */
 std::string pretty(Bitboard b);
 
 } // namespace Engine::Bitboards
 
+
+/// @defgroup FileBitboards Bitboard File Constants
+/// @ingroup Bitboards
+/// @brief Bitboard masks for the files (columns) of the board
+/// @{
 constexpr Bitboard FileA = 0x0101010101010101ULL;
 constexpr Bitboard FileB = FileA << 1;
 constexpr Bitboard FileC = FileA << 2;
@@ -23,7 +54,12 @@ constexpr Bitboard FileE = FileA << 4;
 constexpr Bitboard FileF = FileA << 5;
 constexpr Bitboard FileG = FileA << 6;
 constexpr Bitboard FileH = FileA << 7;
+/// @}
 
+/// @defgroup RankBitboards Bitboard Rank Constants
+/// @ingroup Bitboards
+/// @brief Bitboard masks for the ranks (rows) of the board
+/// @{
 constexpr Bitboard Rank1 = 0xFFULL;
 constexpr Bitboard Rank2 = Rank1 << (8 * 1);
 constexpr Bitboard Rank3 = Rank1 << (8 * 2);
@@ -32,22 +68,30 @@ constexpr Bitboard Rank5 = Rank1 << (8 * 4);
 constexpr Bitboard Rank6 = Rank1 << (8 * 5);
 constexpr Bitboard Rank7 = Rank1 << (8 * 6);
 constexpr Bitboard Rank8 = Rank1 << (8 * 7);
+/// @}
 
+/// @defgroup BitboardHelpers Bitboard Getters
+/// @ingroup Bitboards
+/// @brief Helper functions to create or retrieve the bitboard
+///     of a certain file, rank, or square
+/// @{
 constexpr Bitboard file_bb(File f) { return FileA << f; }
 constexpr Bitboard file_bb(Square s) { return FileA << (file_of(s)); }
 constexpr Bitboard rank_bb(Rank r) { return Rank1 << (8 * r); }
 constexpr Bitboard rank_bb(Square s) { return Rank1 << (8 * rank_of(s)); }
+/// @}
 
-extern Bitboard Line[SQUARE_NB][SQUARE_NB];
-extern Bitboard Between[SQUARE_NB][SQUARE_NB];
-extern Bitboard PseudoAttacks[PIECE_TYPE_NB][SQUARE_NB];
+extern Bitboard Line[SQUARE_NB][SQUARE_NB]; ///< Precomputed array of lines between squares (excluding)
+extern Bitboard Between[SQUARE_NB][SQUARE_NB]; ///< Precomputed array of lines between squares (including)
+extern Bitboard PseudoAttacks[PIECE_TYPE_NB][SQUARE_NB]; ///< Precomputed array of possible moves from any square
 
-// courtesy of chessprogramming.org/Magic_Bitboards
-// attempting the "Fancy" approach
+
+/// @struct Magic
+/// @brief Helper struct for populating sliding piece moves
 struct Magic {
 
-    Bitboard mask;
-    Bitboard* attacks;
+    Bitboard mask; ///< Relevant occupancy mask
+    Bitboard* attacks; ///< Pointer to precomputed attacks
 
 #ifndef USE_PEXT
 
@@ -73,12 +117,11 @@ struct Magic {
     Bitboard attacks_bb(Bitboard occ) const { return attacks[index(occ)]; }
 };
 
-extern Magic Magics[SQUARE_NB][2];
+extern Magic Magics[SQUARE_NB][2]; ///< Array of magics used to precompute sliding attacks
 
-
+/// @ingroup BitboardHelpers 
+/// @{
 constexpr Bitboard square_bb(Square s) {
-    if (!is_ok(s)) {
-        std::cout << "Failed assertion is_ok(s) with value " << s << std::endl;}
     assert(is_ok(s));
     return (1ULL << s);
 }
@@ -86,9 +129,14 @@ constexpr Bitboard square_bb(Square s) {
 template <typename... Squares>
 inline Bitboard square_bb(Square s, Squares... sqs) { return square_bb(sqs...) | s; }
 
-inline Bitboard move_bb(const Move& m) {
-    return square_bb(m.to_sq(), m.from_sq());}
+inline Bitboard move_bb(const Move& m) { return square_bb(m.to_sq(), m.from_sq()); }
+/// @}
 
+
+/// @defgroup BitboardOperators Bitboard Operator Overloads
+/// @ingroup Bitboards
+/// @brief Operator overloads for manipulating bitboards with individual squares
+/// @{
 inline Bitboard operator&(Bitboard b, Square s) { return b & square_bb(s); }
 inline Bitboard operator|(Bitboard b, Square s) { return b | square_bb(s); }
 inline Bitboard operator^(Bitboard b, Square s) { return b ^ square_bb(s); }
@@ -99,9 +147,18 @@ inline Bitboard& operator^=(Bitboard& b, Square s) { return b ^= square_bb(s); }
 inline Bitboard operator&(Square s, Bitboard b) { return b & s; }
 inline Bitboard operator|(Square s, Bitboard b) { return b | s; }
 inline Bitboard operator^(Square s, Bitboard b) { return b ^ s; }
+/// @}
 
+/// @ingroup Bitboards
+/// @brief checks if bitboard has multiple bits high -- this is equivalent to { popcnt(b) > 1 }
+/// @param b Bitboard to check
+/// @return true if more than bit is 1
 constexpr bool more_than_one(Bitboard b) { return b & (b - 1); }
 
+/// @ingroup Bitboards
+/// @brief returns the index of the least significant bit
+/// @param b Biboard to check
+/// @return index of lsb as a Square
 inline Square lsb(Bitboard b) {
 
     #ifdef __GNUC__
@@ -112,6 +169,11 @@ inline Square lsb(Bitboard b) {
 
 }
 
+/// @ingroup Bitboards
+/// @brief returns the index of the least significant bit while also removing it from the bitboard
+/// @param b Bitboard to manipulate
+/// @return index of lsb as a Square
+/// @note This function changes the bitboard passed into it
 inline Square pop_lsb(Bitboard& b) {
     assert(b != 0);
     Square s = lsb(b);
@@ -119,12 +181,13 @@ inline Square pop_lsb(Bitboard& b) {
     return s;
 }
 
+/// @ingroup BitboardHelpers
+/// @{
 inline Bitboard line_bb(Square s1, Square s2) { return Line[s1][s2]; }
 inline Bitboard line_bb(Square s1, Bitboard b) {
     Bitboard line(0);
     while (b) 
         line |= line_bb(s1, pop_lsb(b));
-
     return line;
 }
 
@@ -135,8 +198,12 @@ inline Bitboard between_bb(Square s1, Bitboard b) {
         between |= between_bb(s1, pop_lsb(b));
     return between;
 }
+/// @}
 
-
+/// @brief Non-modifying bit shift of a bitboard
+/// @tparam d Direction to shift b
+/// @param b Bitboard to shift
+/// @return Shifted bitboard
 template <Direction d>
 constexpr Bitboard shift(Bitboard b) {
 
@@ -154,13 +221,21 @@ constexpr Bitboard shift(Bitboard b) {
     
 }
 
-// used to fill pawnattack array in bitboard.cpp
+/// @brief Generates pawn attacks by shifting the bitboard
+/// @tparam c Color to generate pawn attacks for (useful for direction)
+/// @param b Bitboard to shift
+/// @return Possible pawn attacks from all squares on b
 template <Color c>
 constexpr Bitboard generate_pawn_attack(Bitboard b) {
     return c == WHITE ? shift<NORTH_EAST>(b) | shift<NORTH_WEST>(b)
                       : shift<SOUTH_EAST>(b) | shift<SOUTH_WEST>(b);
 }
 
+/// @defgroup Distance Distance Helpers
+/// @ingroup Bitboards
+/// @brief Finds distance between two squares in units of T
+/// @tparam T Unit of distance to find, e.g. Square, File, Rank
+/// @return distance between s1 and s2 in T units
 template<typename T = Square>
 inline int distance(Square, Square);
 
@@ -173,6 +248,12 @@ inline int distance<Rank>(Square s1, Square s2) { return abs(rank_of(s1) - rank_
 template<>
 inline int distance<Square>(Square s1, Square s2) { return std::max(distance<File>(s1, s2), distance<Rank>(s1, s2)); }
 
+/// @defgroup AttackBitboards Attack Bitboard Accessor Functions
+/// @ingroup Bitboards
+/// @brief Provides an interface to access psuedo legal moves at a given square
+///
+/// Wraps the Magic struct to return the pseudo legal moves
+/// @{
 template <PieceType pt>
 constexpr Bitboard attacks_bb(Square s, Color c = COLOR_NB) {
     assert((pt != PAWN) || (c < COLOR_NB));
@@ -215,7 +296,8 @@ inline Bitboard attacks_bb(Square s, Bitboard occupancy, PieceType pt) {
     }
 
     return 0;
-}
+} /// @}
+
 } // namespace Engine
 
 #endif
