@@ -1,3 +1,8 @@
+/*
+ * @file evaluate.h
+ * @brief Contains methods to evaluate the score of the position
+*/
+
 #ifndef EVALUATE_H_INCLUDED
 #define EVALUATE_H_INCLUDED
 
