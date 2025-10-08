@@ -7,11 +7,17 @@
 
 namespace Engine {
 
-Value evaluate(const Position&);
+/// @brief Evaluate the position
+/// @param p Position to evaluate
+/// @return Value of the position -- positive favors white, negative favors black
+Value evaluate(const Position& p);
 
 namespace Eval {
 
-std::string pretty(const Position&);
+/// @brief Create a human friendly representation of the evaluation
+/// @param p Position to evaluate
+/// @return String representation of the position eval
+std::string pretty(const Position& p);
 
 }
 
