@@ -1,3 +1,9 @@
+/**
+ * @file moveorder.h
+ * @brief Contains classes used for sorting moves
+ *
+*/
+
 #ifndef MOVEORDER_H_INCLUDED
 #define MOVEORDER_H_INCLUDED
 
@@ -10,10 +16,16 @@ namespace Engine {
 
 class Position;
 
-void sort(const Position&, ExtMove*, ExtMove*);
+/// @brief Used to sort a move list based on position
+/// @param p Position moves belong to
+/// @param f First move in the list
+/// @param l Last move in the list
+void sort(const Position& p, ExtMove* f, ExtMove* l);
 
 
-// all this does is sort the MoveList
+/// @class MoveOrder
+/// @brief Sorts generated moves upon construction
+/// @tparam T Type of moves to generate (LEGAL, CAPTURES, etc.)
 template <GenType T>
 class MoveOrder : public MoveList<T> {
 
@@ -26,13 +38,17 @@ class MoveOrder : public MoveList<T> {
 };
 
 
-// this is a wrapper for the MoveOrder class
-// functionally, it only exists to lock the next_move function
+/// @class MoveQueue
+/// @brief Exists as a wrapper around MoveOrder, serves to make next() thread-safe
+/// @tparam T Type of move storage to use -> MoveOrder or MoveList
 template <typename T>
 class MoveQueue {
 
     public:
         MoveQueue(const Position& pos) : moves(pos) {}
+        
+        /// @brief Gives next move
+        /// @return Pointer to a move
         inline Move* next() {
             std::lock_guard<std::mutex> lock(mutex);
             return moves.next();
@@ -43,8 +59,8 @@ class MoveQueue {
 
     private:
         
-        T moves;
-        std::mutex mutex;
+        T moves; ///< Move storage
+        std::mutex mutex; ///< Mutex for thread-safe access
 
 };
 
