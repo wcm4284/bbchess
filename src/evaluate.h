@@ -1,4 +1,4 @@
-/*
+/**
  * @file evaluate.h
  * @brief Contains methods to evaluate the score of the position
 */
