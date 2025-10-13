@@ -1,6 +1,6 @@
 /**
  * @file engine.h
- * @brief 
+ * @brief Contains Engine class
 */
 
 #ifndef ENGINE_H_INCLUDED
