@@ -1,5 +1,5 @@
 /**
- * @file uci.h
+ * @file uciengine.h
  * @brief Contains UCIEngine Class
 */
 
